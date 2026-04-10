@@ -1,5 +1,6 @@
 # Fitness Microservices
 
+
 This repository contains an academic project for the course **Advanced Web Technologies** (*Napredne Web Tehnologije*) in the master's program at the **Faculty of Electrical Engineering, University of Sarajevo**.
 
 ## Project Overview
@@ -12,13 +13,16 @@ Architecture includes:
 - `workout-service` – workout plans, exercises, and completed workout tracking.
 
 Each service uses:
+
 - Java 21
 - Spring Boot 4
 - Spring Data JPA
 - PostgreSQL
+
 - Docker (for containerization)
 
 ## Repository Structure
+
 
 ```text
 .
