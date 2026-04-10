@@ -109,7 +109,3 @@ The same approach applies to `nutrition-service` and `workout-service`.
 - Emina Sirbubalo
 - Armin Begić
 - Admir Mehmedagić
-
----
-
-If needed, this README can be extended with API endpoints, request/response examples, and an architecture diagram.
