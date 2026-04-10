@@ -109,7 +109,3 @@ Isti princip važi za `nutrition-service` i `workout-service`.
 - Emina Sirbubalo
 - Armin Begić
 - Admir Mehmedagić
-
----
-
-Ako je potrebno, README se može dodatno proširiti sa API endpointima, primjerima zahtjeva/odgovora i arhitekturnim dijagramom.
