@@ -1,24 +1,28 @@
 # Fitness Microservices
 
-Ovaj repozitorij sadrži akademski projekat iz predmeta **Napredne Web Tehnologije** na master programu **Elektrotehničkog fakulteta u Sarajevu**.
 
-## Opis projekta
+This repository contains an academic project for the course **Advanced Web Technologies** (*Napredne Web Tehnologije*) in the master's program at the **Faculty of Electrical Engineering, University of Sarajevo**.
 
-Sistem je organizovan kao skup mikroservisa za upravljanje fitness domenom. Svaki servis ima vlastitu PostgreSQL bazu podataka i pokreće se kao zasebna Spring Boot aplikacija.
+## Project Overview
 
-Arhitektura obuhvata:
-- `user-service` – upravljanje korisnicima, ulogama, notifikacijama i ciljevima.
-- `nutrition-service` – praćenje obroka i napretka u ishrani.
-- `workout-service` – upravljanje planovima treninga, vježbama i završenim treninzima.
+The system is organized as a set of microservices for fitness domain management. Each service has its own PostgreSQL database and runs as an independent Spring Boot application.
 
-Svaki servis koristi:
+Architecture includes:
+- `user-service` – user, role, notification, and goal management.
+- `nutrition-service` – meal tracking and nutrition progress monitoring.
+- `workout-service` – workout plans, exercises, and completed workout tracking.
+
+Each service uses:
+
 - Java 21
 - Spring Boot 4
 - Spring Data JPA
 - PostgreSQL
-- Docker (za kontejnerizaciju)
 
-## Struktura repozitorija
+- Docker (for containerization)
+
+## Repository Structure
+
 
 ```text
 .
@@ -28,11 +32,11 @@ Svaki servis koristi:
 └── workout-service/
 ```
 
-## Servisi i portovi
+## Services and Ports
 
-Pokretanjem `docker-compose.yml` podižu se sljedeći servisi:
+When started with `docker-compose.yml`, the following services are available:
 
-| Servis | Interni port | Host port |
+| Service | Internal Port | Host Port |
 |---|---:|---:|
 | user-service | 8080 | 8081 |
 | nutrition-service | 8080 | 8082 |
@@ -41,45 +45,45 @@ Pokretanjem `docker-compose.yml` podižu se sljedeći servisi:
 | nutrition-db (PostgreSQL) | 5432 | 5434 |
 | workout-db (PostgreSQL) | 5432 | 5435 |
 
-## Pokretanje projekta
+## Running the Project
 
-### Preduslovi
+### Prerequisites
 - Docker
 - Docker Compose
 
-### 1) Kloniranje repozitorija
+### 1) Clone the repository
 
 ```bash
-git clone <URL_REPOZITORIJA>
+git clone <REPOSITORY_URL>
 cd fitness-microservices
 ```
 
-### 2) Pokretanje svih servisa
+### 2) Start all services
 
 ```bash
 docker compose up --build
 ```
 
-### 3) Zaustavljanje servisa
+### 3) Stop all services
 
 ```bash
 docker compose down
 ```
 
-## Lokalni razvoj bez Dockera (opcionalno)
+## Local Development Without Docker (Optional)
 
-Svaki servis je samostalna Gradle aplikacija i može se pokrenuti zasebno iz vlastitog direktorija:
+Each service is an independent Gradle application and can be run from its own directory:
 
 ```bash
 cd user-service
 ./gradlew bootRun
 ```
 
-Isti princip važi za `nutrition-service` i `workout-service`.
+The same approach applies to `nutrition-service` and `workout-service`.
 
-> Napomena: Za lokalno pokretanje bez Dockera potrebno je obezbijediti dostupnu PostgreSQL bazu i odgovarajuće `DB_*` varijable okruženja.
+> Note: For local non-Docker execution, make sure PostgreSQL is running and required `DB_*` environment variables are configured.
 
-## Modeli po servisima
+## Domain Models by Service
 
 ### user-service
 - `User`
@@ -103,7 +107,7 @@ Isti princip važi za `nutrition-service` i `workout-service`.
 - `CompletedWorkout`
 - `CompletedExercise`
 
-## Kontributori
+## Contributors
 
 - Fejzullah Ždralović
 - Emina Sirbubalo
