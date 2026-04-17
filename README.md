@@ -8,7 +8,9 @@ This repository contains an academic project for the course **Advanced Web Techn
 The system is organized as a set of microservices for fitness domain management. Each service has its own PostgreSQL database and runs as an independent Spring Boot application.
 
 Architecture includes:
-- `user-service` – user, role, notification, and goal management.
+- `auth-service` – user and role management (authentication).
+- `notification-service` – user notification management.
+- `user-service` – fitness goals and trainer-client relationships.
 - `nutrition-service` – meal tracking and nutrition progress monitoring.
 - `workout-service` – workout plans, exercises, and completed workout tracking.
 
@@ -27,6 +29,8 @@ Each service uses:
 ```text
 .
 ├── docker-compose.yml
+├── auth-service/
+├── notification-service/
 ├── user-service/
 ├── nutrition-service/
 └── workout-service/
@@ -41,9 +45,13 @@ When started with `docker-compose.yml`, the following services are available:
 | user-service | 8080 | 8081 |
 | nutrition-service | 8080 | 8082 |
 | workout-service | 8080 | 8083 |
+| auth-service | 8080 | 8084 |
+| notification-service | 8080 | 8085 |
 | user-db (PostgreSQL) | 5432 | 5433 |
 | nutrition-db (PostgreSQL) | 5432 | 5434 |
 | workout-db (PostgreSQL) | 5432 | 5435 |
+| auth-db (PostgreSQL) | 5432 | 5436 |
+| notification-db (PostgreSQL) | 5432 | 5437 |
 
 ## Running the Project
 
@@ -79,17 +87,21 @@ cd user-service
 ./gradlew bootRun
 ```
 
-The same approach applies to `nutrition-service` and `workout-service`.
+The same approach applies to `auth-service`, `notification-service`, `nutrition-service`, and `workout-service`.
 
 > Note: For local non-Docker execution, make sure PostgreSQL is running and required `DB_*` environment variables are configured.
 
 ## Domain Models by Service
 
-### user-service
+### auth-service
 - `User`
 - `Role`
-- `FitnessGoal`
+
+### notification-service
 - `Notification`
+
+### user-service
+- `FitnessGoal`
 - `TrainerClient`
 
 ### nutrition-service
