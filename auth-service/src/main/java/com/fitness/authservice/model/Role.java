@@ -1,4 +1,4 @@
-package com.fitness.userservice.model;
+package com.fitness.authservice.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -7,9 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,32 +15,20 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "trainer_clients")
+@Table(name = "roles")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TrainerClient {
+public class Role {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @Column(nullable = false)
-    private Long trainerId;
-
-    @NotNull
-    @Column(nullable = false)
-    private Long clientId;
-
-    @NotNull
-    @Column(nullable = false)
-    private LocalDate startDate;
-
     @NotBlank
-    @Size(max = 20)
-    @Column(nullable = false, length = 20)
-    private String status;
+    @Size(max = 50)
+    @Column(nullable = false, unique = true, length = 50)
+    private String name;
 }

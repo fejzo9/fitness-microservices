@@ -1,4 +1,4 @@
-package com.fitness.userservice.model;
+package com.fitness.notificationservice.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -9,7 +9,7 @@ import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -17,13 +17,13 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Entity
-@Table(name = "trainer_clients")
+@Table(name = "notifications")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class TrainerClient {
+public class Notification {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -31,18 +31,22 @@ public class TrainerClient {
 
     @NotNull
     @Column(nullable = false)
-    private Long trainerId;
-
-    @NotNull
-    @Column(nullable = false)
-    private Long clientId;
-
-    @NotNull
-    @Column(nullable = false)
-    private LocalDate startDate;
+    private Long userId;
 
     @NotBlank
-    @Size(max = 20)
-    @Column(nullable = false, length = 20)
-    private String status;
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String message;
+
+    @NotBlank
+    @Size(max = 50)
+    @Column(nullable = false, length = 50)
+    private String type;
+
+    @NotNull
+    @Column(nullable = false)
+    private Boolean isRead;
+
+    @NotNull
+    @Column(nullable = false)
+    private LocalDateTime createdAt;
 }

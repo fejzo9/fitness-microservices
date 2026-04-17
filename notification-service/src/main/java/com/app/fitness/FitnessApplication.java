@@ -6,7 +6,7 @@ import org.springframework.boot.persistence.autoconfigure.EntityScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
-@EntityScan(basePackages = "com.fitness.workoutservice.model")
+@EntityScan(basePackages = "com.fitness.notificationservice.model")
 @EnableJpaRepositories(basePackages = "com.app.fitness.repository")
 public class FitnessApplication {
 

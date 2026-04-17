@@ -1,0 +1,18 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Gradle
+.gradle/
+**/build/
+**/bin/
+
+# Spring Boot
+*.jar
+*.war
+*.class
+
+# OS
+.DS_Store
+Thumbs.db

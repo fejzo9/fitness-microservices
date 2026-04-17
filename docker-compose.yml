@@ -1,5 +1,5 @@
 services:
-  # Database for User Service
+  # Database for User Service (fitness_goals, trainer_clients)
   user-db:
     image: postgres:16-alpine
     container_name: user-db
@@ -9,6 +9,32 @@ services:
       POSTGRES_PASSWORD: password
     ports:
       - "5433:5432"
+    networks:
+      - fitness-network
+
+  # Database for Auth Service (users, roles)
+  auth-db:
+    image: postgres:16-alpine
+    container_name: auth-db
+    environment:
+      POSTGRES_DB: auth_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5436:5432"
+    networks:
+      - fitness-network
+
+  # Database for Notification Service (notifications)
+  notification-db:
+    image: postgres:16-alpine
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    ports:
+      - "5437:5432"
     networks:
       - fitness-network
 
@@ -38,7 +64,7 @@ services:
     networks:
       - fitness-network
 
-  # User Service
+  # User Service (fitness_goals, trainer_clients)
   user-service:
     build: ./user-service
     container_name: user-service
@@ -52,6 +78,40 @@ services:
       DB_PASSWORD: password
     depends_on:
       - user-db
+    networks:
+      - fitness-network
+
+  # Auth Service (users, roles)
+  auth-service:
+    build: ./auth-service
+    container_name: auth-service
+    ports:
+      - "8084:8080"
+    environment:
+      DB_HOST: auth-db
+      DB_PORT: 5432
+      DB_NAME: auth_db
+      DB_USER: postgres
+      DB_PASSWORD: password
+    depends_on:
+      - auth-db
+    networks:
+      - fitness-network
+
+  # Notification Service (notifications)
+  notification-service:
+    build: ./notification-service
+    container_name: notification-service
+    ports:
+      - "8085:8080"
+    environment:
+      DB_HOST: notification-db
+      DB_PORT: 5432
+      DB_NAME: notification_db
+      DB_USER: postgres
+      DB_PASSWORD: password
+    depends_on:
+      - notification-db
     networks:
       - fitness-network
 
@@ -88,6 +148,18 @@ services:
       - workout-db
     networks:
       - fitness-network
+
+  # Pg Admin
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: itsupport-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - db
 
 networks:
   fitness-network:
