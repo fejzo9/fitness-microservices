@@ -52,6 +52,132 @@ When started with `docker-compose.yml`, the following services are available:
 | workout-db (PostgreSQL) | 5432 | 5435 |
 | auth-db (PostgreSQL) | 5432 | 5436 |
 | notification-db (PostgreSQL) | 5432 | 5437 |
+| pgAdmin | 80 | 5050 |
+
+## Accessing PostgreSQL Databases via pgAdmin
+
+pgAdmin is available at **http://localhost:5050** after running Docker Compose.
+
+**Login credentials:**
+- Email: `admin@admin.com`
+- Password: `admin`
+
+### Adding a Server for Each Database
+
+In pgAdmin, go to **Object → Register → Server** and fill in the **Connection** tab using the following details for each service database:
+
+| Service | Host (inside Docker network) | Port | Database | Username | Password |
+|---|---|---|---|---|---|
+| auth-service | `auth-db` | `5432` | `auth_db` | `postgres` | `password` |
+| user-service | `user-db` | `5432` | `user_db` | `postgres` | `password` |
+| notification-service | `notification-db` | `5432` | `notification_db` | `postgres` | `password` |
+| nutrition-service | `nutrition-db` | `5432` | `nutrition_db` | `postgres` | `password` |
+| workout-service | `workout-db` | `5432` | `workout_db` | `postgres` | `password` |
+
+> Use the **container name** as the host (e.g. `auth-db`), not `localhost`, because pgAdmin runs inside the same Docker network as the databases.
+
+After registering each server, navigate to **Servers → [server name] → Databases → [db name] → Schemas → public → Tables** to browse all tables.
+
+## REST API Endpoints
+
+Each service exposes a full CRUD REST API. All responses use JSON. Validation errors return HTTP 400 with a `fieldErrors` list; not-found errors return HTTP 404; duplicate resource errors return HTTP 409.
+
+### auth-service (port 8084)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/roles` | List all roles |
+| GET | `/api/roles/{id}` | Get role by ID |
+| POST | `/api/roles` | Create role |
+| PUT | `/api/roles/{id}` | Update role |
+| DELETE | `/api/roles/{id}` | Delete role |
+| GET | `/api/users` | List all users |
+| GET | `/api/users/{id}` | Get user by ID |
+| POST | `/api/users` | Create user |
+| PUT | `/api/users/{id}` | Update user |
+| DELETE | `/api/users/{id}` | Delete user |
+
+### user-service (port 8081)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/fitness-goals` | List all fitness goals |
+| GET | `/api/fitness-goals/{id}` | Get fitness goal by ID |
+| POST | `/api/fitness-goals` | Create fitness goal |
+| PUT | `/api/fitness-goals/{id}` | Update fitness goal |
+| DELETE | `/api/fitness-goals/{id}` | Delete fitness goal |
+| GET | `/api/trainer-clients` | List all trainer-client relationships |
+| GET | `/api/trainer-clients/{id}` | Get relationship by ID |
+| POST | `/api/trainer-clients` | Create relationship |
+| PUT | `/api/trainer-clients/{id}` | Update relationship |
+| DELETE | `/api/trainer-clients/{id}` | Delete relationship |
+
+### notification-service (port 8085)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/notifications` | List all notifications |
+| GET | `/api/notifications/{id}` | Get notification by ID |
+| POST | `/api/notifications` | Create notification |
+| PUT | `/api/notifications/{id}` | Update notification |
+| DELETE | `/api/notifications/{id}` | Delete notification |
+
+### nutrition-service (port 8082)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/meal-logs` | List all meal logs |
+| GET | `/api/meal-logs/{id}` | Get meal log by ID |
+| POST | `/api/meal-logs` | Create meal log |
+| PUT | `/api/meal-logs/{id}` | Update meal log |
+| DELETE | `/api/meal-logs/{id}` | Delete meal log |
+| GET | `/api/meal-items` | List all meal items |
+| GET | `/api/meal-items/{id}` | Get meal item by ID |
+| POST | `/api/meal-items` | Create meal item (requires `mealLogId`) |
+| PUT | `/api/meal-items/{id}` | Update meal item |
+| DELETE | `/api/meal-items/{id}` | Delete meal item |
+| GET | `/api/progress-entries` | List all progress entries |
+| GET | `/api/progress-entries/{id}` | Get progress entry by ID |
+| POST | `/api/progress-entries` | Create progress entry |
+| PUT | `/api/progress-entries/{id}` | Update progress entry |
+| DELETE | `/api/progress-entries/{id}` | Delete progress entry |
+
+### workout-service (port 8083)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/api/exercises` | List all exercises |
+| POST | `/api/exercises` | Create exercise |
+| PUT | `/api/exercises/{id}` | Update exercise |
+| DELETE | `/api/exercises/{id}` | Delete exercise |
+| GET | `/api/exercise-categories` | List all categories |
+| POST | `/api/exercise-categories` | Create category |
+| PUT | `/api/exercise-categories/{id}` | Update category |
+| DELETE | `/api/exercise-categories/{id}` | Delete category |
+| GET | `/api/exercise-category-maps` | List all exercise-category mappings |
+| POST | `/api/exercise-category-maps` | Create mapping |
+| DELETE | `/api/exercise-category-maps/{id}` | Delete mapping |
+| GET | `/api/workout-plans` | List all workout plans |
+| POST | `/api/workout-plans` | Create workout plan |
+| PUT | `/api/workout-plans/{id}` | Update workout plan |
+| DELETE | `/api/workout-plans/{id}` | Delete workout plan |
+| GET | `/api/workout-days` | List all workout days |
+| POST | `/api/workout-days` | Create workout day (requires `workoutPlanId`) |
+| PUT | `/api/workout-days/{id}` | Update workout day |
+| DELETE | `/api/workout-days/{id}` | Delete workout day |
+| GET | `/api/workout-exercises` | List all workout exercises |
+| POST | `/api/workout-exercises` | Assign exercise to workout day |
+| PUT | `/api/workout-exercises/{id}` | Update workout exercise |
+| DELETE | `/api/workout-exercises/{id}` | Remove exercise from day |
+| GET | `/api/completed-workouts` | List all completed workouts |
+| POST | `/api/completed-workouts` | Log a completed workout |
+| PUT | `/api/completed-workouts/{id}` | Update completed workout |
+| DELETE | `/api/completed-workouts/{id}` | Delete completed workout |
+| GET | `/api/completed-exercises` | List all completed exercises |
+| POST | `/api/completed-exercises` | Log a completed exercise |
+| PUT | `/api/completed-exercises/{id}` | Update completed exercise |
+| DELETE | `/api/completed-exercises/{id}` | Delete completed exercise |
+
 
 ## Running the Project
 
@@ -78,7 +204,7 @@ docker compose up --build
 docker compose down
 ```
 
-## Local Development Without Docker (Optional)
+## Local Development Without Docker
 
 Each service is an independent Gradle application and can be run from its own directory:
 

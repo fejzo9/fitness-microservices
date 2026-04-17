@@ -1,7 +1,9 @@
 package com.app.fitness.repository;
 
 import com.fitness.authservice.model.User;
+import java.util.List;
 import java.util.Optional;
+import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
@@ -9,4 +11,12 @@ public interface UserRepository extends JpaRepository<User, Long> {
     Optional<User> findByUsername(String username);
 
     boolean existsByUsername(String username);
+
+    @Override
+    @EntityGraph(attributePaths = "role")
+    List<User> findAll();
+
+    @Override
+    @EntityGraph(attributePaths = "role")
+    Optional<User> findById(Long id);
 }

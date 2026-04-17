@@ -159,7 +159,13 @@ services:
     ports:
       - "5050:80"
     depends_on:
-      - db
+      - user-db
+      - auth-db
+      - notification-db
+      - nutrition-db
+      - workout-db
+    networks:
+      - fitness-network
 
 networks:
   fitness-network:
