@@ -2,10 +2,11 @@ package com.app.fitness.controller;
 
 import com.app.fitness.dto.MealItemRequest;
 import com.app.fitness.dto.MealItemResponse;
+import com.app.fitness.dto.PageResponse;
 import com.app.fitness.service.MealItemService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,8 +40,8 @@ public class MealItemController {
     private final MealItemService mealItemService;
 
     @GetMapping
-    public ResponseEntity<List<MealItemResponse>> getAll() {
-        return ResponseEntity.ok(mealItemService.findAll());
+    public ResponseEntity<PageResponse<MealItemResponse>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(mealItemService.findAll(pageable));
     }
 
     @GetMapping("/{id}")

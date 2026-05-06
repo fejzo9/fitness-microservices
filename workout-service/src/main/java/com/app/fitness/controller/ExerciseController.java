@@ -2,10 +2,11 @@ package com.app.fitness.controller;
 
 import com.app.fitness.dto.ExerciseRequest;
 import com.app.fitness.dto.ExerciseResponse;
+import com.app.fitness.dto.PageResponse;
 import com.app.fitness.service.ExerciseService;
 import jakarta.validation.Valid;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -39,8 +40,8 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
 
     @GetMapping
-    public ResponseEntity<List<ExerciseResponse>> getAll() {
-        return ResponseEntity.ok(exerciseService.findAll());
+    public ResponseEntity<PageResponse<ExerciseResponse>> getAll(Pageable pageable) {
+        return ResponseEntity.ok(exerciseService.findAll(pageable));
     }
 
     @GetMapping("/{id}")

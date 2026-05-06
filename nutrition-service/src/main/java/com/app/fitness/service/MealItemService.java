@@ -2,6 +2,7 @@ package com.app.fitness.service;
 
 import com.app.fitness.dto.MealItemRequest;
 import com.app.fitness.dto.MealItemResponse;
+import com.app.fitness.dto.PageResponse;
 import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.mapper.MealItemMapper;
@@ -9,8 +10,9 @@ import com.app.fitness.repository.MealItemRepository;
 import com.app.fitness.repository.MealLogRepository;
 import com.fitness.nutritionservice.model.MealItem;
 import com.fitness.nutritionservice.model.MealLog;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,10 +25,9 @@ public class MealItemService {
     private final MealItemMapper mealItemMapper;
 
     @Transactional(readOnly = true)
-    public List<MealItemResponse> findAll() {
-        return mealItemRepository.findAll().stream()
-                .map(mealItemMapper::toResponse)
-                .toList();
+    public PageResponse<MealItemResponse> findAll(Pageable pageable) {
+        Page<MealItem> page = mealItemRepository.findAll(pageable);
+        return PageResponse.of(page.map(mealItemMapper::toResponse));
     }
 
     @Transactional(readOnly = true)

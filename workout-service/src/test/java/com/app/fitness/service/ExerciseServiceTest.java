@@ -9,6 +9,7 @@ import com.app.fitness.repository.ExerciseRepository;
 import com.fitness.workoutservice.model.Exercise;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -36,13 +37,14 @@ class ExerciseServiceTest {
     void findAll_shouldReturnMappedList() {
         Exercise exercise = Exercise.builder().id(1L).name("Bench Press").build();
         ExerciseResponse response = new ExerciseResponse(1L, "Bench Press", null, null);
-        when(exerciseRepository.findAll()).thenReturn(List.of(exercise));
+        Page<Exercise> page = new org.springframework.data.domain.PageImpl<>(List.of(exercise));
+        when(exerciseRepository.findAll(any(org.springframework.data.domain.Pageable.class))).thenReturn(page);
         when(exerciseMapper.toResponse(exercise)).thenReturn(response);
 
-        List<ExerciseResponse> result = exerciseService.findAll();
+        var result = exerciseService.findAll(org.springframework.data.domain.PageRequest.of(0, 10));
 
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getName()).isEqualTo("Bench Press");
+        assertThat(result.content()).hasSize(1);
+        assertThat(result.content().get(0).getName()).isEqualTo("Bench Press");
     }
 
     @Test

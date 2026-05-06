@@ -2,6 +2,7 @@ package com.app.fitness.controller;
 
 import com.app.fitness.dto.ExerciseRequest;
 import com.app.fitness.dto.ExerciseResponse;
+import com.app.fitness.dto.PageResponse;
 import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.GlobalExceptionHandler;
 import com.app.fitness.exception.ResourceNotFoundException;
@@ -10,8 +11,11 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -37,15 +41,22 @@ class ExerciseControllerTest {
     private ExerciseService exerciseService;
 
     @Test
-    void getAll_shouldReturnList() throws Exception {
+    void getAll_shouldReturnPage() throws Exception {
         List<ExerciseResponse> exercises = List.of(
                 new ExerciseResponse(1L, "Bench Press", "Chest exercise", "INTERMEDIATE"));
-        when(exerciseService.findAll()).thenReturn(exercises);
+        Pageable pageable = PageRequest.of(0, 10);
+        PageResponse<ExerciseResponse> pageResponse = PageResponse.of(
+                new PageImpl<>(exercises, pageable, 1));
+        when(exerciseService.findAll(any(Pageable.class))).thenReturn(pageResponse);
 
         mockMvc.perform(get("/api/exercises"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].name").value("Bench Press"));
+                .andExpect(jsonPath("$.content.length()").value(1))
+                .andExpect(jsonPath("$.content[0].name").value("Bench Press"))
+                .andExpect(jsonPath("$.pageNumber").value(0))
+                .andExpect(jsonPath("$.pageSize").value(10))
+                .andExpect(jsonPath("$.totalElements").value(1))
+                .andExpect(jsonPath("$.totalPages").value(1));
     }
 
     @Test

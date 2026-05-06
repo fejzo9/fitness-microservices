@@ -2,13 +2,15 @@ package com.app.fitness.service;
 
 import com.app.fitness.dto.ExerciseRequest;
 import com.app.fitness.dto.ExerciseResponse;
+import com.app.fitness.dto.PageResponse;
 import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.mapper.ExerciseMapper;
 import com.app.fitness.repository.ExerciseRepository;
 import com.fitness.workoutservice.model.Exercise;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,10 +22,9 @@ public class ExerciseService {
     private final ExerciseMapper exerciseMapper;
 
     @Transactional(readOnly = true)
-    public List<ExerciseResponse> findAll() {
-        return exerciseRepository.findAll().stream()
-                .map(exerciseMapper::toResponse)
-                .toList();
+    public PageResponse<ExerciseResponse> findAll(Pageable pageable) {
+        Page<Exercise> page = exerciseRepository.findAll(pageable);
+        return PageResponse.of(page.map(exerciseMapper::toResponse));
     }
 
     @Transactional(readOnly = true)
