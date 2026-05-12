@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Endpoints:
  * <ul>
  *   <li>GET    /api/workout-plans         - Retrieve all workout plans</li>
+ *   <li>GET    /api/workout-plans/user/{userId} - Retrieve workout plans by user ID</li>
  *   <li>GET    /api/workout-plans/{id}    - Retrieve a workout plan by ID</li>
  *   <li>POST   /api/workout-plans         - Create a new workout plan</li>
  *   <li>PUT    /api/workout-plans/{id}    - Update an existing workout plan</li>
@@ -41,6 +42,11 @@ public class WorkoutPlanController {
     @GetMapping
     public ResponseEntity<List<WorkoutPlanResponse>> getAll() {
         return ResponseEntity.ok(workoutPlanService.findAll());
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<WorkoutPlanResponse>> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(workoutPlanService.findByUserId(userId));
     }
 
     @GetMapping("/{id}")

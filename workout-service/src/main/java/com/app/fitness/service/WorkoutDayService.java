@@ -29,6 +29,13 @@ public class WorkoutDayService {
     }
 
     @Transactional(readOnly = true)
+    public List<WorkoutDayResponse> findByWorkoutPlanId(Long workoutPlanId) {
+        return workoutDayRepository.findByWorkoutPlanId(workoutPlanId).stream()
+                .map(workoutDayMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public WorkoutDayResponse findById(Long id) {
         return workoutDayRepository.findById(id)
                 .map(workoutDayMapper::toResponse)

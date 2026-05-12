@@ -18,13 +18,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
- * REST controller for logging exercises within a completed workout.
+ * REST controller for logging exercises within a completed workout and tracking exercise progress.
  *
  * <p>Base URL: /api/completed-exercises
  *
  * <p>Endpoints:
  * <ul>
  *   <li>GET    /api/completed-exercises         - Retrieve all completed exercises</li>
+ *   <li>GET    /api/completed-exercises/exercise/{exerciseId} - Retrieve completed exercises by exercise ID (progress tracking)</li>
+ *   <li>GET    /api/completed-exercises/user/{userId} - Retrieve completed exercises by user ID</li>
  *   <li>GET    /api/completed-exercises/{id}    - Retrieve a completed exercise by ID</li>
  *   <li>POST   /api/completed-exercises         - Log a new completed exercise</li>
  *   <li>PUT    /api/completed-exercises/{id}    - Update a completed exercise entry</li>
@@ -41,6 +43,16 @@ public class CompletedExerciseController {
     @GetMapping
     public ResponseEntity<List<CompletedExerciseResponse>> getAll() {
         return ResponseEntity.ok(completedExerciseService.findAll());
+    }
+
+    @GetMapping("/exercise/{exerciseId}")
+    public ResponseEntity<List<CompletedExerciseResponse>> getByExerciseId(@PathVariable Long exerciseId) {
+        return ResponseEntity.ok(completedExerciseService.findByExerciseId(exerciseId));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<CompletedExerciseResponse>> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(completedExerciseService.findByUserId(userId));
     }
 
     @GetMapping("/{id}")

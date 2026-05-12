@@ -33,6 +33,20 @@ public class ExerciseCategoryMapService {
     }
 
     @Transactional(readOnly = true)
+    public List<ExerciseCategoryMapResponse> findByCategoryId(Long categoryId) {
+        return mapRepository.findByCategoryId(categoryId).stream()
+                .map(mapMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ExerciseCategoryMapResponse> findByExerciseId(Long exerciseId) {
+        return mapRepository.findByExerciseId(exerciseId).stream()
+                .map(mapMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public ExerciseCategoryMapResponse findById(Long id) {
         return mapRepository.findById(id)
                 .map(mapMapper::toResponse)

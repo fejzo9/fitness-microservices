@@ -19,4 +19,10 @@ public interface ExerciseCategoryMapRepository extends JpaRepository<ExerciseCat
     @Override
     @EntityGraph(attributePaths = {"exercise", "category"})
     Optional<ExerciseCategoryMap> findById(Long id);
+    
+    @EntityGraph(attributePaths = {"exercise", "category"})
+    List<ExerciseCategoryMap> findByCategoryId(Long categoryId);
+    
+    @EntityGraph(attributePaths = {"exercise", "category"})
+    List<ExerciseCategoryMap> findByExerciseId(Long exerciseId);
 }

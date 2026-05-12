@@ -19,4 +19,10 @@ public interface CompletedExerciseRepository extends JpaRepository<CompletedExer
     @Override
     @EntityGraph(attributePaths = {"completedWorkout", "exercise"})
     Optional<CompletedExercise> findById(Long id);
+    
+    @EntityGraph(attributePaths = {"completedWorkout", "exercise"})
+    List<CompletedExercise> findByExerciseId(Long exerciseId);
+    
+    @EntityGraph(attributePaths = {"completedWorkout", "exercise"})
+    List<CompletedExercise> findByCompletedWorkoutUserId(Long userId);
 }

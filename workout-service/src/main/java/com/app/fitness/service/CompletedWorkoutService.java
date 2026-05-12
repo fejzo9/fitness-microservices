@@ -26,6 +26,13 @@ public class CompletedWorkoutService {
     }
 
     @Transactional(readOnly = true)
+    public List<CompletedWorkoutResponse> findByUserId(Long userId) {
+        return completedWorkoutRepository.findByUserId(userId).stream()
+                .map(completedWorkoutMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public CompletedWorkoutResponse findById(Long id) {
         return completedWorkoutRepository.findById(id)
                 .map(completedWorkoutMapper::toResponse)

@@ -24,6 +24,8 @@ import org.springframework.web.bind.annotation.RestController;
  * <p>Endpoints:
  * <ul>
  *   <li>GET    /api/exercise-category-maps         - Retrieve all mappings</li>
+ *   <li>GET    /api/exercise-category-maps/category/{categoryId} - Retrieve mappings by category ID</li>
+ *   <li>GET    /api/exercise-category-maps/exercise/{exerciseId} - Retrieve mappings by exercise ID</li>
  *   <li>GET    /api/exercise-category-maps/{id}    - Retrieve a mapping by ID</li>
  *   <li>POST   /api/exercise-category-maps         - Create a new mapping</li>
  *   <li>DELETE /api/exercise-category-maps/{id}    - Delete a mapping by ID</li>
@@ -39,6 +41,16 @@ public class ExerciseCategoryMapController {
     @GetMapping
     public ResponseEntity<List<ExerciseCategoryMapResponse>> getAll() {
         return ResponseEntity.ok(exerciseCategoryMapService.findAll());
+    }
+
+    @GetMapping("/category/{categoryId}")
+    public ResponseEntity<List<ExerciseCategoryMapResponse>> getByCategoryId(@PathVariable Long categoryId) {
+        return ResponseEntity.ok(exerciseCategoryMapService.findByCategoryId(categoryId));
+    }
+
+    @GetMapping("/exercise/{exerciseId}")
+    public ResponseEntity<List<ExerciseCategoryMapResponse>> getByExerciseId(@PathVariable Long exerciseId) {
+        return ResponseEntity.ok(exerciseCategoryMapService.findByExerciseId(exerciseId));
     }
 
     @GetMapping("/{id}")

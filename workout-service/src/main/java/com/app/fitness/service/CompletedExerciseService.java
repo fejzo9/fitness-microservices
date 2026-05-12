@@ -33,6 +33,20 @@ public class CompletedExerciseService {
     }
 
     @Transactional(readOnly = true)
+    public List<CompletedExerciseResponse> findByExerciseId(Long exerciseId) {
+        return completedExerciseRepository.findByExerciseId(exerciseId).stream()
+                .map(completedExerciseMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<CompletedExerciseResponse> findByUserId(Long userId) {
+        return completedExerciseRepository.findByCompletedWorkoutUserId(userId).stream()
+                .map(completedExerciseMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public CompletedExerciseResponse findById(Long id) {
         return completedExerciseRepository.findById(id)
                 .map(completedExerciseMapper::toResponse)

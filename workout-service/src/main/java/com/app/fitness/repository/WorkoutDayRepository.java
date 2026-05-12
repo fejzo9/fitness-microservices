@@ -20,4 +20,7 @@ public interface WorkoutDayRepository extends JpaRepository<WorkoutDay, Long> {
     @Override
     @EntityGraph(attributePaths = "workoutPlan")
     Optional<WorkoutDay> findById(Long id);
+    
+    @EntityGraph(attributePaths = "workoutPlan")
+    List<WorkoutDay> findByWorkoutPlanId(Long workoutPlanId);
 }
