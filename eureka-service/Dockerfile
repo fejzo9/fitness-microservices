@@ -6,5 +6,5 @@ RUN sed -i 's/\r$//' gradlew && chmod +x gradlew && ./gradlew bootJar --no-daemo
 FROM eclipse-temurin:21-jre-alpine
 WORKDIR /app
 COPY --from=build /app/build/libs/*.jar app.jar
-EXPOSE 8081
+EXPOSE 8761
 ENTRYPOINT ["java", "-jar", "app.jar"]
