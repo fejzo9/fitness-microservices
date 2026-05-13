@@ -9,6 +9,7 @@ import com.app.fitness.repository.WorkoutDayRepository;
 import com.app.fitness.repository.WorkoutExerciseRepository;
 import com.app.fitness.repository.WorkoutPlanRepository;
 import com.fitness.workoutservice.model.CompletedExercise;
+import java.util.List;
 import com.fitness.workoutservice.model.CompletedWorkout;
 import com.fitness.workoutservice.model.Exercise;
 import com.fitness.workoutservice.model.ExerciseCategory;
@@ -177,7 +178,7 @@ public class SeedDataConfig {
 
         Exercise exercise = exerciseRepository.findByName(exerciseName)
                 .orElseThrow(() -> new IllegalStateException("Exercise not found: " + exerciseName));
-        ExerciseCategory category = categoryRepository.findByName(categoryName)
+        ExerciseCategory category = categoryRepository.findFirstByNameOrderById(categoryName)
                 .orElseThrow(() -> new IllegalStateException("Category not found: " + categoryName));
 
         if (!mapRepository.existsByExerciseAndCategory(exercise, category)) {
