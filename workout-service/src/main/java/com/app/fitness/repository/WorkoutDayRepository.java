@@ -12,6 +12,8 @@ public interface WorkoutDayRepository extends JpaRepository<WorkoutDay, Long> {
     boolean existsByWorkoutPlanAndDayName(WorkoutPlan workoutPlan, String dayName);
 
     Optional<WorkoutDay> findByWorkoutPlanAndDayName(WorkoutPlan workoutPlan, String dayName);
+    
+    Optional<WorkoutDay> findFirstByWorkoutPlanAndDayName(WorkoutPlan workoutPlan, String dayName);
 
     @Override
     @EntityGraph(attributePaths = "workoutPlan")

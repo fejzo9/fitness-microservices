@@ -78,7 +78,7 @@ services:
     build: ./user-service
     container_name: user-service
     ports:
-      - "8081:8080"
+      - "8081:8081"
     environment:
       DB_HOST: user-db
       DB_PORT: 5432
@@ -96,7 +96,7 @@ services:
     build: ./auth-service
     container_name: auth-service
     ports:
-      - "8084:8080"
+      - "8084:8084"
     environment:
       DB_HOST: auth-db
       DB_PORT: 5432
@@ -114,7 +114,7 @@ services:
     build: ./notification-service
     container_name: notification-service
     ports:
-      - "8085:8080"
+      - "8085:8085"
     environment:
       DB_HOST: notification-db
       DB_PORT: 5432
@@ -132,7 +132,7 @@ services:
     build: ./nutrition-service
     container_name: nutrition-service
     ports:
-      - "8082:8080"
+      - "8082:8082"
     environment:
       DB_HOST: nutrition-db
       DB_PORT: 5432
@@ -169,7 +169,7 @@ services:
     build: ./workout-service
     container_name: workout-service-2
     ports:
-      - "8086:8081"
+      - "8086:8087"
     environment:
       DB_HOST: workout-db
       DB_PORT: 5432
@@ -177,6 +177,8 @@ services:
       DB_USER: postgres
       DB_PASSWORD: password
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
+      ENABLE_SEED_DATA: false
+      SERVER_PORT: 8087
     depends_on:
       - workout-db
       - eureka-service

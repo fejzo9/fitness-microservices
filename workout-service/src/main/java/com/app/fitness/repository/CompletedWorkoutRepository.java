@@ -12,5 +12,7 @@ public interface CompletedWorkoutRepository extends JpaRepository<CompletedWorko
 
     Optional<CompletedWorkout> findByUserIdAndWorkoutPlanIdAndDate(Long userId, Long workoutPlanId, LocalDate date);
     
+    Optional<CompletedWorkout> findFirstByUserIdAndWorkoutPlanIdAndDate(Long userId, Long workoutPlanId, LocalDate date);
+    
     List<CompletedWorkout> findByUserId(Long userId);
 }

@@ -37,6 +37,13 @@ public class SeedDataConfig {
             CompletedExerciseRepository completedExerciseRepository) {
 
         return args -> {
+            // Only run seed data for primary instance to avoid race conditions
+            boolean enableSeedData = Boolean.parseBoolean(System.getenv().getOrDefault("ENABLE_SEED_DATA", "true"));
+            if (!enableSeedData) {
+                return;
+            }
+            
+            // Re-enabled with safer approach
             createCategoryIfMissing(exerciseCategoryRepository, "Chest");
             createCategoryIfMissing(exerciseCategoryRepository, "Back");
             createCategoryIfMissing(exerciseCategoryRepository, "Legs");
@@ -176,7 +183,7 @@ public class SeedDataConfig {
             String exerciseName,
             String categoryName) {
 
-        Exercise exercise = exerciseRepository.findByName(exerciseName)
+        Exercise exercise = exerciseRepository.findFirstByName(exerciseName)
                 .orElseThrow(() -> new IllegalStateException("Exercise not found: " + exerciseName));
         ExerciseCategory category = categoryRepository.findFirstByNameOrderById(categoryName)
                 .orElseThrow(() -> new IllegalStateException("Category not found: " + categoryName));
@@ -202,7 +209,7 @@ public class SeedDataConfig {
                     .build());
         }
 
-        return repository.findByUserIdAndName(userId, planName)
+        return repository.findFirstByUserIdAndName(userId, planName)
                 .orElseThrow(() -> new IllegalStateException("Workout plan not found"));
     }
 
@@ -232,9 +239,9 @@ public class SeedDataConfig {
             int reps,
             int restSec) {
 
-        WorkoutDay workoutDay = workoutDayRepository.findByWorkoutPlanAndDayName(plan, dayName)
+        WorkoutDay workoutDay = workoutDayRepository.findFirstByWorkoutPlanAndDayName(plan, dayName)
                 .orElseThrow(() -> new IllegalStateException("Workout day not found: " + dayName));
-        Exercise exercise = exerciseRepository.findByName(exerciseName)
+        Exercise exercise = exerciseRepository.findFirstByName(exerciseName)
                 .orElseThrow(() -> new IllegalStateException("Exercise not found: " + exerciseName));
 
         if (!workoutExerciseRepository.existsByWorkoutDayAndExercise(workoutDay, exercise)) {
@@ -264,7 +271,7 @@ public class SeedDataConfig {
                     .build());
         }
 
-        return repository.findByUserIdAndWorkoutPlanIdAndDate(userId, workoutPlanId, date)
+        return repository.findFirstByUserIdAndWorkoutPlanIdAndDate(userId, workoutPlanId, date)
                 .orElseThrow(() -> new IllegalStateException("Completed workout not found"));
     }
 
@@ -276,7 +283,7 @@ public class SeedDataConfig {
             int setsDone,
             int repsDone) {
 
-        Exercise exercise = exerciseRepository.findByName(exerciseName)
+        Exercise exercise = exerciseRepository.findFirstByName(exerciseName)
                 .orElseThrow(() -> new IllegalStateException("Exercise not found: " + exerciseName));
 
         if (!completedExerciseRepository.existsByCompletedWorkoutAndExercise(completedWorkout, exercise)) {
