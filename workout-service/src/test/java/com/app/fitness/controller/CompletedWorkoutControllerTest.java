@@ -4,6 +4,7 @@ import com.app.fitness.dto.CompletedWorkoutRequest;
 import com.app.fitness.dto.CompletedWorkoutResponse;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.service.CompletedWorkoutService;
+import com.app.fitness.exception.ServiceUnavailableException;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -144,5 +145,32 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
         mockMvc.perform(delete("/api/completed-workouts/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"));
+    }
+
+    @Test
+    void create_whenAuthServiceUnavailable_shouldReturn503() throws Exception {
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, 7L, LocalDate.of(2026, 5, 10), 60);
+        when(completedWorkoutService.create(any(CompletedWorkoutRequest.class)))
+                .thenThrow(new ServiceUnavailableException("auth-service not available. Try again"));
+
+        mockMvc.perform(post("/api/completed-workouts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isServiceUnavailable())
+                .andExpect(jsonPath("$.error").value("SERVICE_UNAVAILABLE"));
+    }
+
+    @Test
+    void create_whenUserNotFoundInAuthService_shouldReturn404() throws Exception {
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(99L, 7L, LocalDate.of(2026, 5, 10), 60);
+        when(completedWorkoutService.create(any(CompletedWorkoutRequest.class)))
+                .thenThrow(new ResourceNotFoundException("User with ID=99 doesn't exist"));
+
+        mockMvc.perform(post("/api/completed-workouts")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"))
+                .andExpect(jsonPath("$.message").value("User with ID=99 doesn't exist"));
     }
 }
