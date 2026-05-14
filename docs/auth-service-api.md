@@ -136,3 +136,34 @@ Napomene:
 - `fieldErrors` postoji samo kod validacijskih gresaka.
 - `error` moze biti `VALIDATION_ERROR`, `NOT_FOUND`, `CONFLICT` ili `INTERNAL_ERROR`.
 - `404` se koristi za nepostojeci resurs, `409` za duplikat, `500` za neocekivanu gresku.
+
+# Screenshots
+## GET /api/roles
+![get all roles](screenshots/get-all-roles.png)
+
+## GET /api/roles/{id}
+![get role by id](screenshots/get-role-by-id.png)
+
+## POST /api/roles
+![post role](screenshots/post-role.png)
+
+## PUT /api/roles/{id}
+![put role](screenshots/put-role.png)
+
+## DELETE /api/roles/{id}
+![delete role](screenshots/delete-role.png)
+
+## GET /api/users
+![get all users](screenshots/get-all-users.png)
+
+## GET /api/users/{id}
+![get user by id](screenshots/get-user-by-id.png)
+
+## POST /api/users
+![post user](screenshots/post-user.png)
+
+## PUT /api/users/{id}
+![put user](screenshots/put-user.png)
+
+## DELETE /api/users/{id}
+![delete user](screenshots/delete-user.png)
