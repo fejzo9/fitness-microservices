@@ -1,11 +1,10 @@
 package com.app.fitness.controller;
 
-import com.app.fitness.dto.NotificationRequest;
-import com.app.fitness.dto.NotificationResponse;
+import com.app.fitness.dto.ExerciseCategoryRequest;
+import com.app.fitness.dto.ExerciseCategoryResponse;
 import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.ResourceNotFoundException;
-import com.app.fitness.service.NotificationService;
-import java.time.LocalDateTime;
+import com.app.fitness.service.ExerciseCategoryService;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,71 +26,68 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
-class NotificationControllerTest extends ControllerTestSupport {
-
-    private static final LocalDateTime CREATED_AT = LocalDateTime.of(2026, 5, 14, 11, 0);
+class ExerciseCategoryControllerTest extends ControllerTestSupport {
 
     @Mock
-    private NotificationService notificationService;
+    private ExerciseCategoryService exerciseCategoryService;
 
     @InjectMocks
-    private NotificationController notificationController;
+    private ExerciseCategoryController exerciseCategoryController;
 
     @BeforeEach
     void setUp() {
-        setUpMockMvc(notificationController);
+        setUpMockMvc(exerciseCategoryController);
     }
 
     @Test
     void getAll_shouldReturnList() throws Exception {
-        when(notificationService.findAll()).thenReturn(List.of(
-                new NotificationResponse(1L, 3L, "Welcome!", "INFO", false, CREATED_AT)));
+        when(exerciseCategoryService.findAll()).thenReturn(List.of(
+                new ExerciseCategoryResponse(1L, "Strength", "Heavy compound work")));
 
-        mockMvc.perform(get("/api/notifications"))
+        mockMvc.perform(get("/api/exercise-categories"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].type").value("INFO"));
+                .andExpect(jsonPath("$[0].name").value("Strength"));
     }
 
     @Test
-    void getById_whenNotificationExists_shouldReturnNotification() throws Exception {
-        when(notificationService.findById(1L))
-                .thenReturn(new NotificationResponse(1L, 3L, "Welcome!", "INFO", false, CREATED_AT));
+    void getById_whenCategoryExists_shouldReturnCategory() throws Exception {
+        when(exerciseCategoryService.findById(1L))
+                .thenReturn(new ExerciseCategoryResponse(1L, "Strength", "Heavy compound work"));
 
-        mockMvc.perform(get("/api/notifications/1"))
+        mockMvc.perform(get("/api/exercise-categories/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.message").value("Welcome!"));
+                .andExpect(jsonPath("$.description").value("Heavy compound work"));
     }
 
     @Test
     void getById_whenNotFound_shouldReturn404() throws Exception {
-        when(notificationService.findById(99L)).thenThrow(
-                new ResourceNotFoundException("Notification not found with id: 99"));
+        when(exerciseCategoryService.findById(99L)).thenThrow(
+                new ResourceNotFoundException("Exercise category not found with id: 99"));
 
-        mockMvc.perform(get("/api/notifications/99"))
+        mockMvc.perform(get("/api/exercise-categories/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }
 
     @Test
     void create_withValidRequest_shouldReturn201() throws Exception {
-        NotificationRequest request = new NotificationRequest(3L, "Welcome!", "INFO", false);
-        when(notificationService.create(any(NotificationRequest.class)))
-                .thenReturn(new NotificationResponse(1L, 3L, "Welcome!", "INFO", false, CREATED_AT));
+        ExerciseCategoryRequest request = new ExerciseCategoryRequest("Mobility", "Mobility work");
+        when(exerciseCategoryService.create(any(ExerciseCategoryRequest.class)))
+                .thenReturn(new ExerciseCategoryResponse(2L, "Mobility", "Mobility work"));
 
-        mockMvc.perform(post("/api/notifications")
+        mockMvc.perform(post("/api/exercise-categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.message").value("Welcome!"));
+                .andExpect(jsonPath("$.name").value("Mobility"));
     }
 
     @Test
-    void create_withMissingType_shouldReturn400() throws Exception {
-        NotificationRequest request = new NotificationRequest(3L, "msg", null, false);
+    void create_withInvalidRequest_shouldReturn400() throws Exception {
+        ExerciseCategoryRequest request = new ExerciseCategoryRequest("", "Mobility work");
 
-        mockMvc.perform(post("/api/notifications")
+        mockMvc.perform(post("/api/exercise-categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -100,11 +96,11 @@ class NotificationControllerTest extends ControllerTestSupport {
 
     @Test
     void create_whenDuplicate_shouldReturn409() throws Exception {
-        NotificationRequest request = new NotificationRequest(3L, "Welcome!", "INFO", false);
-        when(notificationService.create(any(NotificationRequest.class)))
-                .thenThrow(new DuplicateResourceException("Notification already exists for userId=3, type=INFO"));
+        ExerciseCategoryRequest request = new ExerciseCategoryRequest("Strength", "Duplicate");
+        when(exerciseCategoryService.create(any(ExerciseCategoryRequest.class)))
+                .thenThrow(new DuplicateResourceException("Exercise category already exists with name: Strength"));
 
-        mockMvc.perform(post("/api/notifications")
+        mockMvc.perform(post("/api/exercise-categories")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -113,25 +109,24 @@ class NotificationControllerTest extends ControllerTestSupport {
 
     @Test
     void update_withValidRequest_shouldReturn200() throws Exception {
-        NotificationRequest request = new NotificationRequest(3L, "Updated", "INFO", true);
-        when(notificationService.update(eq(1L), any(NotificationRequest.class)))
-                .thenReturn(new NotificationResponse(1L, 3L, "Updated", "INFO", true, CREATED_AT));
+        ExerciseCategoryRequest request = new ExerciseCategoryRequest("Strength+", "Updated");
+        when(exerciseCategoryService.update(eq(1L), any(ExerciseCategoryRequest.class)))
+                .thenReturn(new ExerciseCategoryResponse(1L, "Strength+", "Updated"));
 
-        mockMvc.perform(put("/api/notifications/1")
+        mockMvc.perform(put("/api/exercise-categories/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.isRead").value(true))
-                .andExpect(jsonPath("$.message").value("Updated"));
+                .andExpect(jsonPath("$.name").value("Strength+"));
     }
 
     @Test
     void update_whenNotFound_shouldReturn404() throws Exception {
-        NotificationRequest request = new NotificationRequest(3L, "Updated", "INFO", true);
-        when(notificationService.update(eq(99L), any(NotificationRequest.class)))
-                .thenThrow(new ResourceNotFoundException("Notification not found with id: 99"));
+        ExerciseCategoryRequest request = new ExerciseCategoryRequest("Strength+", "Updated");
+        when(exerciseCategoryService.update(eq(99L), any(ExerciseCategoryRequest.class)))
+                .thenThrow(new ResourceNotFoundException("Exercise category not found with id: 99"));
 
-        mockMvc.perform(put("/api/notifications/99")
+        mockMvc.perform(put("/api/exercise-categories/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -140,16 +135,16 @@ class NotificationControllerTest extends ControllerTestSupport {
 
     @Test
     void delete_whenExists_shouldReturn204() throws Exception {
-        mockMvc.perform(delete("/api/notifications/1"))
+        mockMvc.perform(delete("/api/exercise-categories/1"))
                 .andExpect(status().isNoContent());
     }
 
     @Test
     void delete_whenNotFound_shouldReturn404() throws Exception {
-        doThrow(new ResourceNotFoundException("Notification not found with id: 99"))
-                .when(notificationService).delete(99L);
+        doThrow(new ResourceNotFoundException("Exercise category not found with id: 99"))
+                .when(exerciseCategoryService).delete(99L);
 
-        mockMvc.perform(delete("/api/notifications/99"))
+        mockMvc.perform(delete("/api/exercise-categories/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }

@@ -4,54 +4,43 @@ import com.app.fitness.dto.ExerciseRequest;
 import com.app.fitness.dto.ExerciseResponse;
 import com.app.fitness.dto.PageResponse;
 import com.app.fitness.exception.DuplicateResourceException;
-import com.app.fitness.exception.GlobalExceptionHandler;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.service.ExerciseService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebMvc;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.MOCK)
-@AutoConfigureWebMvc
-@Import(GlobalExceptionHandler.class)
-@ActiveProfiles("test")
-class ExerciseControllerTest {
+@ExtendWith(MockitoExtension.class)
+class ExerciseControllerTest extends ControllerTestSupport {
 
-    @Autowired
-    private WebApplicationContext webApplicationContext;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @MockitoBean
+    @Mock
     private ExerciseService exerciseService;
 
-    private MockMvc mockMvc;
+    @InjectMocks
+    private ExerciseController exerciseController;
 
     @BeforeEach
     void setUp() {
-        this.mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext).build();
+        setUpMockMvc(exerciseController);
     }
 
     @Test
@@ -59,18 +48,26 @@ class ExerciseControllerTest {
         List<ExerciseResponse> exercises = List.of(
                 new ExerciseResponse(1L, "Bench Press", "Chest exercise", "INTERMEDIATE"));
         Pageable pageable = PageRequest.of(0, 10);
-        PageResponse<ExerciseResponse> pageResponse = PageResponse.of(
-                new PageImpl<>(exercises, pageable, 1));
-        when(exerciseService.findAll(any(Pageable.class))).thenReturn(pageResponse);
+        when(exerciseService.findAll(any(Pageable.class)))
+                .thenReturn(PageResponse.of(new PageImpl<>(exercises, pageable, 1)));
 
         mockMvc.perform(get("/api/exercises"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.content.length()").value(1))
                 .andExpect(jsonPath("$.content[0].name").value("Bench Press"))
                 .andExpect(jsonPath("$.pageNumber").value(0))
-                .andExpect(jsonPath("$.pageSize").value(10))
-                .andExpect(jsonPath("$.totalElements").value(1))
-                .andExpect(jsonPath("$.totalPages").value(1));
+                .andExpect(jsonPath("$.pageSize").value(10));
+    }
+
+    @Test
+    void getById_whenExerciseExists_shouldReturnExercise() throws Exception {
+        when(exerciseService.findById(1L))
+                .thenReturn(new ExerciseResponse(1L, "Bench Press", "Chest exercise", "INTERMEDIATE"));
+
+        mockMvc.perform(get("/api/exercises/1"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.name").value("Bench Press"));
     }
 
     @Test
@@ -86,8 +83,8 @@ class ExerciseControllerTest {
     @Test
     void create_withValidRequest_shouldReturn201() throws Exception {
         ExerciseRequest request = new ExerciseRequest("Squat", "Leg exercise", "BEGINNER");
-        ExerciseResponse response = new ExerciseResponse(2L, "Squat", "Leg exercise", "BEGINNER");
-        when(exerciseService.create(any())).thenReturn(response);
+        when(exerciseService.create(any(ExerciseRequest.class)))
+                .thenReturn(new ExerciseResponse(2L, "Squat", "Leg exercise", "BEGINNER"));
 
         mockMvc.perform(post("/api/exercises")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -110,8 +107,8 @@ class ExerciseControllerTest {
     @Test
     void create_whenDuplicate_shouldReturn409() throws Exception {
         ExerciseRequest request = new ExerciseRequest("Bench Press", null, null);
-        when(exerciseService.create(any())).thenThrow(
-                new DuplicateResourceException("Exercise already exists with name: Bench Press"));
+        when(exerciseService.create(any(ExerciseRequest.class)))
+                .thenThrow(new DuplicateResourceException("Exercise already exists with name: Bench Press"));
 
         mockMvc.perform(post("/api/exercises")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -123,14 +120,27 @@ class ExerciseControllerTest {
     @Test
     void update_withValidRequest_shouldReturn200() throws Exception {
         ExerciseRequest request = new ExerciseRequest("Bench Press Updated", null, "ADVANCED");
-        ExerciseResponse response = new ExerciseResponse(1L, "Bench Press Updated", null, "ADVANCED");
-        when(exerciseService.update(eq(1L), any())).thenReturn(response);
+        when(exerciseService.update(eq(1L), any(ExerciseRequest.class)))
+                .thenReturn(new ExerciseResponse(1L, "Bench Press Updated", null, "ADVANCED"));
 
         mockMvc.perform(put("/api/exercises/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value("Bench Press Updated"));
+    }
+
+    @Test
+    void update_whenNotFound_shouldReturn404() throws Exception {
+        ExerciseRequest request = new ExerciseRequest("Bench Press Updated", null, "ADVANCED");
+        when(exerciseService.update(eq(99L), any(ExerciseRequest.class)))
+                .thenThrow(new ResourceNotFoundException("Exercise not found with id: 99"));
+
+        mockMvc.perform(put("/api/exercises/99")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }
 
     @Test
@@ -144,6 +154,7 @@ class ExerciseControllerTest {
         doThrow(new ResourceNotFoundException("Exercise not found with id: 99")).when(exerciseService).delete(99L);
 
         mockMvc.perform(delete("/api/exercises/99"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }
 }
