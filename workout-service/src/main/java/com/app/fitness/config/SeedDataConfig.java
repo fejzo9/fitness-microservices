@@ -2,18 +2,15 @@ package com.app.fitness.config;
 
 import com.app.fitness.repository.CompletedExerciseRepository;
 import com.app.fitness.repository.CompletedWorkoutRepository;
-import com.app.fitness.repository.ExerciseCategoryMapRepository;
 import com.app.fitness.repository.ExerciseCategoryRepository;
 import com.app.fitness.repository.ExerciseRepository;
 import com.app.fitness.repository.WorkoutDayRepository;
 import com.app.fitness.repository.WorkoutExerciseRepository;
 import com.app.fitness.repository.WorkoutPlanRepository;
 import com.fitness.workoutservice.model.CompletedExercise;
-import java.util.List;
 import com.fitness.workoutservice.model.CompletedWorkout;
 import com.fitness.workoutservice.model.Exercise;
 import com.fitness.workoutservice.model.ExerciseCategory;
-import com.fitness.workoutservice.model.ExerciseCategoryMap;
 import com.fitness.workoutservice.model.WorkoutDay;
 import com.fitness.workoutservice.model.WorkoutExercise;
 import com.fitness.workoutservice.model.WorkoutPlan;
@@ -29,7 +26,6 @@ public class SeedDataConfig {
     CommandLineRunner seedWorkoutData(
             ExerciseCategoryRepository exerciseCategoryRepository,
             ExerciseRepository exerciseRepository,
-            ExerciseCategoryMapRepository exerciseCategoryMapRepository,
             WorkoutPlanRepository workoutPlanRepository,
             WorkoutDayRepository workoutDayRepository,
             WorkoutExerciseRepository workoutExerciseRepository,
@@ -62,14 +58,14 @@ public class SeedDataConfig {
             createExerciseIfMissing(exerciseRepository, "Running", "Cardio endurance activity", "EASY");
             createExerciseIfMissing(exerciseRepository, "Jump Rope", "Cardio coordination exercise", "MEDIUM");
 
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Bench Press", "Chest");
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Push Up", "Chest");
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Pull Up", "Back");
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Barbell Row", "Back");
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Squat", "Legs");
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Lunges", "Legs");
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Running", "Cardio");
-            mapExerciseToCategoryIfMissing(exerciseCategoryMapRepository, exerciseRepository, exerciseCategoryRepository, "Jump Rope", "Cardio");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Bench Press", "Chest");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Push Up", "Chest");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Pull Up", "Back");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Barbell Row", "Back");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Squat", "Legs");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Lunges", "Legs");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Running", "Cardio");
+            mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Jump Rope", "Cardio");
 
             WorkoutPlan plan = createPlanIfMissing(workoutPlanRepository);
 
@@ -177,7 +173,6 @@ public class SeedDataConfig {
     }
 
     private void mapExerciseToCategoryIfMissing(
-            ExerciseCategoryMapRepository mapRepository,
             ExerciseRepository exerciseRepository,
             ExerciseCategoryRepository categoryRepository,
             String exerciseName,
@@ -188,11 +183,11 @@ public class SeedDataConfig {
         ExerciseCategory category = categoryRepository.findFirstByNameOrderById(categoryName)
                 .orElseThrow(() -> new IllegalStateException("Category not found: " + categoryName));
 
-        if (!mapRepository.existsByExerciseAndCategory(exercise, category)) {
-            mapRepository.save(ExerciseCategoryMap.builder()
-                    .exercise(exercise)
-                    .category(category)
-                    .build());
+        boolean alreadyMapped = exercise.getCategories().stream()
+                .anyMatch(c -> c.getId().equals(category.getId()));
+        if (!alreadyMapped) {
+            exercise.getCategories().add(category);
+            exerciseRepository.save(exercise);
         }
     }
 
