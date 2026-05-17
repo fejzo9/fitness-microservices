@@ -150,7 +150,7 @@ services:
     build: ./workout-service
     container_name: workout-service
     ports:
-      - "8083:8081"
+      - "8083:8083"
     environment:
       DB_HOST: workout-db
       DB_PORT: 5432
@@ -158,6 +158,8 @@ services:
       DB_USER: postgres
       DB_PASSWORD: password
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
+      SERVER_PORT: 8083
+      ENABLE_SEED_DATA: true
     depends_on:
       - workout-db
       - eureka-service

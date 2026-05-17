@@ -53,12 +53,12 @@ class EurekaXmlLoadTester:
                         
                         # Only include UP instances
                         if status.upper() == 'UP':
-                            # Map internal instances to external ports
-                            # Instance 1 (fcc284a834a343663d89f03c66f4d9ca) -> port 8083
-                            # Instance 2 (c205d81b99276110883802f3792adb28) -> port 8086
-                            if 'fcc284a834a343663d89f03c66f4d9ca' in instance_id:
+                            # Map instance IDs to external ports based on the pattern
+                            # workout-service:8083 -> http://localhost:8083
+                            # workout-service:8087 -> http://localhost:8086
+                            if ':8083' in instance_id:
                                 external_port = 8083
-                            elif 'c205d81b99276110883802f3792adb28' in instance_id:
+                            elif ':8087' in instance_id:
                                 external_port = 8086
                             else:
                                 external_port = port  # fallback to internal port
