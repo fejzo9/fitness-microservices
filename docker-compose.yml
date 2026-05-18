@@ -88,6 +88,7 @@ services:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
     depends_on:
       - user-db
+      - eureka-service # Added dependency
     networks:
       - fitness-network
 
@@ -106,6 +107,8 @@ services:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
     depends_on:
       - auth-db
+      - eureka-service
+    restart: on-failure
     networks:
       - fitness-network
 
@@ -124,6 +127,7 @@ services:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
     depends_on:
       - notification-db
+      - eureka-service # Added dependency
     networks:
       - fitness-network
 
@@ -142,6 +146,7 @@ services:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
     depends_on:
       - nutrition-db
+      - eureka-service # Added dependency
     networks:
       - fitness-network
 
@@ -184,6 +189,20 @@ services:
     depends_on:
       - workout-db
       - eureka-service
+    networks:
+      - fitness-network
+
+  # API Gateway
+  gateway-service:
+    build: ./gateway-service
+    container_name: gateway-service
+    ports:
+      - "8080:8080" # Gateway will listen on 8080
+    environment:
+      EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
+    depends_on:
+      - eureka-service
+    restart: on-failure
     networks:
       - fitness-network
 

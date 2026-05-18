@@ -20,19 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST controller for managing roles.
  *
- * <p>Base URL: /api/roles
+ * <p>Base URL: /auth/roles
  *
  * <p>Endpoints:
  * <ul>
- *   <li>GET    /api/roles         - Retrieve all roles</li>
- *   <li>GET    /api/roles/{id}    - Retrieve a role by ID</li>
- *   <li>POST   /api/roles         - Create a new role</li>
- *   <li>PUT    /api/roles/{id}    - Update an existing role</li>
- *   <li>DELETE /api/roles/{id}    - Delete a role by ID</li>
+ *   <li>GET    /auth/roles         - Retrieve all roles</li>
+ *   <li>GET    /auth/roles/{id}    - Retrieve a role by ID</li>
+ *   <li>POST   /auth/roles         - Create a new role</li>
+ *   <li>PUT    /auth/roles/{id}    - Update an existing role</li>
+ *   <li>DELETE /auth/roles/{id}    - Delete a role by ID</li>
  * </ul>
  */
 @RestController
-@RequestMapping("/api/roles")
+@RequestMapping("/auth/roles")
 @RequiredArgsConstructor
 public class RoleController {
 

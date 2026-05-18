@@ -1,0 +1,62 @@
+server:
+  port: 8080 # Default port for the Gateway
+
+spring:
+  application:
+    name: gateway-service
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: true
+          lower-case-service-id: true
+      default-filters:
+        - name: JwtAuthentication
+      routes:
+        - id: auth-service
+          uri: lb://auth-service
+          predicates:
+            - Path=/auth/**
+        - id: user-service
+          uri: lb://user-service
+          predicates:
+            - Path=/users/**
+          filters:
+            - RewritePath=/users/(?<segment>.*), /api/$\{segment}
+        - id: workout-service
+          uri: lb://workout-service
+          predicates:
+            - Path=/workouts/**
+          filters:
+            - RewritePath=/workouts/(?<segment>.*), /api/$\{segment}
+        - id: nutrition-service
+          uri: lb://nutrition-service
+          predicates:
+            - Path=/nutrition/**
+          filters:
+            - RewritePath=/nutrition/(?<segment>.*), /api/$\{segment}
+        - id: notification-service
+          uri: lb://notification-service
+          predicates:
+            - Path=/notifications/**
+          filters:
+            - RewritePath=/notifications/(?<segment>.*), /api/$\{segment}
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: ${EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE:http://localhost:8761/eureka/}
+    register-with-eureka: true
+    fetch-registry: true
+    healthcheck:
+      enabled: true
+    registry-fetch-interval-seconds: 30
+  instance:
+    hostname: ${HOSTNAME:localhost}
+    prefer-ip-address: true
+    lease-renewal-interval-in-seconds: 30
+    lease-expiration-duration-in-seconds: 90
+
+# JWT Configuration
+jwt:
+  secret: aGVsbG93b3JsZGhlbGxvd29ybGRoZWxsbG93b3JsZGhlbGxvd29ybGRoZWxsbG93b3JsZA==

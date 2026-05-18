@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Configuration
 public class SeedDataConfig {
@@ -15,7 +16,8 @@ public class SeedDataConfig {
     @Bean
     CommandLineRunner seedData(
             RoleRepository roleRepository,
-            UserRepository userRepository) {
+            UserRepository userRepository,
+            PasswordEncoder passwordEncoder) {
 
         return args -> {
             createRoleIfMissing(roleRepository, "ADMIN");
@@ -29,10 +31,10 @@ public class SeedDataConfig {
             Role userRole = roleRepository.findByName("USER")
                     .orElseThrow(() -> new IllegalStateException("USER role not found"));
 
-            createUserIfMissing(userRepository, "admin1", "admin1@fitapp.com", "admin123hash", adminRole);
-            createUserIfMissing(userRepository, "trainer1", "trainer1@fitapp.com", "trainer123hash", trainerRole);
-            createUserIfMissing(userRepository, "user1", "user1@fitapp.com", "user123hash", userRole);
-            createUserIfMissing(userRepository, "user2", "user2@fitapp.com", "user234hash", userRole);
+            createUserIfMissing(userRepository, "admin1", "admin1@fitapp.com", "admin123", adminRole, passwordEncoder);
+            createUserIfMissing(userRepository, "trainer1", "trainer1@fitapp.com", "trainer123", trainerRole, passwordEncoder);
+            createUserIfMissing(userRepository, "user1", "user1@fitapp.com", "user123", userRole, passwordEncoder);
+            createUserIfMissing(userRepository, "user2", "user2@fitapp.com", "user234", userRole, passwordEncoder);
         };
     }
 
@@ -46,14 +48,15 @@ public class SeedDataConfig {
             UserRepository userRepository,
             String username,
             String email,
-            String passwordHash,
-            Role role) {
+            String password,
+            Role role,
+            PasswordEncoder passwordEncoder) {
 
         if (!userRepository.existsByUsername(username)) {
             userRepository.save(User.builder()
                     .username(username)
                     .email(email)
-                    .passwordHash(passwordHash)
+                    .passwordHash(passwordEncoder.encode(password))
                     .role(role)
                     .createdAt(LocalDateTime.now())
                     .build());

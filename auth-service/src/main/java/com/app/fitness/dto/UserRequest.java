@@ -24,9 +24,9 @@ public class UserRequest {
     @Size(max = 150, message = "Email must not exceed 150 characters")
     private String email;
 
-    @NotBlank(message = "Password hash must not be blank")
-    @Size(max = 255, message = "Password hash must not exceed 255 characters")
-    private String passwordHash;
+    @NotBlank(message = "Password must not be blank")
+    @Size(min = 6, max = 255, message = "Password must be between 6 and 255 characters")
+    private String password;
 
     @NotNull(message = "Role ID must not be null")
     private Long roleId;

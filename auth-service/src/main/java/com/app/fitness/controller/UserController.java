@@ -20,19 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 /**
  * REST controller for managing users.
  *
- * <p>Base URL: /api/users
+ * <p>Base URL: /auth/users
  *
  * <p>Endpoints:
  * <ul>
- *   <li>GET    /api/users         - Retrieve all users</li>
- *   <li>GET    /api/users/{id}    - Retrieve a user by ID</li>
- *   <li>POST   /api/users         - Create a new user</li>
- *   <li>PUT    /api/users/{id}    - Update an existing user</li>
- *   <li>DELETE /api/users/{id}    - Delete a user by ID</li>
+ *   <li>GET    /auth/users         - Retrieve all users</li>
+ *   <li>GET    /auth/users/{id}    - Retrieve a user by ID</li>
+ *   <li>POST   /auth/users         - Create a new user</li>
+ *   <li>PUT    /auth/users/{id}    - Update an existing user</li>
+ *   <li>DELETE /auth/users/{id}    - Delete a user by ID</li>
  * </ul>
  */
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/auth/users")
 @RequiredArgsConstructor
 public class UserController {
 
