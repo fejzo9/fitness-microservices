@@ -18,4 +18,6 @@ public interface ExerciseCategoryRepository extends JpaRepository<ExerciseCatego
     
     @Query("SELECT ec FROM ExerciseCategory ec WHERE ec.name = ?1 ORDER BY ec.id ASC")
     Optional<ExerciseCategory> findFirstByNameOrderById(String name);
+
+    List<ExerciseCategory> findByNameIn(List<String> names);
 }

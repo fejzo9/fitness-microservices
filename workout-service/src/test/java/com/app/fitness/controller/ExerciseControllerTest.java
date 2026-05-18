@@ -46,7 +46,12 @@ class ExerciseControllerTest extends ControllerTestSupport {
     @Test
     void getAll_shouldReturnPage() throws Exception {
         List<ExerciseResponse> exercises = List.of(
-                new ExerciseResponse(1L, "Bench Press", "Chest exercise", "INTERMEDIATE"));
+                ExerciseResponse.builder()
+                        .id(1L)
+                        .name("Bench Press")
+                        .description("Chest exercise")
+                        .difficulty("INTERMEDIATE")
+                        .build());
         Pageable pageable = PageRequest.of(0, 10);
         when(exerciseService.findAll(any(Pageable.class)))
                 .thenReturn(PageResponse.of(new PageImpl<>(exercises, pageable, 1)));
@@ -62,7 +67,12 @@ class ExerciseControllerTest extends ControllerTestSupport {
     @Test
     void getById_whenExerciseExists_shouldReturnExercise() throws Exception {
         when(exerciseService.findById(1L))
-                .thenReturn(new ExerciseResponse(1L, "Bench Press", "Chest exercise", "INTERMEDIATE"));
+                .thenReturn(ExerciseResponse.builder()
+                        .id(1L)
+                        .name("Bench Press")
+                        .description("Chest exercise")
+                        .difficulty("INTERMEDIATE")
+                        .build());
 
         mockMvc.perform(get("/api/exercises/1"))
                 .andExpect(status().isOk())
@@ -82,9 +92,18 @@ class ExerciseControllerTest extends ControllerTestSupport {
 
     @Test
     void create_withValidRequest_shouldReturn201() throws Exception {
-        ExerciseRequest request = new ExerciseRequest("Squat", "Leg exercise", "BEGINNER");
+        ExerciseRequest request = ExerciseRequest.builder()
+                .name("Squat")
+                .description("Leg exercise")
+                .difficulty("BEGINNER")
+                .build();
         when(exerciseService.create(any(ExerciseRequest.class)))
-                .thenReturn(new ExerciseResponse(2L, "Squat", "Leg exercise", "BEGINNER"));
+                .thenReturn(ExerciseResponse.builder()
+                        .id(2L)
+                        .name("Squat")
+                        .description("Leg exercise")
+                        .difficulty("BEGINNER")
+                        .build());
 
         mockMvc.perform(post("/api/exercises")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -95,7 +114,11 @@ class ExerciseControllerTest extends ControllerTestSupport {
 
     @Test
     void create_withBlankName_shouldReturn400() throws Exception {
-        ExerciseRequest request = new ExerciseRequest("", "desc", "EASY");
+        ExerciseRequest request = ExerciseRequest.builder()
+                .name("")
+                .description("desc")
+                .difficulty("EASY")
+                .build();
 
         mockMvc.perform(post("/api/exercises")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -106,7 +129,9 @@ class ExerciseControllerTest extends ControllerTestSupport {
 
     @Test
     void create_whenDuplicate_shouldReturn409() throws Exception {
-        ExerciseRequest request = new ExerciseRequest("Bench Press", null, null);
+        ExerciseRequest request = ExerciseRequest.builder()
+                .name("Bench Press")
+                .build();
         when(exerciseService.create(any(ExerciseRequest.class)))
                 .thenThrow(new DuplicateResourceException("Exercise already exists with name: Bench Press"));
 
@@ -119,9 +144,16 @@ class ExerciseControllerTest extends ControllerTestSupport {
 
     @Test
     void update_withValidRequest_shouldReturn200() throws Exception {
-        ExerciseRequest request = new ExerciseRequest("Bench Press Updated", null, "ADVANCED");
+        ExerciseRequest request = ExerciseRequest.builder()
+                .name("Bench Press Updated")
+                .difficulty("ADVANCED")
+                .build();
         when(exerciseService.update(eq(1L), any(ExerciseRequest.class)))
-                .thenReturn(new ExerciseResponse(1L, "Bench Press Updated", null, "ADVANCED"));
+                .thenReturn(ExerciseResponse.builder()
+                        .id(1L)
+                        .name("Bench Press Updated")
+                        .difficulty("ADVANCED")
+                        .build());
 
         mockMvc.perform(put("/api/exercises/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -132,7 +164,10 @@ class ExerciseControllerTest extends ControllerTestSupport {
 
     @Test
     void update_whenNotFound_shouldReturn404() throws Exception {
-        ExerciseRequest request = new ExerciseRequest("Bench Press Updated", null, "ADVANCED");
+        ExerciseRequest request = ExerciseRequest.builder()
+                .name("Bench Press Updated")
+                .difficulty("ADVANCED")
+                .build();
         when(exerciseService.update(eq(99L), any(ExerciseRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Exercise not found with id: 99"));
 
