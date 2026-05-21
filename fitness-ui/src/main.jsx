@@ -6,6 +6,11 @@ import { Layout } from './Layout'
 import { Dashboard } from './Dashboard'
 import { PlanTreninga } from './PlanTreninga'
 import { Biblioteka } from './Biblioteka'
+import { Ishrana } from './Ishrana'
+import { Napredak } from './Napredak'
+import { Profil } from './Profil'
+import { TrenerPanel } from './TrenerPanel'
+import { AdminPanel } from './AdminPanel'
 import { Login } from './Login'
 import { Register } from './Register'
 import './index.css'
@@ -26,6 +31,11 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route index element={<Dashboard />} />
             <Route path="plan-treninga" element={<PlanTreninga />} />
             <Route path="biblioteka" element={<Biblioteka />} />
+            <Route path="ishrana" element={<Ishrana />} />
+            <Route path="napredak" element={<Napredak />} />
+            <Route path="profil" element={<Profil />} />
+            <Route path="trener-panel" element={<TrenerPanel />} />
+            <Route path="admin-panel" element={<AdminPanel />} />
           </Route>
         </Routes>
       </BrowserRouter>
