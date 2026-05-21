@@ -37,6 +37,14 @@ public class ExerciseService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponse<ExerciseResponse> searchByName(String name, Pageable pageable) {
+        if (name == null || name.trim().isEmpty()) {
+            return findAll(pageable);
+        }
+        return PageResponse.of(exerciseRepository.findByNameContainingIgnoreCase(name.trim(), pageable).map(exerciseMapper::toResponse));
+    }
+
+    @Transactional(readOnly = true)
     public ExerciseResponse findById(Long id) {
         return exerciseRepository.findById(id)
                 .map(exerciseMapper::toResponse)

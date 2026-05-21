@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -42,6 +43,13 @@ public class ExerciseController {
     @GetMapping
     public ResponseEntity<PageResponse<ExerciseResponse>> getAll(Pageable pageable) {
         return ResponseEntity.ok(exerciseService.findAll(pageable));
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<PageResponse<ExerciseResponse>> search(
+            @RequestParam(required = false) String name,
+            Pageable pageable) {
+        return ResponseEntity.ok(exerciseService.searchByName(name, pageable));
     }
 
     @GetMapping("/{id}")
