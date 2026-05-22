@@ -60,3 +60,8 @@ eureka:
 # JWT Configuration
 jwt:
   secret: aGVsbG93b3JsZGhlbGxvd29ybGRoZWxsbG93b3JsZGhlbGxvd29ybGRoZWxsbG93b3JsZA==
+logging:
+  level:
+    org.springframework.cloud.gateway: DEBUG
+    org.springframework.web: DEBUG
+    reactor.netty: DEBUG

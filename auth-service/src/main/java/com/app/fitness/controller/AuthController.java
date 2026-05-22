@@ -46,11 +46,16 @@ public class AuthController {
         );
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         String accessToken = jwtUtil.generateToken(userDetails);
-        
-        // Create and store refresh token in database
         RefreshToken refreshToken = refreshTokenService.createRefreshToken(userDetails.getUsername());
-        
-        return ResponseEntity.ok(new AuthResponse(accessToken, refreshToken.getToken()));
+
+        // Dohvati user podatke
+        UserResponse userResponse = userService.findByUsername(loginRequest.getUsername());
+
+        return ResponseEntity.ok(AuthResponse.builder()
+                .accessToken(accessToken)
+                .refreshToken(refreshToken.getToken())
+                .user(userResponse)
+                .build());
     }
 
     @PostMapping("/refresh-token")
@@ -76,8 +81,11 @@ public class AuthController {
         
         // Optionally generate new refresh token for better security
         RefreshToken newRefreshToken = refreshTokenService.createRefreshToken(user.getUsername());
-        
-        return ResponseEntity.ok(new AuthResponse(newAccessToken, newRefreshToken.getToken()));
+
+        return ResponseEntity.ok(AuthResponse.builder()
+                .accessToken(newAccessToken)
+                .refreshToken(newRefreshToken.getToken())
+                .build());
     }
 
     @PostMapping("/logout")

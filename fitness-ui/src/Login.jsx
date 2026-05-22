@@ -27,8 +27,13 @@ export function Login() {
       }
 
       const data = await response.json();
-      login(data.accessToken, data.refreshToken, data.user);
-      
+      const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
+      login(data.accessToken, data.refreshToken, {
+        username: payload.sub,
+        email: null,
+        id: null,
+        roles: [],
+      });
       navigate('/');
     } catch (err) {
       setError(err.message || 'Greška pri prijavi');

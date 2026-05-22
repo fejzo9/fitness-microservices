@@ -87,4 +87,10 @@ public class UserService implements UserDetailsService {
         }
         userRepository.deleteById(id);
     }
+    @Transactional(readOnly = true)
+    public UserResponse findByUsername(String username) {
+        return userRepository.findByUsername(username)
+                .map(userMapper::toResponse)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+    }
 }
