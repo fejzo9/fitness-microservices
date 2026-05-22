@@ -28,12 +28,7 @@ export function Login() {
 
       const data = await response.json();
       const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
-      login(data.accessToken, data.refreshToken, {
-        username: payload.sub,
-        email: null,
-        id: null,
-        roles: [],
-      });
+      login(data.accessToken, data.refreshToken, data.user);
       navigate('/');
     } catch (err) {
       setError(err.message || 'Greška pri prijavi');
