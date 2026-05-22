@@ -8,15 +8,14 @@ const navItems = [
   { path: "/ishrana", label: "Ishrana" },
   { path: "/napredak", label: "Napredak" },
   { path: "/profil", label: "Profil" },
-  { path: "/trener-panel", label: "Trener Panel" },
-  { path: "/admin-panel", label: "Admin Panel" },
 ];
 
 export function Layout() {
   const location = useLocation();
   const { user, logout } = useAuth();
   const isActive = (path) => location.pathname === path;
-
+  const isAdmin = user?.roleName === 'ADMIN';
+  const isTrener = user?.roleName === 'TRENER';
   return (
     <div className="min-h-screen bg-background text-foreground dark flex flex-col">
       {/* Top Header */}
@@ -53,18 +52,42 @@ export function Layout() {
         <aside className="w-52 bg-sidebar border-r border-sidebar-border flex-shrink-0 relative">
           <nav className="p-3 space-y-0.5">
             {navItems.map(({ path, label }) => (
-              <Link
-                key={path}
-                to={path}
-                className={`flex items-center px-3 py-2.5 text-sm rounded transition-colors ${
-                  isActive(path)
-                    ? "bg-primary text-white font-medium"
-                    : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                }`}
-              >
-                {label}
-              </Link>
+                <Link
+                    key={path}
+                    to={path}
+                    className={`flex items-center px-3 py-2.5 text-sm rounded transition-colors ${
+                        isActive(path)
+                            ? "bg-primary text-white font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    }`}
+                >
+                  {label}
+                </Link>
             ))}
+            {(isAdmin || isTrener) && (
+                <Link
+                    to="/trener-panel"
+                    className={`flex items-center px-3 py-2.5 text-sm rounded transition-colors ${
+                        isActive("/trener-panel")
+                            ? "bg-primary text-white font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    }`}
+                >
+                  Trener Panel
+                </Link>
+            )}
+            {isAdmin && (
+                <Link
+                    to="/admin-panel"
+                    className={`flex items-center px-3 py-2.5 text-sm rounded transition-colors ${
+                        isActive("/admin-panel")
+                            ? "bg-primary text-white font-medium"
+                            : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    }`}
+                >
+                  Admin Panel
+                </Link>
+            )}
           </nav>
 
           <div className="absolute bottom-0 left-0 w-52 p-3 border-t border-sidebar-border">

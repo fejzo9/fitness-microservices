@@ -47,18 +47,17 @@ export function AdminPanel() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [u, r, ex, cats, maps] = await Promise.all([
+      const [u, r, ex, cats] = await Promise.all([
         api.getUsers(),
         api.getRoles(),
         api.getExercises(0, 100),
         api.getExerciseCategories(),
-        api.getExerciseCategoryMaps(),
       ]);
       setUsers(u || []);
       setRoles(r || []);
       setExercises((ex?.content || ex) || []);
       setCategories(cats || []);
-      setCatMaps(maps || []);
+      setCatMaps([]);
     } catch {
       setError('Greška pri učitavanju podataka');
     } finally {
