@@ -37,7 +37,8 @@ export function Layout() {
             <div className="w-8 h-8 rounded-full bg-primary/20 border border-primary/40 flex items-center justify-center">
               <span className="text-primary text-xs font-bold">{user?.username?.substring(0, 2).toUpperCase() || 'K'}</span>
             </div>
-            <button 
+            <button
+              type="button"
               onClick={logout}
               className="text-xs text-muted-foreground hover:text-foreground transition-colors"
             >

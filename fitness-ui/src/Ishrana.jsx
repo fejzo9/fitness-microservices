@@ -165,6 +165,7 @@ export function Ishrana() {
           ].map(([key, label]) => (
               <button
                   key={key}
+                  type="button"
                   onClick={() => setActiveTab(key)}
                   className={`px-4 py-2 text-sm rounded-md transition-colors cursor-pointer ${
                       activeTab === key ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:text-foreground'
@@ -185,6 +186,7 @@ export function Ishrana() {
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-sm text-muted-foreground">{mealLogs.length} dnevnika</span>
                       <button
+                          type="button"
                           onClick={() => openModal('log')}
                           className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors cursor-pointer"
                       >
@@ -211,12 +213,14 @@ export function Ishrana() {
                             </div>
                             <div className="flex gap-2">
                               <button
+                                  type="button"
                                   onClick={() => openModal('log', log)}
                                   className="bg-secondary border border-border text-foreground px-3 py-1.5 text-xs rounded hover:bg-secondary/80 transition-colors cursor-pointer"
                               >
                                 Uredi
                               </button>
                               <button
+                                  type="button"
                                   onClick={() => handleDelete('log', log.id)}
                                   className="bg-destructive/10 border border-destructive/30 text-destructive px-3 py-1.5 text-xs rounded hover:bg-destructive/20 transition-colors cursor-pointer"
                               >
@@ -235,6 +239,7 @@ export function Ishrana() {
                     <div className="flex justify-between items-center mb-4">
                       <span className="text-sm text-muted-foreground">{mealItems.length} stavki</span>
                       <button
+                          type="button"
                           onClick={() => openModal('item')}
                           className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors cursor-pointer"
                       >
@@ -277,12 +282,14 @@ export function Ishrana() {
                                     <td className="px-4 py-3 text-right">
                                       <div className="flex gap-2 justify-end">
                                         <button
+                                            type="button"
                                             onClick={() => openModal('item', item)}
                                             className="bg-secondary border border-border text-foreground px-2 py-1 text-xs rounded hover:bg-secondary/80 cursor-pointer"
                                         >
                                           Uredi
                                         </button>
                                         <button
+                                            type="button"
                                             onClick={() => handleDelete('item', item.id)}
                                             className="bg-destructive/10 border border-destructive/30 text-destructive px-2 py-1 text-xs rounded hover:bg-destructive/20 cursor-pointer"
                                         >

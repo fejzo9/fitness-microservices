@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from './contexts/AuthContext';
 import { api } from './services/api';
 
@@ -16,6 +16,20 @@ function Input({ label, ...props }) {
   );
 }
 
+const GOAL_TYPES = [
+  { value: 'WEIGHT_LOSS', label: 'Mršanje' },
+  { value: 'MUSCLE_GAIN', label: 'Izgradnja mišića' },
+  { value: 'MAINTENANCE', label: 'Održavanje forme' },
+  { value: 'ENDURANCE', label: 'Poboljšanje kondicije' },
+];
+
+const TIME_FRAMES = [
+  { value: 3, label: '3 meseca' },
+  { value: 6, label: '6 meseci' },
+  { value: 9, label: '9 meseci' },
+  { value: 12, label: '12 meseci' },
+];
+
 export function Profil() {
   const { user, logout } = useAuth();
   const [editing, setEditing] = useState(false);
@@ -28,8 +42,53 @@ export function Profil() {
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
   const [error, setError] = useState('');
+  
+  const [activeGoal, setActiveGoal] = useState(null);
+  const [goalForm, setGoalForm] = useState({
+    goalType: '',
+    targetValue: '',
+    timeFrame: 6,
+  });
+  const [editingGoal, setEditingGoal] = useState(false);
+  const [savingGoal, setSavingGoal] = useState(false);
 
   const f = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }));
+  const fg = (key) => (e) => setGoalForm(prev => ({ ...prev, [key]: e.target.value }));
+  
+  useEffect(() => {
+    if (user?.id) {
+      loadActiveGoal();
+    }
+  }, [user?.id]);
+  
+  const loadActiveGoal = async () => {
+    try {
+      const goal = await api.getActiveFitnessGoal(user.id);
+      if (goal) {
+        setActiveGoal(goal);
+        setGoalForm({
+          goalType: goal.goalType,
+          targetValue: goal.targetValue || '',
+          timeFrame: goal.deadline ? calculateMonthsDiff(new Date(), new Date(goal.deadline)) : 6,
+        });
+      } else {
+        setActiveGoal(null);
+      }
+    } catch (err) {
+      setActiveGoal(null);
+    }
+  };
+  
+  const calculateMonthsDiff = (start, end) => {
+    const months = (end.getFullYear() - start.getFullYear()) * 12 + (end.getMonth() - start.getMonth());
+    return Math.max(3, Math.min(12, months));
+  };
+  
+  const getDeadlineFromMonths = (months) => {
+    const date = new Date();
+    date.setMonth(date.getMonth() + months);
+    return date.toISOString().split('T')[0];
+  };
 
   const handleSave = async () => {
     setSaving(true);
@@ -45,6 +104,44 @@ export function Profil() {
       setError('Greška pri čuvanju profila.');
     } finally {
       setSaving(false);
+    }
+  };
+  
+  const handleSaveGoal = async () => {
+    setSavingGoal(true);
+    setError('');
+    setSuccess('');
+    try {
+      const goalData = {
+        userId: user.id,
+        goalType: goalForm.goalType,
+        targetValue: goalForm.targetValue ? parseFloat(goalForm.targetValue) : null,
+        isActive: true,
+        deadline: getDeadlineFromMonths(parseInt(goalForm.timeFrame)),
+      };
+      
+      if (activeGoal) {
+        // Deaktiviraj postojeći cilj - zadrži njegove originalne podatke
+        await api.updateFitnessGoal(activeGoal.id, { 
+          userId: activeGoal.userId,
+          goalType: activeGoal.goalType,
+          targetValue: activeGoal.targetValue,
+          isActive: false,
+          deadline: activeGoal.deadline,
+        });
+      }
+      
+      // Kreiraj novi aktivan cilj
+      const newGoal = await api.createFitnessGoal(goalData);
+      setActiveGoal(newGoal);
+      setSuccess('Cilj uspješno sačuvan.');
+      setEditingGoal(false);
+      await loadActiveGoal();
+    } catch (err) {
+      setError('Greška pri čuvanju cilja.');
+      console.error('Error saving goal:', err);
+    } finally {
+      setSavingGoal(false);
     }
   };
 
@@ -83,6 +180,7 @@ export function Profil() {
             <h3 className="text-base font-semibold text-foreground" style={BARLOW}>Informacije o nalogu</h3>
             {!editing && (
               <button
+                type="button"
                 onClick={() => { setEditing(true); setSuccess(''); setError(''); }}
                 className="bg-secondary border border-border text-foreground px-4 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors"
               >
@@ -104,6 +202,7 @@ export function Profil() {
               <Input label="Email" type="email" value={form.email} onChange={f('email')} placeholder="email@example.com" />
               <div className="flex gap-3 pt-2">
                 <button
+                  type="button"
                   onClick={handleSave}
                   disabled={saving}
                   className="bg-primary text-white px-5 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
@@ -111,6 +210,7 @@ export function Profil() {
                   {saving ? 'Čuvanje...' : 'Sačuvaj'}
                 </button>
                 <button
+                  type="button"
                   onClick={() => setEditing(false)}
                   className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors"
                 >
@@ -136,11 +236,114 @@ export function Profil() {
           )}
         </div>
 
+        {/* Fitness Ciljevi */}
+        <div className="bg-card border border-border rounded-lg p-6">
+          <div className="flex items-center justify-between mb-5">
+            <h3 className="text-base font-semibold text-foreground uppercase" style={BARLOW}>Fitness Ciljevi</h3>
+            {!editingGoal && (
+              <button
+                type="button"
+                onClick={() => { setEditingGoal(true); setSuccess(''); setError(''); }}
+                className="bg-secondary border border-border text-foreground px-4 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors"
+              >
+                {activeGoal ? 'Promijeni cilj' : 'Postavi cilj'}
+              </button>
+            )}
+          </div>
+
+          {success && <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-2 rounded text-sm mb-4">{success}</div>}
+          {error && <div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm mb-4">{error}</div>}
+
+          {editingGoal ? (
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs text-muted-foreground mb-1">Primarni cilj</label>
+                <select
+                  value={goalForm.goalType}
+                  onChange={fg('goalType')}
+                  className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                >
+                  <option value="">Izaberite cilj</option>
+                  {GOAL_TYPES.map(gt => (
+                    <option key={gt.value} value={gt.value}>{gt.label}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input
+                  label="Ciljna težina (kg)"
+                  type="number"
+                  value={goalForm.targetValue}
+                  onChange={fg('targetValue')}
+                  placeholder="80"
+                />
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">Vremenski okvir</label>
+                  <select
+                    value={goalForm.timeFrame}
+                    onChange={fg('timeFrame')}
+                    className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    {TIME_FRAMES.map(tf => (
+                      <option key={tf.value} value={tf.value}>{tf.label}</option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={handleSaveGoal}
+                  disabled={savingGoal || !goalForm.goalType}
+                  className="bg-primary text-white px-5 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {savingGoal ? 'Čuvanje...' : 'Sačuvaj cilj'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setEditingGoal(false)}
+                  className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors"
+                >
+                  Odustani
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {activeGoal ? (
+                <>
+                  <div className="flex items-center border-b border-border pb-3">
+                    <span className="text-sm text-muted-foreground w-40">Primarni cilj</span>
+                    <span className="text-sm text-foreground">
+                      {GOAL_TYPES.find(gt => gt.value === activeGoal.goalType)?.label || activeGoal.goalType}
+                    </span>
+                  </div>
+                  {activeGoal.targetValue && (
+                    <div className="flex items-center border-b border-border pb-3">
+                      <span className="text-sm text-muted-foreground w-40">Ciljna težina (kg)</span>
+                      <span className="text-sm text-foreground">{activeGoal.targetValue}</span>
+                    </div>
+                  )}
+                  {activeGoal.deadline && (
+                    <div className="flex items-center">
+                      <span className="text-sm text-muted-foreground w-40">Rok</span>
+                      <span className="text-sm text-foreground">{new Date(activeGoal.deadline).toLocaleDateString('sr-RS')}</span>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <p className="text-sm text-muted-foreground">Nemate postavljen cilj. Kliknite "Postavi cilj" da definišete svoj fitness cilj.</p>
+              )}
+            </div>
+          )}
+        </div>
+
         {/* Danger zone */}
         <div className="bg-card border border-destructive/30 rounded-lg p-6">
           <h3 className="text-base font-semibold text-foreground mb-1" style={BARLOW}>Zona opasnosti</h3>
           <p className="text-xs text-muted-foreground mb-4">Ove akcije su nepovratne.</p>
           <button
+            type="button"
             onClick={logout}
             className="bg-destructive/10 border border-destructive/40 text-destructive px-4 py-2 text-sm rounded hover:bg-destructive/20 transition-colors"
           >

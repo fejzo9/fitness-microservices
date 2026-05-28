@@ -18,6 +18,7 @@ const jsonHeaders = () => ({
 
 async function request(url, options = {}) {
   const response = await fetch(url, { headers: getAuthHeader(), ...options });
+  if (response.status === 204) return null;
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const text = await response.text();
   return text ? JSON.parse(text) : null;
@@ -51,6 +52,8 @@ export const api = {
   // ── USER SERVICE (/users) ──────────────────────────────────
   getFitnessGoals: () => request(`${API_BASE.user}/fitness-goals`),
   getFitnessGoalById: (id) => request(`${API_BASE.user}/fitness-goals/${id}`),
+  getFitnessGoalsByUserId: (userId) => request(`${API_BASE.user}/fitness-goals/user/${userId}`),
+  getActiveFitnessGoal: (userId) => request(`${API_BASE.user}/fitness-goals/user/${userId}/active`),
   createFitnessGoal: (data) => requestJson(`${API_BASE.user}/fitness-goals`, 'POST', data),
   updateFitnessGoal: (id, data) => requestJson(`${API_BASE.user}/fitness-goals/${id}`, 'PUT', data),
   deleteFitnessGoal: (id) => request(`${API_BASE.user}/fitness-goals/${id}`, { method: 'DELETE' }),
@@ -91,7 +94,7 @@ export const api = {
   getExercises: async (page = 0, size = 9, search = '', categoryId = null) => {
     const base = API_BASE.workout;
     if (search) {
-      return request(`${base}/exercises?name=${encodeURIComponent(search)}&page=${page}&size=${size}`);
+      return request(`${base}/exercises/search?name=${encodeURIComponent(search)}&page=${page}&size=${size}`);
     }
     const params = new URLSearchParams({ page, size });
     if (categoryId) params.append('categoryId', categoryId);

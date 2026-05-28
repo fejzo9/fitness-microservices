@@ -27,7 +27,6 @@ export function Login() {
       }
 
       const data = await response.json();
-      const payload = JSON.parse(atob(data.accessToken.split('.')[1]));
       login(data.accessToken, data.refreshToken, data.user);
       navigate('/');
     } catch (err) {

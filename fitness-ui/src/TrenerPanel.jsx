@@ -9,7 +9,7 @@ function Modal({ title, onClose, children }) {
       <div className="bg-card border border-border rounded-lg w-full max-w-lg">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <h3 className="text-base font-semibold text-foreground" style={BARLOW}>{title}</h3>
-          <button onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button>
         </div>
         <div className="p-5">{children}</div>
       </div>
@@ -132,6 +132,7 @@ export function TrenerPanel() {
         {TABS.map(([key, label]) => (
           <button
             key={key}
+            type="button"
             onClick={() => setActiveTab(key)}
             className={`px-4 py-2 text-sm rounded-md transition-colors ${
               activeTab === key ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:text-foreground'
@@ -151,7 +152,7 @@ export function TrenerPanel() {
             <>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm text-muted-foreground">{trainerClients.length} klijenata</span>
-                <button onClick={() => openModal('client')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
+                <button type="button" onClick={() => openModal('client')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
                   + Dodaj klijenta
                 </button>
               </div>
@@ -185,8 +186,8 @@ export function TrenerPanel() {
                           </td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex gap-2 justify-end">
-                              <button onClick={() => openModal('client', tc)} className="bg-secondary border border-border text-foreground px-2 py-1 text-xs rounded hover:bg-secondary/80">Uredi</button>
-                              <button onClick={() => handleDelete('client', tc.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-2 py-1 text-xs rounded hover:bg-destructive/20">Obriši</button>
+                              <button type="button" onClick={() => openModal('client', tc)} className="bg-secondary border border-border text-foreground px-2 py-1 text-xs rounded hover:bg-secondary/80">Uredi</button>
+                              <button type="button" onClick={() => handleDelete('client', tc.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-2 py-1 text-xs rounded hover:bg-destructive/20">Obriši</button>
                             </div>
                           </td>
                         </tr>
@@ -203,7 +204,7 @@ export function TrenerPanel() {
             <>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm text-muted-foreground">{workoutPlans.length} planova</span>
-                <button onClick={() => openModal('plan')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
+                <button type="button" onClick={() => openModal('plan')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
                   + Novi plan
                 </button>
               </div>
@@ -222,8 +223,8 @@ export function TrenerPanel() {
                       {plan.userId && <span>Korisnik: #{plan.userId}</span>}
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => openModal('plan', plan)} className="bg-secondary border border-border text-foreground px-3 py-1.5 text-xs rounded hover:bg-secondary/80">Uredi</button>
-                      <button onClick={() => handleDelete('plan', plan.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-3 py-1.5 text-xs rounded hover:bg-destructive/20">Obriši</button>
+                      <button type="button" onClick={() => openModal('plan', plan)} className="bg-secondary border border-border text-foreground px-3 py-1.5 text-xs rounded hover:bg-secondary/80">Uredi</button>
+                      <button type="button" onClick={() => handleDelete('plan', plan.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-3 py-1.5 text-xs rounded hover:bg-destructive/20">Obriši</button>
                     </div>
                   </div>
                 ))}
@@ -236,7 +237,7 @@ export function TrenerPanel() {
             <>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm text-muted-foreground">{workoutDays.length} dana treninga</span>
-                <button onClick={() => openModal('day')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
+                <button type="button" onClick={() => openModal('day')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
                   + Novi dan
                 </button>
               </div>
@@ -264,8 +265,8 @@ export function TrenerPanel() {
                           <td className="px-4 py-3 text-muted-foreground">{day.dayOfWeek || day.day || '—'}</td>
                           <td className="px-4 py-3 text-right">
                             <div className="flex gap-2 justify-end">
-                              <button onClick={() => openModal('day', day)} className="bg-secondary border border-border text-foreground px-2 py-1 text-xs rounded hover:bg-secondary/80">Uredi</button>
-                              <button onClick={() => handleDelete('day', day.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-2 py-1 text-xs rounded hover:bg-destructive/20">Obriši</button>
+                              <button type="button" onClick={() => openModal('day', day)} className="bg-secondary border border-border text-foreground px-2 py-1 text-xs rounded hover:bg-secondary/80">Uredi</button>
+                              <button type="button" onClick={() => handleDelete('day', day.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-2 py-1 text-xs rounded hover:bg-destructive/20">Obriši</button>
                             </div>
                           </td>
                         </tr>
@@ -282,7 +283,7 @@ export function TrenerPanel() {
             <>
               <div className="flex justify-between items-center mb-4">
                 <span className="text-sm text-muted-foreground">{notifications.length} obavijesti</span>
-                <button onClick={() => openModal('notification')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
+                <button type="button" onClick={() => openModal('notification')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
                   + Pošalji obavijest
                 </button>
               </div>
@@ -301,8 +302,8 @@ export function TrenerPanel() {
                       </div>
                     </div>
                     <div className="flex gap-2 flex-shrink-0">
-                      <button onClick={() => openModal('notification', n)} className="bg-secondary border border-border text-foreground px-3 py-1.5 text-xs rounded hover:bg-secondary/80">Uredi</button>
-                      <button onClick={() => handleDelete('notification', n.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-3 py-1.5 text-xs rounded hover:bg-destructive/20">Obriši</button>
+                      <button type="button" onClick={() => openModal('notification', n)} className="bg-secondary border border-border text-foreground px-3 py-1.5 text-xs rounded hover:bg-secondary/80">Uredi</button>
+                      <button type="button" onClick={() => handleDelete('notification', n.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-3 py-1.5 text-xs rounded hover:bg-destructive/20">Obriši</button>
                     </div>
                   </div>
                 ))}
@@ -380,10 +381,10 @@ export function TrenerPanel() {
             )}
 
             <div className="flex gap-3 pt-2">
-              <button onClick={handleSave} disabled={saving} className="flex-1 bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
+              <button type="button" onClick={handleSave} disabled={saving} className="flex-1 bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors disabled:opacity-50">
                 {saving ? 'Čuvanje...' : 'Sačuvaj'}
               </button>
-              <button onClick={closeModal} className="flex-1 bg-secondary border border-border text-foreground px-4 py-2 text-sm rounded hover:bg-secondary/80 transition-colors">
+              <button type="button" onClick={closeModal} className="flex-1 bg-secondary border border-border text-foreground px-4 py-2 text-sm rounded hover:bg-secondary/80 transition-colors">
                 Odustani
               </button>
             </div>

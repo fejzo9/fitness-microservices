@@ -25,6 +25,6 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
     @EntityGraph(attributePaths = {"categories"})
     Optional<Exercise> findById(Long id);
 
-    @Query("SELECT e FROM Exercise e LEFT JOIN FETCH e.categories WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%'))")
+    @Query("SELECT e FROM Exercise e LEFT JOIN FETCH e.categories WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY e.id")
     Page<Exercise> findByNameContainingIgnoreCase(String name, Pageable pageable);
 }

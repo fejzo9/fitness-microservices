@@ -190,7 +190,7 @@ export function PlanTreninga() {
           >
             {modZaUredjivanje ? "Završi uređivanje" : "Uredi plan"}
           </button>
-          <button className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors">
+          <button type="button" className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors">
             Istorija
           </button>
         </div>
@@ -199,7 +199,7 @@ export function PlanTreninga() {
         {modZaUredjivanje && (
             <div className="bg-amber-500/10 border border-amber-500/30 text-amber-500 rounded-lg p-3 mb-6 text-sm flex justify-between items-center animate-pulse">
               <span>U režimu ste za uređivanje. Možete uklanjati vežbe sa crvenim "X" i menjati minutažu na dnu svakog dana.</span>
-              <button onClick={() => setModZaUredjivanje(false)} className="underline text-xs font-bold cursor-pointer">Završi</button>
+              <button type="button" onClick={() => setModZaUredjivanje(false)} className="underline text-xs font-bold cursor-pointer">Završi</button>
             </div>
         )}
 
@@ -263,10 +263,10 @@ export function PlanTreninga() {
           <div className="flex justify-between items-center">
             <div className="text-sm font-medium text-foreground">Nedelja: 22.03.2026 – 28.03.2026</div>
             <div className="flex gap-2">
-              <button className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors">
+              <button type="button" className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors">
                 ← Prethodna
               </button>
-              <button className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors">
+              <button type="button" className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors">
                 Sledeća →
               </button>
             </div>

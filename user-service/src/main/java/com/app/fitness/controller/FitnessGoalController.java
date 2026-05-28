@@ -64,4 +64,18 @@ public class FitnessGoalController {
         fitnessGoalService.delete(id);
         return ResponseEntity.noContent().build();
     }
+    
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<FitnessGoalResponse>> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(fitnessGoalService.findByUserId(userId));
+    }
+    
+    @GetMapping("/user/{userId}/active")
+    public ResponseEntity<FitnessGoalResponse> getActiveByUserId(@PathVariable Long userId) {
+        FitnessGoalResponse goal = fitnessGoalService.findActiveByUserId(userId);
+        if (goal == null) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(goal);
+    }
 }

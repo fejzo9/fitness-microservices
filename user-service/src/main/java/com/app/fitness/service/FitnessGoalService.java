@@ -41,6 +41,16 @@ public class FitnessGoalService {
                     "Fitness goal already exists for userId=" + request.getUserId()
                             + ", goalType=" + request.getGoalType());
         }
+        
+        // If the new goal is active, deactivate all existing active goals for this user
+        if (request.getIsActive()) {
+            List<FitnessGoal> existingActiveGoals = fitnessGoalRepository.findActiveGoalsByUserId(request.getUserId());
+            for (FitnessGoal existingGoal : existingActiveGoals) {
+                existingGoal.setIsActive(false);
+                fitnessGoalRepository.save(existingGoal);
+            }
+        }
+        
         FitnessGoal goal = fitnessGoalMapper.toEntity(request);
         return fitnessGoalMapper.toResponse(fitnessGoalRepository.save(goal));
     }
@@ -59,5 +69,33 @@ public class FitnessGoalService {
             throw new ResourceNotFoundException("Fitness goal not found with id: " + id);
         }
         fitnessGoalRepository.deleteById(id);
+    }
+    
+    @Transactional(readOnly = true)
+    public List<FitnessGoalResponse> findByUserId(Long userId) {
+        return fitnessGoalRepository.findByUserId(userId).stream()
+                .map(this::mapToResponse)
+                .toList();
+    }
+    
+    @Transactional(readOnly = true)
+    public FitnessGoalResponse findActiveByUserId(Long userId) {
+        List<FitnessGoal> activeGoals = fitnessGoalRepository.findActiveGoalsByUserId(userId);
+        if (activeGoals.isEmpty()) {
+            return null;
+        }
+        // Return the most recent active goal (first one since ordered by id DESC)
+        return mapToResponse(activeGoals.get(0));
+    }
+    
+    private FitnessGoalResponse mapToResponse(FitnessGoal goal) {
+        return FitnessGoalResponse.builder()
+                .id(goal.getId())
+                .userId(goal.getUserId())
+                .goalType(goal.getGoalType())
+                .targetValue(goal.getTargetValue())
+                .isActive(goal.getIsActive())
+                .deadline(goal.getDeadline())
+                .build();
     }
 }

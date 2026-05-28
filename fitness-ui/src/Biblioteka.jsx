@@ -16,7 +16,7 @@ export function Biblioteka() {
   useEffect(() => {
     fetchCategories();
     fetchExercises();
-  }, [currentPage, selectedCategory]);
+  }, [currentPage, selectedCategory, searchTerm]);
 
   const fetchCategories = async () => {
     try {
@@ -132,7 +132,11 @@ export function Biblioteka() {
           {/* Search Button */}
           <div className="col-span-2 flex items-end">
             <button
-              onClick={() => setCurrentPage(0)}
+              type="button"
+              onClick={() => {
+                setCurrentPage(0);
+                fetchExercises();
+              }}
               className="w-full bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors"
             >
               Pretraži
@@ -144,6 +148,7 @@ export function Biblioteka() {
         <div className="flex gap-2 mt-4 pt-4 border-t border-border items-center flex-wrap">
           <div className="text-xs text-muted-foreground">Brzi filteri:</div>
           <button
+            type="button"
             onClick={() => {
               setActiveFilter('Svi');
               setSelectedCategory(null);
@@ -159,6 +164,7 @@ export function Biblioteka() {
           {categories.map((cat) => (
             <button
               key={cat.id}
+              type="button"
               onClick={() => {
                 setActiveFilter(cat.name);
                 setSelectedCategory(cat.id);
@@ -199,7 +205,7 @@ export function Biblioteka() {
               <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
                 {exercise.description || 'Nema opisa'}
               </p>
-              <button className="w-full bg-secondary border border-border text-foreground px-3 py-2 text-xs rounded hover:bg-primary hover:text-white hover:border-primary transition-colors">
+              <button type="button" className="w-full bg-secondary border border-border text-foreground px-3 py-2 text-xs rounded hover:bg-primary hover:text-white hover:border-primary transition-colors">
                 + Dodaj u plan
               </button>
             </div>
@@ -215,6 +221,7 @@ export function Biblioteka() {
           </div>
           <div className="flex gap-2">
             <button
+              type="button"
               className="bg-secondary border border-border text-muted-foreground px-3 py-1 text-sm rounded hover:bg-secondary/80 transition-colors disabled:opacity-50"
               onClick={() => setCurrentPage(Math.max(0, currentPage - 1))}
               disabled={currentPage === 0}
@@ -224,6 +231,7 @@ export function Biblioteka() {
             {[...Array(totalPages)].map((_, i) => (
               <button
                 key={i}
+                type="button"
                 className={`px-3 py-1 text-sm rounded ${
                   i === currentPage
                     ? 'bg-primary text-white font-medium'
@@ -235,6 +243,7 @@ export function Biblioteka() {
               </button>
             ))}
             <button
+              type="button"
               className="bg-secondary border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary/80 transition-colors disabled:opacity-50"
               onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
               disabled={currentPage === totalPages - 1}
