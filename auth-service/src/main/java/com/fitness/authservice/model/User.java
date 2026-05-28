@@ -58,6 +58,27 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 255)
     private String passwordHash;
 
+    @Size(max = 100)
+    @Column(length = 100)
+    private String firstName;
+
+    @Size(max = 100)
+    @Column(length = 100)
+    private String lastName;
+
+    @Column
+    private Integer age;
+
+    @Column
+    private Integer height;
+
+    @Column
+    private Integer weight;
+
+    @Size(max = 20)
+    @Column(length = 20)
+    private String gender;
+
     @NotNull
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", nullable = false)

@@ -1,6 +1,6 @@
 import React from 'react'
-import { Dashboard } from './Dashboard'
-import './App.css'
+import { Dashboard } from './pages/Dashboard'
+import './styles/App.css'
 
 function App() {
   return (

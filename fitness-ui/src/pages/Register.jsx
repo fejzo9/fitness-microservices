@@ -16,6 +16,13 @@ export function Register() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  }; const handleInvalid = (e) => {
+    e.target.setCustomValidity('Polje ne smije biti prazno!');
+  };
+
+  const handleInput = (e) => {
+    e.target.setCustomValidity('');
+    handleChange(e);
   };
 
   const handleRegister = async (e) => {
@@ -82,7 +89,8 @@ export function Register() {
                   type="text"
                   name="firstName"
                   value={formData.firstName}
-                  onChange={handleChange}
+                  onChange={handleInput}
+                  onInvalid={handleInvalid}
                   className="w-full bg-secondary border border-border rounded px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Ime"
                   required
@@ -97,7 +105,8 @@ export function Register() {
                   type="text"
                   name="lastName"
                   value={formData.lastName}
-                  onChange={handleChange}
+                  onChange={handleInput}
+                  onInvalid={handleInvalid}
                   className="w-full bg-secondary border border-border rounded px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                   placeholder="Prezime"
                   required
@@ -113,7 +122,8 @@ export function Register() {
                 type="text"
                 name="username"
                 value={formData.username}
-                onChange={handleChange}
+                onChange={handleInput}
+                onInvalid={handleInvalid}
                 className="w-full bg-secondary border border-border rounded px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Unesite korisničko ime"
                 required
@@ -128,7 +138,8 @@ export function Register() {
                 type="email"
                 name="email"
                 value={formData.email}
-                onChange={handleChange}
+                onChange={handleInput}
+                onInvalid={handleInvalid}
                 className="w-full bg-secondary border border-border rounded px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Unesite email"
                 required
@@ -143,7 +154,8 @@ export function Register() {
                 type="password"
                 name="password"
                 value={formData.password}
-                onChange={handleChange}
+                onChange={handleInput}
+                onInvalid={handleInvalid}
                 className="w-full bg-secondary border border-border rounded px-4 py-2 text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
                 placeholder="Unesite lozinku"
                 required

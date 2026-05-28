@@ -47,6 +47,7 @@ export const api = {
   getUserById: (id) => request(`${API_BASE.auth}/users/${id}`),
   createUser: (data) => requestJson(`${API_BASE.auth}/users`, 'POST', data),
   updateUser: (id, data) => requestJson(`${API_BASE.auth}/users/${id}`, 'PUT', data),
+  updateUserProfile: (id, data) => requestJson(`${API_BASE.auth}/users/${id}/profile`, 'PATCH', data),
   deleteUser: (id) => request(`${API_BASE.auth}/users/${id}`, { method: 'DELETE' }),
 
   // ── USER SERVICE (/users) ──────────────────────────────────

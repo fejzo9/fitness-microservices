@@ -1,5 +1,6 @@
 package com.app.fitness.controller;
 
+import com.app.fitness.dto.UserProfileRequest;
 import com.app.fitness.dto.UserRequest;
 import com.app.fitness.dto.UserResponse;
 import com.app.fitness.service.UserService;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -57,6 +59,12 @@ public class UserController {
     public ResponseEntity<UserResponse> update(@PathVariable Long id,
             @Valid @RequestBody UserRequest request) {
         return ResponseEntity.ok(userService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/profile")
+    public ResponseEntity<UserResponse> updateProfile(@PathVariable Long id,
+            @Valid @RequestBody UserProfileRequest request) {
+        return ResponseEntity.ok(userService.updateProfile(id, request));
     }
 
     @DeleteMapping("/{id}")

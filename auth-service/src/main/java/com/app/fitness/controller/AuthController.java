@@ -43,6 +43,10 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<AuthResponse> login(@Valid @RequestBody LoginRequest loginRequest) {
+        if (!userService.existsByUsername(loginRequest.getUsername())) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword())
         );

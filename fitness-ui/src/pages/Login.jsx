@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Login() {
   const [username, setUsername] = useState('');
@@ -23,6 +23,12 @@ export function Login() {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          throw new Error('Pogrešna lozinka');
+        }
+        if (response.status === 404) {
+          throw new Error('Korisničko ime ne postoji');
+        }
         throw new Error('Neuspješna prijava');
       }
 

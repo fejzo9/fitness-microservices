@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { useAuth } from './contexts/AuthContext';
-import { api } from './services/api';
+import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
 
@@ -31,13 +31,17 @@ const TIME_FRAMES = [
 ];
 
 export function Profil() {
-  const { user, logout } = useAuth();
+  const { user, logout, refreshUser } = useAuth();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     username: user?.username || '',
     email: user?.email || '',
     firstName: user?.firstName || '',
     lastName: user?.lastName || '',
+    age: user?.age || '',
+    height: user?.height || '',
+    weight: user?.weight || '',
+    gender: user?.gender || '',
   });
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState('');
@@ -51,6 +55,8 @@ export function Profil() {
   });
   const [editingGoal, setEditingGoal] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
+  const [goalSuccess, setGoalSuccess] = useState('');
+  const [goalError, setGoalError] = useState('');
 
   const f = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }));
   const fg = (key) => (e) => setGoalForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -96,7 +102,16 @@ export function Profil() {
     setSuccess('');
     try {
       if (user?.id) {
-        await api.updateUser(user.id, form);
+        const profileData = {
+          firstName: form.firstName,
+          lastName: form.lastName,
+          age: form.age ? parseInt(form.age) : null,
+          height: form.height ? parseInt(form.height) : null,
+          weight: form.weight ? parseInt(form.weight) : null,
+          gender: form.gender,
+        };
+        await api.updateUserProfile(user.id, profileData);
+        await refreshUser();
         setSuccess('Profil uspješno ažuriran.');
       }
       setEditing(false);
@@ -109,8 +124,8 @@ export function Profil() {
   
   const handleSaveGoal = async () => {
     setSavingGoal(true);
-    setError('');
-    setSuccess('');
+    setGoalError('');
+    setGoalSuccess('');
     try {
       const goalData = {
         userId: user.id,
@@ -134,11 +149,11 @@ export function Profil() {
       // Kreiraj novi aktivan cilj
       const newGoal = await api.createFitnessGoal(goalData);
       setActiveGoal(newGoal);
-      setSuccess('Cilj uspješno sačuvan.');
+      setGoalSuccess('Cilj uspješno sačuvan.');
       setEditingGoal(false);
       await loadActiveGoal();
     } catch (err) {
-      setError('Greška pri čuvanju cilja.');
+      setGoalError('Greška pri čuvanju cilja.');
       console.error('Error saving goal:', err);
     } finally {
       setSavingGoal(false);
@@ -198,8 +213,27 @@ export function Profil() {
                 <Input label="Ime" value={form.firstName} onChange={f('firstName')} placeholder="Ime" />
                 <Input label="Prezime" value={form.lastName} onChange={f('lastName')} placeholder="Prezime" />
               </div>
-              <Input label="Korisničko ime" value={form.username} onChange={f('username')} placeholder="Username" />
-              <Input label="Email" type="email" value={form.email} onChange={f('email')} placeholder="email@example.com" />
+              <Input label="Email adresa" type="email" value={form.email} onChange={f('email')} placeholder="email@example.com" />
+              <div className="grid grid-cols-2 gap-4">
+                <Input label="Godine" type="number" value={form.age} onChange={f('age')} placeholder="Godine" />
+                <Input label="Visina (cm)" type="number" value={form.height} onChange={f('height')} placeholder="Visina (cm)" />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <Input label="Težina (kg)" type="number" value={form.weight} onChange={f('weight')} placeholder="Težina (kg)" />
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1">Pol</label>
+                  <select
+                    value={form.gender}
+                    onChange={f('gender')}
+                    className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                  >
+                    <option value="">Izaberite pol</option>
+                    <option value="MALE">Muški</option>
+                    <option value="FEMALE">Ženski</option>
+                    <option value="OTHER">Ostalo</option>
+                  </select>
+                </div>
+              </div>
               <div className="flex gap-3 pt-2">
                 <button
                   type="button"
@@ -221,11 +255,12 @@ export function Profil() {
           ) : (
             <div className="space-y-4">
               {[
-                ['Ime', user?.firstName || '—'],
-                ['Prezime', user?.lastName || '—'],
-                ['Korisničko ime', user?.username || '—'],
-                ['Email', user?.email || '—'],
-                ['ID korisnika', user?.id || '—'],
+                ['Ime i prezime', `${user?.firstName || ''} ${user?.lastName || ''}`.trim() || '—'],
+                ['Email adresa', user?.email || '—'],
+                ['Godine', user?.age || '—'],
+                ['Visina (cm)', user?.height || '—'],
+                ['Težina (kg)', user?.weight || '—'],
+                ['Pol', user?.gender === 'MALE' ? 'Muški' : user?.gender === 'FEMALE' ? 'Ženski' : user?.gender || '—'],
               ].map(([label, value]) => (
                 <div key={label} className="flex items-center border-b border-border pb-3 last:border-0 last:pb-0">
                   <span className="text-sm text-muted-foreground w-40">{label}</span>
@@ -243,7 +278,7 @@ export function Profil() {
             {!editingGoal && (
               <button
                 type="button"
-                onClick={() => { setEditingGoal(true); setSuccess(''); setError(''); }}
+                onClick={() => { setEditingGoal(true); setGoalSuccess(''); setGoalError(''); }}
                 className="bg-secondary border border-border text-foreground px-4 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors"
               >
                 {activeGoal ? 'Promijeni cilj' : 'Postavi cilj'}
@@ -251,8 +286,8 @@ export function Profil() {
             )}
           </div>
 
-          {success && <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-2 rounded text-sm mb-4">{success}</div>}
-          {error && <div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm mb-4">{error}</div>}
+          {goalSuccess && <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-2 rounded text-sm mb-4">{goalSuccess}</div>}
+          {goalError && <div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm mb-4">{goalError}</div>}
 
           {editingGoal ? (
             <div className="space-y-4">

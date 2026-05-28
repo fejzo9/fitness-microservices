@@ -1,5 +1,6 @@
 package com.app.fitness.service;
 
+import com.app.fitness.dto.UserProfileRequest;
 import com.app.fitness.dto.UserRequest;
 import com.app.fitness.dto.UserResponse;
 import com.app.fitness.event.UserDeletionEvent;
@@ -85,6 +86,31 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
+    public UserResponse updateProfile(Long id, UserProfileRequest request) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        if (request.getFirstName() != null) {
+            user.setFirstName(request.getFirstName());
+        }
+        if (request.getLastName() != null) {
+            user.setLastName(request.getLastName());
+        }
+        if (request.getAge() != null) {
+            user.setAge(request.getAge());
+        }
+        if (request.getHeight() != null) {
+            user.setHeight(request.getHeight());
+        }
+        if (request.getWeight() != null) {
+            user.setWeight(request.getWeight());
+        }
+        if (request.getGender() != null) {
+            user.setGender(request.getGender());
+        }
+        return userMapper.toResponse(userRepository.save(user));
+    }
+
+    @Transactional
     public void delete(Long id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
@@ -104,5 +130,10 @@ public class UserService implements UserDetailsService {
         return userRepository.findByUsername(username)
                 .map(userMapper::toResponse)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found: " + username));
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsByUsername(String username) {
+        return userRepository.existsByUsername(username);
     }
 }
