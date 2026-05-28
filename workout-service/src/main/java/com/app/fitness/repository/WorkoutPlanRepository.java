@@ -14,4 +14,6 @@ public interface WorkoutPlanRepository extends JpaRepository<WorkoutPlan, Long> 
     Optional<WorkoutPlan> findFirstByUserIdAndName(Long userId, String name);
     
     List<WorkoutPlan> findByUserId(Long userId);
+
+    void deleteByUserId(Long userId);
 }

@@ -14,6 +14,8 @@ public interface FitnessGoalRepository extends JpaRepository<FitnessGoal, Long> 
     
     List<FitnessGoal> findByUserId(Long userId);
     
+    void deleteByUserId(Long userId);
+    
     @Query("SELECT fg FROM FitnessGoal fg WHERE fg.userId = :userId AND fg.isActive = true ORDER BY fg.id DESC")
     List<FitnessGoal> findActiveGoalsByUserId(@Param("userId") Long userId);
 }

@@ -68,6 +68,22 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    @Builder.Default
+    @Column(nullable = false)
+    private String status = "ACTIVE"; // ACTIVE, DELETING, DELETED
+
+    @Builder.Default
+    @Column(name = "user_service_status")
+    private String userServiceStatus = "PENDING";
+
+    @Builder.Default
+    @Column(name = "workout_service_status")
+    private String workoutServiceStatus = "PENDING";
+
+    @Builder.Default
+    @Column(name = "nutrition_service_status")
+    private String nutritionServiceStatus = "PENDING";
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<RefreshToken> refreshTokens;
 

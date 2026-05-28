@@ -2,6 +2,8 @@ package com.app.fitness.service;
 
 import com.app.fitness.dto.UserRequest;
 import com.app.fitness.dto.UserResponse;
+import com.app.fitness.event.UserDeletionEvent;
+import com.app.fitness.config.RabbitMQConfig;
 import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.mapper.UserMapper;
@@ -18,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 
 @Service
 @RequiredArgsConstructor
@@ -27,6 +30,7 @@ public class UserService implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final RabbitTemplate rabbitTemplate;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -82,10 +86,18 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public void delete(Long id) {
-        if (!userRepository.existsById(id)) {
-            throw new ResourceNotFoundException("User not found with id: " + id);
-        }
-        userRepository.deleteById(id);
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
+        
+        user.setStatus("DELETING");
+        userRepository.save(user);
+
+        UserDeletionEvent event = UserDeletionEvent.builder()
+                .userId(id)
+                .type(UserDeletionEvent.Type.START)
+                .build();
+        
+        rabbitTemplate.convertAndSend(RabbitMQConfig.DELETION_EXCHANGE, "user.deletion.request", event);
     }
     @Transactional(readOnly = true)
     public UserResponse findByUsername(String username) {

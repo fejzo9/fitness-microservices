@@ -10,4 +10,6 @@ public interface MealLogRepository extends JpaRepository<MealLog, Long> {
     boolean existsByUserIdAndLogDateAndMealType(Long userId, LocalDate logDate, String mealType);
 
     Optional<MealLog> findByUserIdAndLogDateAndMealType(Long userId, LocalDate logDate, String mealType);
+
+    void deleteByUserId(Long userId);
 }

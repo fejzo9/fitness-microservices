@@ -86,9 +86,11 @@ services:
       DB_USER: postgres
       DB_PASSWORD: password
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
+      RABBIT_HOST: rabbitmq
     depends_on:
       - user-db
       - eureka-service # Added dependency
+      - rabbitmq
     networks:
       - fitness-network
 
@@ -105,9 +107,11 @@ services:
       DB_USER: postgres
       DB_PASSWORD: password
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
+      RABBIT_HOST: rabbitmq
     depends_on:
       - auth-db
       - eureka-service
+      - rabbitmq
     restart: on-failure
     networks:
       - fitness-network
@@ -125,9 +129,11 @@ services:
       DB_USER: postgres
       DB_PASSWORD: password
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
+      RABBIT_HOST: rabbitmq
     depends_on:
       - notification-db
       - eureka-service # Added dependency
+      - rabbitmq
     networks:
       - fitness-network
 
@@ -144,9 +150,11 @@ services:
       DB_USER: postgres
       DB_PASSWORD: password
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
+      RABBIT_HOST: rabbitmq
     depends_on:
       - nutrition-db
       - eureka-service # Added dependency
+      - rabbitmq
     networks:
       - fitness-network
 
@@ -165,9 +173,11 @@ services:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
       SERVER_PORT: 8083
       ENABLE_SEED_DATA: true
+      RABBIT_HOST: rabbitmq
     depends_on:
       - workout-db
       - eureka-service
+      - rabbitmq
     networks:
       - fitness-network
 
@@ -186,9 +196,11 @@ services:
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
       ENABLE_SEED_DATA: false
       SERVER_PORT: 8087
+      RABBIT_HOST: rabbitmq
     depends_on:
       - workout-db
       - eureka-service
+      - rabbitmq
     networks:
       - fitness-network
 
@@ -203,6 +215,16 @@ services:
     depends_on:
       - eureka-service
     restart: on-failure
+    networks:
+      - fitness-network
+
+  # RabbitMQ
+  rabbitmq:
+    image: rabbitmq:3-management
+    container_name: rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
     networks:
       - fitness-network
 

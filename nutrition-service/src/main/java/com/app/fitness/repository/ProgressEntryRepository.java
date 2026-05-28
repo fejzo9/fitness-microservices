@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface ProgressEntryRepository extends JpaRepository<ProgressEntry, Long> {
 
     boolean existsByUserIdAndEntryDate(Long userId, LocalDate entryDate);
+
+    void deleteByUserId(Long userId);
 }
