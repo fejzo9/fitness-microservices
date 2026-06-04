@@ -34,7 +34,7 @@ const INITIAL_DANI = [
 
 export function PlanTreninga() {
   const { user } = useAuth();
-  // Stanje za dane i vežbe
+  // Stanje za dane i vježbe
   const [dani, setDani] = React.useState(INITIAL_DANI);
   const [sveVezbe, setSveVezbe] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
@@ -68,7 +68,7 @@ export function PlanTreninga() {
       setSveVezbe(allEx.content || []);
       setStats(statistics);
 
-      // Mapiranje vežbi po danima
+      // Mapiranje vježbi po danima
       const noviDani = INITIAL_DANI.map(dan => {
         const vezbeZaDan = exercises
           .filter(ex => DAY_MAP[ex.dayOfWeek] === dan.id)
@@ -95,7 +95,7 @@ export function PlanTreninga() {
     }
   };
 
-  // Funkcija za dodavanje vežbe
+  // Funkcija za dodavanje vježbe
   const handleDodajVezbu = async (e) => {
     e.preventDefault();
     if (!izabranaVezbaId || !detaljiVezbe.trim()) return;
@@ -128,7 +128,7 @@ export function PlanTreninga() {
     }
   };
 
-  // Funkcija za brisanje pojedinačne vežbe
+  // Funkcija za brisanje pojedinačne vježbe
   const obrisiVezbu = async (danId, vezbaId) => {
     try {
       await api.deleteWorkoutExercise(vezbaId);
@@ -162,7 +162,7 @@ export function PlanTreninga() {
               className="text-3xl font-bold uppercase tracking-wide border-b border-border pb-3"
               style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
           >
-            Nedeljni plan treninga
+            Nedjeljni plan treninga
           </h2>
         </div>
 
@@ -190,12 +190,12 @@ export function PlanTreninga() {
         {/* Režim obaveštenja za uređivanje */}
         {modZaUredjivanje && (
             <div className="bg-amber-500/10 border border-amber-500/30 text-amber-500 rounded-lg p-3 mb-6 text-sm flex justify-between items-center animate-pulse">
-              <span>U režimu ste za uređivanje. Možete uklanjati vežbe sa crvenim "X" i menjati minutažu na dnu svakog dana.</span>
+              <span>U režimu ste za uređivanje. Možete uklanjati vježbe sa crvenim "X" i menjati minutažu na dnu svakog dana.</span>
               <button type="button" onClick={() => setModZaUredjivanje(false)} className="underline text-xs font-bold cursor-pointer">Završi</button>
             </div>
         )}
 
-        {/* Forma za unos vežbe */}
+        {/* Forma za unos vježbe */}
         {prikaziFormu && (
             <form onSubmit={handleDodajVezbu} className="bg-card border border-primary/40 rounded-lg p-4 mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end shadow-md">
               <div>
@@ -211,14 +211,14 @@ export function PlanTreninga() {
                 </select>
               </div>
               <div>
-                <label className="block text-xs text-muted-foreground mb-1 font-medium">Naziv vežbe</label>
+                <label className="block text-xs text-muted-foreground mb-1 font-medium">Naziv vježbe</label>
                 <select
                     value={izabranaVezbaId}
                     onChange={(e) => setIzabranaVezbaId(e.target.value)}
                     className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
                     required
                 >
-                  <option value="">Izaberi vežbu</option>
+                  <option value="">Izaberi vježbu</option>
                   {sveVezbe.map(v => (
                       <option key={v.id} value={v.id}>{v.name}</option>
                   ))}
@@ -286,7 +286,7 @@ export function PlanTreninga() {
                               <div key={vezba.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
                                 <div className="pr-4">
                                   <div className={`text-xs font-medium ${vezba.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
-                                    {vezba.naziv || 'Vežba'} {vezba.completed && '✓'}
+                                    {vezba.naziv || 'Vježba'} {vezba.completed && '✓'}
                                   </div>
                                   <div className="text-xs text-primary font-semibold mt-0.5">{vezba.detalji}</div>
                                 </div>
@@ -297,7 +297,7 @@ export function PlanTreninga() {
                                         type="button"
                                         onClick={() => obrisiVezbu(dan.id, vezba.id)}
                                         className="text-red-500 hover:text-red-700 text-xs font-bold px-1 rounded bg-red-500/10 hover:bg-red-500/20 cursor-pointer transition-colors align-middle"
-                                        title="Obriši vežbu"
+                                        title="Obriši vježbu"
                                     >
                                       ✕
                                     </button>

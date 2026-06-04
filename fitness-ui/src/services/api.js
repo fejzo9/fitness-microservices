@@ -91,6 +91,14 @@ export const api = {
   updateProgressEntry: (id, data) => requestJson(`${API_BASE.nutrition}/progress-entries/${id}`, 'PUT', data),
   deleteProgressEntry: (id) => request(`${API_BASE.nutrition}/progress-entries/${id}`, { method: 'DELETE' }),
 
+  getMealEntries: () => request(`${API_BASE.nutrition}/meal-entries`),
+  getMealEntriesByUserAndDate: (userId, date) => request(`${API_BASE.nutrition}/meal-entries/user/${userId}/date/${date}`),
+  getMealEntriesByUser: (userId) => request(`${API_BASE.nutrition}/meal-entries/user/${userId}`),
+  getMealEntryById: (id) => request(`${API_BASE.nutrition}/meal-entries/${id}`),
+  createMealEntry: (data) => requestJson(`${API_BASE.nutrition}/meal-entries`, 'POST', data),
+  updateMealEntry: (id, data) => requestJson(`${API_BASE.nutrition}/meal-entries/${id}`, 'PUT', data),
+  deleteMealEntry: (id) => request(`${API_BASE.nutrition}/meal-entries/${id}`, { method: 'DELETE' }),
+
   // ── WORKOUT SERVICE (/workouts) ───────────────────────────────
   getExercises: async (page = 0, size = 9, search = '', categoryId = null) => {
     const base = API_BASE.workout;

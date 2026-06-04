@@ -375,7 +375,7 @@ export function Profil() {
 
         {/* Logout Section */}
         <div className="bg-card border border-border rounded-lg p-6 flex items-center justify-between">
-          <span className="text-sm text-muted-foreground">Želite da završite sesiju?</span>
+          <span className="text-sm text-muted-foreground">Želite li da se odjavite?</span>
           <button
             type="button"
             onClick={logout}

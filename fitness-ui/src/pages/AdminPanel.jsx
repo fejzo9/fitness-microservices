@@ -144,7 +144,7 @@ export function AdminPanel() {
             return diffDays <= 7;
           }).length} ove nedelje`, color: 'border-t-primary', tc: 'text-primary' },
           { label: 'Aktivni korisnici', value: users.length, sub: '100% od ukupno', color: 'border-t-emerald-500', tc: 'text-emerald-400' },
-          { label: 'Vežbi u biblioteci', value: exData.totalElements, sub: `${categories.length} kategorija`, color: 'border-t-blue-500', tc: 'text-blue-400' },
+          { label: 'Vježbi u biblioteci', value: exData.totalElements, sub: `${categories.length} kategorija`, color: 'border-t-blue-500', tc: 'text-blue-400' },
           { label: 'Treneri', value: trainerCount, sub: 'sa nalozima', color: 'border-t-amber-500', tc: 'text-amber-400' },
         ].map(({ label, value, sub, color, tc }) => (
           <div key={label} className={`bg-card border border-border rounded-lg p-4 border-t-2 ${color}`}>
@@ -245,7 +245,7 @@ export function AdminPanel() {
               </div>
               <div className="border border-border rounded-lg overflow-hidden">
                 <div className="grid grid-cols-12 border-b border-border bg-secondary">
-                  {['Naziv vežbe','Kategorija','Nivo','Opis','Akcije'].map((h, i) => {
+                  {['Naziv vježbe','Kategorija','Nivo','Opis','Akcije'].map((h, i) => {
                     const spans = ['col-span-4','col-span-2','col-span-2','col-span-2','col-span-2'];
                     return (
                       <div key={h} className={`${spans[i]} p-3 ${i < 4 ? 'border-r border-border' : ''}`}>
@@ -254,7 +254,7 @@ export function AdminPanel() {
                     );
                   })}
                 </div>
-                {displayExercises.length === 0 && <div className="p-8 text-center text-muted-foreground text-sm">Nema vežbi.</div>}
+                {displayExercises.length === 0 && <div className="p-8 text-center text-muted-foreground text-sm">Nema vježbi.</div>}
                 {displayExercises.map(ex => { const db = getDiffBadge(ex.difficulty); return (
                   <div key={ex.id} className="grid grid-cols-12 border-b border-border last:border-b-0 hover:bg-secondary/50 transition-colors">
                     <div className="col-span-4 p-3 border-r border-border"><span className="text-sm font-medium text-foreground">{ex.name}</span></div>
@@ -358,8 +358,8 @@ export function AdminPanel() {
                   {[
                     { name: 'Upravljanje korisnicima', admin: true, trainer: false, user: false },
                     { name: 'Kreiranje planova treninga', admin: true, trainer: true, user: false },
-                    { name: 'Pristup biblioteci vežbi', admin: true, trainer: true, user: true },
-                    { name: 'Dodavanje vežbi', admin: true, trainer: true, user: false },
+                    { name: 'Pristup biblioteci vježbi', admin: true, trainer: true, user: true },
+                    { name: 'Dodavanje vježbi', admin: true, trainer: true, user: false },
                     { name: 'Praćenje sopstvenog napretka', admin: true, trainer: true, user: true },
                   ].map((p, i, arr) => (
                     <div key={i} className={`grid grid-cols-5 hover:bg-secondary/50 transition-colors ${i < arr.length - 1 ? 'border-b border-border' : ''}`}>
