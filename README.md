@@ -174,6 +174,34 @@ Each service exposes a full CRUD REST API. All responses use JSON. Validation er
 | DELETE | `/api/completed-exercises/{id}` | Delete completed exercise |
 
 
+## Frontend (fitness-ui)
+
+The `fitness-ui` directory contains a React + Vite application that communicates with the backend through the API Gateway.
+
+### Environment Variables
+
+The application reads the gateway base URL from an environment variable. Before starting the frontend, create a `.env` file inside `fitness-ui/`:
+
+```bash
+cp fitness-ui/.env.example fitness-ui/.env
+```
+
+| Variable | Description | Default |
+|---|---|---|
+| `VITE_API_BASE` | Base URL of the API Gateway | `http://localhost:8080` |
+
+> `.env` is listed in `.gitignore` and will not be committed. Use `.env.example` as a template.
+
+### Running the Frontend
+
+```bash
+cd fitness-ui
+npm install
+npm run dev
+```
+
+The app will be available at **http://localhost:3000**.
+
 ## Running the Project
 
 ### Prerequisites
