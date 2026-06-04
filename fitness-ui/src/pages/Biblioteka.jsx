@@ -169,7 +169,6 @@ export function Biblioteka() {
               key={cat.id}
               type="button"
               onClick={() => {
-                console.log('Quick filter clicked:', cat.name, 'ID:', cat.id);
                 setActiveFilter(cat.name);
                 setSelectedCategory(cat.id);
                 setCurrentPage(0);

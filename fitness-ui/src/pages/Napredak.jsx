@@ -205,7 +205,7 @@ export function Napredak() {
               className="text-base font-bold text-foreground uppercase tracking-wide"
               style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
             >
-              Telesna težina · Poslednjih 8 nedelja
+              Tjelesna težina · Poslednjih 8 nedelja
             </h3>
           </div>
           <div className="bg-secondary rounded-lg p-4 h-64 relative">

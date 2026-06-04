@@ -5,11 +5,10 @@ import { useToast } from '../contexts/ToastContext';
 
 const DAY_NAMES = ['Nedjelja', 'Ponedeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
 
-// Vraća datum ponedjeljka za datu sedmicu (offset 0 = tekuća, 1 = iduća)
 function getWeekMonday(weekOffset = 0) {
   const today = new Date();
-  const day = today.getDay(); // 0=ned, 1=pon...
-  const diff = (day === 0 ? -6 : 1 - day); // koliko dana do ponedjeljka
+  const day = today.getDay();
+  const diff = (day === 0 ? -6 : 1 - day);
   const monday = new Date(today);
   monday.setDate(today.getDate() + diff + weekOffset * 7);
   monday.setHours(0, 0, 0, 0);
@@ -26,13 +25,13 @@ function buildWeekDays(weekOffset = 0) {
     const yyyy = d.getFullYear();
     return {
       id: `${yyyy}-${mm}-${dd}`, // "YYYY-MM-DD"
-      ime: DAY_NAMES[d.getDay()],
-      datum: `${dd}.${mm}`,
+      name: DAY_NAMES[d.getDay()],
+      date: `${dd}.${mm}`,
       dateObj: d,
-      tip: "Odmor",
-      trajanje: 0,
-      aktivan: true,
-      vezbe: []
+      type: "Odmor",
+      duration: 0,
+      active: true,
+      exercises: []
     };
   });
 }
@@ -43,18 +42,16 @@ export function PlanTreninga() {
   const { user } = useAuth();
   const toast = useToast();
   const [weekOffset, setWeekOffset] = React.useState(0);
-  const [dani, setDani] = React.useState(() => buildWeekDays(0));
-  const [sveVezbe, setSveVezbe] = React.useState([]);
+  const [days, setDays] = React.useState(() => buildWeekDays(0));
+  const [allExercises, setAllExercises] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [stats, setStats] = React.useState(null);
 
-  // Stanja za interfejs
-  const [prikaziFormu, setPrikaziFormu] = React.useState(false);
-  const [modZaUredjivanje, setModZaUredjivanje] = React.useState(false);
+  const [showForm, setShowForm] = React.useState(false);
+  const [editMode, setEditMode] = React.useState(false);
 
-  // Stanja za formu dodavanja
-  const [izabraniDan, setIzabraniDan] = React.useState("");
-  const [izabranaVezbaId, setIzabranaVezbaId] = React.useState("");
+  const [selectedDay, setSelectedDay] = React.useState("");
+  const [selectedExerciseId, setSelectedExerciseId] = React.useState("");
   const [sets, setSets] = React.useState("3");
   const [reps, setReps] = React.useState("10");
   const [startTime, setStartTime] = React.useState("10:00");
@@ -76,35 +73,34 @@ export function PlanTreninga() {
         api.getWorkoutStatistics(user.id)
       ]);
 
-      setSveVezbe(allEx.content || []);
+      setAllExercises(allEx.content || []);
       setStats(statistics);
 
       const weekDays = buildWeekDays(offset);
 
-      // Mapiranje vežbi po scheduledDate
-      const noviDani = weekDays.map(dan => {
-        const vezbeZaDan = (exercises || [])
-          .filter(ex => ex.scheduledDate === dan.id)
+      const newDays = weekDays.map(day => {
+        const dayExercises = (exercises || [])
+          .filter(ex => ex.scheduledDate === day.id)
           .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
           .map(ex => ({
             id: ex.id,
-            naziv: ex.exerciseName,
-            detalji: `${ex.sets}×${ex.reps}`,
+            name: ex.exerciseName,
+            details: `${ex.sets}×${ex.reps}`,
             startTime: ex.startTime ? ex.startTime.slice(0, 5) : null,
             restSec: ex.restSec,
             completed: ex.completed,
-            canComplete: dan.id <= todayStr
+            canComplete: day.id <= todayStr
           }));
 
         return {
-          ...dan,
-          vezbe: vezbeZaDan,
-          trajanje: vezbeZaDan.length * 15,
-          tip: vezbeZaDan.length > 0 ? "Snaga" : "Odmor"
+          ...day,
+          exercises: dayExercises,
+          duration: dayExercises.length * 15,
+          type: dayExercises.length > 0 ? "Snaga" : "Odmor"
         };
       });
 
-      setDani(noviDani);
+      setDays(newDays);
     } catch (error) {
       toast('Greška pri učitavanju plana treninga. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
@@ -112,15 +108,14 @@ export function PlanTreninga() {
     }
   };
 
-  // Funkcija za dodavanje vježbe
-  const handleDodajVezbu = async (e) => {
+  const handleAddExercise = async (e) => {
     e.preventDefault();
-    if (!izabranaVezbaId || !izabraniDan) return;
+    if (!selectedExerciseId || !selectedDay) return;
 
     const request = {
       userId: user.id,
-      exerciseId: parseInt(izabranaVezbaId),
-      scheduledDate: izabraniDan,
+      exerciseId: parseInt(selectedExerciseId),
+      scheduledDate: selectedDay,
       sets: parseInt(sets) || 3,
       reps: parseInt(reps) || 10,
       startTime: startTime ? startTime + ":00" : "10:00:00",
@@ -132,53 +127,48 @@ export function PlanTreninga() {
       await api.createWorkoutExercise(request);
       await fetchData(weekOffset);
 
-      // Reset forme
-      setIzabranaVezbaId("");
+      setSelectedExerciseId("");
       setSets("3");
       setReps("10");
       setStartTime("10:00");
       setRestSec("60");
-      setPrikaziFormu(false);
+      setShowForm(false);
     } catch (error) {
       toast('Nije moguće dodati vježbu u plan. Pokušajte ponovo.', 'error');
     }
   };
 
-  // Funkcija za označavanje vježbe kao završene
-  const oznaciCompleted = async (vezbaId) => {
+  const markAsCompleted = async (exerciseId) => {
     try {
-      await api.completeWorkoutExercise(vezbaId);
+      await api.completeWorkoutExercise(exerciseId);
       await fetchData(weekOffset);
     } catch (error) {
       toast('Nije moguće označiti vježbu kao završenu. Pokušajte ponovo.', 'error');
     }
   };
 
-  // Funkcija za brisanje pojedinačne vežbe
-  const obrisiVezbu = async (danId, vezbaId) => {
+  const deleteExercise = async (dayId, exerciseId) => {
     try {
-      await api.deleteWorkoutExercise(vezbaId);
+      await api.deleteWorkoutExercise(exerciseId);
       await fetchData(weekOffset);
     } catch (error) {
       toast('Nije moguće obrisati vježbu iz plana. Pokušajte ponovo.', 'error');
     }
   };
 
-  // Funkcija za promenu trajanja direktno u uređivanju
-  const promeniTrajanje = (danId, novoTrajanje) => {
-    setDani((prethodniDani) =>
-        prethodniDani.map((dan) =>
-            dan.id === danId ? { ...dan, trajanje: Number(novoTrajanje) || 0 } : dan
+  const changeDuration = (dayId, newDuration) => {
+    setDani((previousDays) =>
+        previousDays.map((day) =>
+            day.id === dayId ? { ...dan, trajanje: Number(newDuration) || 0 } : dan
         )
     );
   };
 
-  // Proračun statistike uživo
-  const treninziSaVezbama = dani.filter(dan => dan.vezbe.length > 0);
-  const ukupnoTreninga = treninziSaVezbama.length;
-  const ukupnoVreme = dani.reduce((acc, dan) => acc + dan.trajanje, 0);
-  const prosecnoTrajanje = ukupnoTreninga > 0 ? Math.round(ukupnoVreme / ukupnoTreninga) : 0;
-  const danaOdmora = dani.filter(dan => dan.vezbe.length === 0).length;
+  const workoutsWithExercises = days.filter(day => day.exercises.length > 0);
+  const totalWorkouts = workoutsWithExercises.length;
+  const totalTime = days.reduce((acc, day) => acc + day.duration, 0);
+  const avgDuration = totalWorkouts > 0 ? Math.round(totalTime / totalWorkouts) : 0;
+  const restDays = days.filter(day => day.exercises.length === 0).length;
 
   return (
       <div className="p-4 bg-background text-foreground min-h-screen">
@@ -192,21 +182,20 @@ export function PlanTreninga() {
           </h2>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex flex-wrap gap-2 mb-6">
           <button
-              onClick={() => { setPrikaziFormu(!prikaziFormu); setModZaUredjivanje(false); if (!prikaziFormu) setIzabraniDan(new Date().toISOString().slice(0, 10)); }}
+              onClick={() => { setShowForm(!showForm); setEditMode(false); if (!showForm) setSelectedDay(new Date().toISOString().slice(0, 10)); }}
               type="button"
-              className={`px-5 py-2 text-sm rounded font-medium transition-colors cursor-pointer flex-shrink-0 min-h-[44px] ${prikaziFormu ? 'bg-red-600 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
+              className={`px-5 py-2 text-sm rounded font-medium transition-colors cursor-pointer flex-shrink-0 min-h-[44px] ${showForm ? 'bg-red-600 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
           >
-            {prikaziFormu ? "Zatvori" : "+ Nova vježba"}
+            {showForm ? "Zatvori" : "+ Nova vježba"}
           </button>
           <button
-              onClick={() => { setModZaUredjivanje(!modZaUredjivanje); setPrikaziFormu(false); }}
+              onClick={() => { setEditMode(!editMode); setShowForm(false); }}
               type="button"
-              className={`px-5 py-2 text-sm rounded font-medium border transition-colors cursor-pointer flex-shrink-0 min-h-[44px] ${modZaUredjivanje ? 'bg-amber-600 text-white border-transparent' : 'bg-secondary border-border text-foreground hover:bg-secondary/80'}`}
+              className={`px-5 py-2 text-sm rounded font-medium border transition-colors cursor-pointer flex-shrink-0 min-h-[44px] ${editMode ? 'bg-amber-600 text-white border-transparent' : 'bg-secondary border-border text-foreground hover:bg-secondary/80'}`}
           >
-            {modZaUredjivanje ? "Završi uređivanje" : "Uredi plan"}
+            {editMode ? "Završi uređivanje" : "Uredi plan"}
           </button>
           <button type="button" className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors flex-shrink-0 min-h-[44px]">
             Historija
@@ -214,24 +203,24 @@ export function PlanTreninga() {
         </div>
 
         {/* Režim obaveštenja za uređivanje */}
-        {modZaUredjivanje && (
+        {editMode && (
             <div className="bg-amber-500/10 border border-amber-500/30 text-amber-500 rounded-lg p-3 mb-6 text-sm flex justify-between items-center animate-pulse">
               <span>U režimu ste za uređivanje. Možete uklanjati vježbe sa crvenim "X" i menjati minutažu na dnu svakog dana.</span>
-              <button type="button" onClick={() => setModZaUredjivanje(false)} className="underline text-xs font-bold cursor-pointer">Završi</button>
+              <button type="button" onClick={() => setEditMode(false)} className="underline text-xs font-bold cursor-pointer">Završi</button>
             </div>
         )}
 
         {/* Forma za unos vježbe */}
-        {prikaziFormu && (
-            <form onSubmit={handleDodajVezbu} className="bg-card border border-primary/40 rounded-lg p-4 mb-6 shadow-md">
+        {showForm && (
+            <form onSubmit={handleAddExercise} className="bg-card border border-primary/40 rounded-lg p-4 mb-6 shadow-md">
               <h3 className="text-sm font-semibold text-foreground mb-3">Nova vježba</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
                 <div>
                   <label className="block text-xs text-muted-foreground mb-1 font-medium">Datum</label>
                   <input
                       type="date"
-                      value={izabraniDan}
-                      onChange={(e) => setIzabraniDan(e.target.value)}
+                      value={selectedDay}
+                      onChange={(e) => setSelectedDay(e.target.value)}
                       className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
                       required
                   />
@@ -239,8 +228,8 @@ export function PlanTreninga() {
                 <div>
                   <label className="block text-xs text-muted-foreground mb-1 font-medium">Naziv vježbe</label>
                   <select
-                      value={izabranaVezbaId}
-                      onChange={(e) => setIzabranaVezbaId(e.target.value)}
+                      value={selectedExerciseId}
+                      onChange={(e) => setSelectedExerciseId(e.target.value)}
                       className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
                       required
                   >
@@ -304,7 +293,7 @@ export function PlanTreninga() {
         <div className="bg-secondary border border-border rounded-lg p-4 mb-4">
           <div className="flex flex-wrap justify-between items-center gap-2">
             <div className="text-sm font-medium text-foreground">
-              {dani.length > 0 && `Sedmica: ${dani[0].datum} – ${dani[6].datum}`}
+              {days.length > 0 && `Sedmica: ${days[0].datum} – ${days[6].datum}`}
               {weekOffset === 0 && <span className="ml-2 text-xs text-primary">(tekuća)</span>}
               {weekOffset === 1 && <span className="ml-2 text-xs text-emerald-400">(iduća)</span>}
             </div>
@@ -332,42 +321,42 @@ export function PlanTreninga() {
         {/* Weekly Workout Grid */}
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
         <div className="grid grid-cols-7 gap-2 mb-6 min-w-[700px]">
-          {dani.map((dan) => {
-            const imaVezbi = dan.vezbe.length > 0;
+          {days.map((day) => {
+            const hasExercises = day.vezbe.length > 0;
             return (
-                <div key={dan.id} className={`bg-card border rounded-lg overflow-hidden flex flex-col justify-between min-h-[240px] transition-all ${modZaUredjivanje ? 'border-amber-500/50 shadow-sm' : 'border-border'}`}>
+                <div key={dan.id} className={`bg-card border rounded-lg overflow-hidden flex flex-col justify-between min-h-[240px] transition-all ${editMode ? 'border-amber-500/50 shadow-sm' : 'border-border'}`}>
                   <div>
-                    <div className={`${dan.aktivan && imaVezbi ? "bg-primary text-white" : "bg-secondary text-foreground"} p-2 text-center`}>
+                    <div className={`${dan.aktivan && hasExercises ? "bg-primary text-white" : "bg-secondary text-foreground"} p-2 text-center`}>
                       <div className="text-xs font-semibold">{dan.ime}</div>
-                      <div className={`text-xs mt-0.5 ${dan.aktivan && imaVezbi ? "text-white/80" : "text-muted-foreground"}`}>{dan.datum}</div>
+                      <div className={`text-xs mt-0.5 ${dan.aktivan && hasExercises ? "text-white/80" : "text-muted-foreground"}`}>{dan.datum}</div>
                     </div>
 
                     <div className="p-2.5 space-y-1.5">
-                      {imaVezbi ? (
-                          dan.vezbe.map((vezba) => (
-                              <div key={vezba.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
+                      {hasExercises ? (
+                          day.vezbe.map((exercise) => (
+                              <div key={exercise.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
                                 <div className="flex-1 min-w-0">
-                                  {vezba.startTime && (
-                                    <div className="text-xs text-muted-foreground mb-0.5">{vezba.startTime}</div>
+                                  {exercise.startTime && (
+                                    <div className="text-xs text-muted-foreground mb-0.5">{exercise.startTime}</div>
                                   )}
-                                  <div className={`text-xs font-medium ${vezba.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
-                                    {vezba.naziv || 'Vježba'}
+                                  <div className={`text-xs font-medium ${exercise.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
+                                    {exercise.naziv || 'Vježba'}
                                   </div>
-                                  <div className="text-xs text-primary font-semibold mt-0.5">{vezba.detalji}</div>
+                                  <div className="text-xs text-primary font-semibold mt-0.5">{exercise.detalji}</div>
                                 </div>
                                 <div className="flex gap-1 ml-1 shrink-0">
-                                  {!vezba.completed && vezba.canComplete && !modZaUredjivanje && (
+                                  {!exercise.completed && exercise.canComplete && !editMode && (
                                     <button
                                       type="button"
-                                      onClick={() => oznaciCompleted(vezba.id)}
+                                      onClick={() => markAsCompleted(exercise.id)}
                                       className="text-emerald-500 hover:text-emerald-700 text-xs font-bold px-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition-colors"
                                       title="Označi kao završeno"
                                     >✓</button>
                                   )}
-                                  {modZaUredjivanje && dan.id >= todayStr && (
+                                  {editMode && day.id >= todayStr && (
                                     <button
                                       type="button"
-                                      onClick={() => obrisiVezbu(dan.id, vezba.id)}
+                                      onClick={() => deleteExercise(dan.id, exercise.id)}
                                       className="text-red-500 hover:text-red-700 text-xs font-bold px-1 rounded bg-red-500/10 hover:bg-red-500/20 cursor-pointer transition-colors"
                                       title="Obriši vježbu"
                                     >✕</button>
@@ -385,14 +374,14 @@ export function PlanTreninga() {
 
                   {/* Donji deo kartice sa vremenom */}
                   <div className="border-t border-border p-2 text-xs text-muted-foreground text-center bg-secondary/30">
-                    {imaVezbi ? (
-                        modZaUredjivanje ? (
+                    {hasExercises ? (
+                        editMode ? (
                             <div className="flex items-center justify-center gap-1">
                               <span>{dan.tip} · </span>
                               <input
                                   type="number"
                                   value={dan.trajanje}
-                                  onChange={(e) => promeniTrajanje(dan.id, e.target.value)}
+                                  onChange={(e) => changeDuration(dan.id, e.target.value)}
                                   className="w-12 bg-card border border-border rounded text-center text-foreground p-0.5"
                                   min="0"
                               />
@@ -434,7 +423,7 @@ export function PlanTreninga() {
           <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-muted-foreground">
             <div className="text-xs text-muted-foreground mb-2">Dana odmora</div>
             <div className="text-3xl font-bold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {dani.filter(d => d.vezbe.length === 0).length}
+              {days.filter(d => d.vezbe.length === 0).length}
             </div>
           </div>
         </div>
