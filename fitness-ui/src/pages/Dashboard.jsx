@@ -27,14 +27,24 @@ export function Dashboard() {
         api.getWorkoutStatistics(user.id),
         api.getMealEntriesByUserAndDate(user.id, todayDate)
       ]);
-
-      setTodayExercises(ex || []);
+      
+      const sorted = (ex || []).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+      setTodayExercises(sorted);
       setStats(statistics);
       setTodayMeals(meals || []);
     } catch (error) {
       console.error("Error fetching dashboard data:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleComplete = async (id) => {
+    try {
+      await api.completeWorkoutExercise(id);
+      await fetchDashboardData();
+    } catch (error) {
+      console.error("Error completing exercise:", error);
     }
   };
 
@@ -70,11 +80,30 @@ export function Dashboard() {
               <div className="text-center py-8 text-muted-foreground text-sm">Učitavanje...</div>
             ) : todayExercises.length > 0 ? (
               todayExercises.map(ex => (
-                <div key={ex.id} className="flex justify-between items-center border-b border-border/50 pb-2">
-                  <span className={`text-sm ${ex.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
-                    {ex.exerciseName}
-                  </span>
-                  <span className="text-xs text-primary font-medium">{ex.sets}×{ex.reps}</span>
+                <div key={ex.id} className="flex justify-between items-start border-b border-border/50 pb-2">
+                  <div className="flex-1 min-w-0">
+                    {ex.startTime && (
+                      <div className="text-xs text-muted-foreground">{ex.startTime.slice(0,5)}</div>
+                    )}
+                    <span className={`text-sm ${ex.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
+                      {ex.exerciseName}
+                    </span>
+                    <div className="text-xs text-muted-foreground mt-0.5">
+                      {ex.sets}×{ex.reps} serija{ex.restSec ? ` · odmor ${ex.restSec}s` : ''}
+                    </div>
+                  </div>
+                  <div className="ml-2 shrink-0">
+                    {ex.completed ? (
+                      <span className="text-xs text-emerald-500 font-bold">✓</span>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => handleComplete(ex.id)}
+                        className="text-emerald-500 hover:text-emerald-700 text-xs font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition-colors"
+                        title="Označi kao završeno"
+                      >✓</button>
+                    )}
+                  </div>
                 </div>
               ))
             ) : (

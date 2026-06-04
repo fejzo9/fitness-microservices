@@ -1,6 +1,7 @@
 package com.app.fitness.dto;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -15,6 +16,7 @@ public class WorkoutExerciseResponse {
 
     private Long id;
     private Long userId;
+    private LocalDate scheduledDate;
     private DayOfWeek dayOfWeek;
     private LocalTime startTime;
     private Boolean completed;

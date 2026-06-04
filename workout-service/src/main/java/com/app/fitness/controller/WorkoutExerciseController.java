@@ -35,8 +35,10 @@ public class WorkoutExerciseController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<WorkoutExerciseResponse>> getByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(workoutExerciseService.findByUserId(userId));
+    public ResponseEntity<List<WorkoutExerciseResponse>> getByUserId(
+            @PathVariable Long userId,
+            @RequestParam(defaultValue = "false") boolean nextWeek) {
+        return ResponseEntity.ok(workoutExerciseService.findByUserId(userId, nextWeek));
     }
 
     @GetMapping("/user/{userId}/day/{day}")
@@ -60,6 +62,11 @@ public class WorkoutExerciseController {
     public ResponseEntity<WorkoutExerciseResponse> update(@PathVariable Long id,
             @Valid @RequestBody WorkoutExerciseRequest request) {
         return ResponseEntity.ok(workoutExerciseService.update(id, request));
+    }
+
+    @PatchMapping("/{id}/complete")
+    public ResponseEntity<WorkoutExerciseResponse> markCompleted(@PathVariable Long id) {
+        return ResponseEntity.ok(workoutExerciseService.markCompleted(id));
     }
 
     @DeleteMapping("/{id}")

@@ -1,6 +1,6 @@
 package com.app.fitness.dto;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -17,8 +17,8 @@ public class WorkoutExerciseRequest {
     @NotNull(message = "User ID must not be null")
     private Long userId;
 
-    @NotNull(message = "Day of week must not be null")
-    private DayOfWeek dayOfWeek;
+    @NotNull(message = "Scheduled date must not be null")
+    private LocalDate scheduledDate;
 
     private LocalTime startTime;
 

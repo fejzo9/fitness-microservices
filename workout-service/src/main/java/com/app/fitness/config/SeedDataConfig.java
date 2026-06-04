@@ -10,9 +10,9 @@ import com.app.fitness.model.CompletedWorkout;
 import com.app.fitness.model.Exercise;
 import com.app.fitness.model.ExerciseCategory;
 import com.app.fitness.model.WorkoutExercise;
-import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.DayOfWeek;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,11 +65,21 @@ public class SeedDataConfig {
 
             Long testUserId = 1L;
 
+            LocalDate monday = LocalDate.now().with(DayOfWeek.MONDAY);
+            LocalDate sunday = monday.plusDays(6);
+
+            // Obriši stare workout exercise zapise koji nisu u tekućoj sedmici
+            workoutExerciseRepository.findAll().stream()
+                    .filter(e -> e.getUserId() != null && e.getUserId().equals(testUserId)
+                            && e.getScheduledDate() != null
+                            && (e.getScheduledDate().isBefore(monday) || e.getScheduledDate().isAfter(sunday)))
+                    .forEach(e -> workoutExerciseRepository.deleteById(e.getId()));
+
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.MONDAY,
+                    monday,
                     LocalTime.of(8, 0),
                     "Bench Press",
                     4,
@@ -79,7 +89,7 @@ public class SeedDataConfig {
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.MONDAY,
+                    monday,
                     LocalTime.of(8, 45),
                     "Push Up",
                     3,
@@ -89,7 +99,7 @@ public class SeedDataConfig {
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.WEDNESDAY,
+                    monday.plusDays(2),
                     LocalTime.of(17, 0),
                     "Pull Up",
                     3,
@@ -99,7 +109,7 @@ public class SeedDataConfig {
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.WEDNESDAY,
+                    monday.plusDays(2),
                     LocalTime.of(17, 30),
                     "Barbell Row",
                     4,
@@ -109,7 +119,7 @@ public class SeedDataConfig {
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.THURSDAY,
+                    monday.plusDays(3),
                     LocalTime.of(10, 0),
                     "Running",
                     1,
@@ -119,7 +129,7 @@ public class SeedDataConfig {
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.FRIDAY,
+                    monday.plusDays(4),
                     LocalTime.of(18, 0),
                     "Squat",
                     4,
@@ -129,7 +139,7 @@ public class SeedDataConfig {
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.FRIDAY,
+                    monday.plusDays(4),
                     LocalTime.of(18, 45),
                     "Lunges",
                     3,
@@ -139,7 +149,7 @@ public class SeedDataConfig {
                     workoutExerciseRepository,
                     exerciseRepository,
                     testUserId,
-                    DayOfWeek.FRIDAY,
+                    monday.plusDays(4),
                     LocalTime.of(19, 15),
                     "Jump Rope",
                     1,
@@ -197,7 +207,7 @@ public class SeedDataConfig {
             WorkoutExerciseRepository workoutExerciseRepository,
             ExerciseRepository exerciseRepository,
             Long userId,
-            DayOfWeek dayOfWeek,
+            LocalDate scheduledDate,
             LocalTime startTime,
             String exerciseName,
             int sets,
@@ -207,10 +217,10 @@ public class SeedDataConfig {
         Exercise exercise = exerciseRepository.findFirstByName(exerciseName)
                 .orElseThrow(() -> new IllegalStateException("Exercise not found: " + exerciseName));
 
-        if (!workoutExerciseRepository.existsByUserIdAndDayOfWeekAndExercise(userId, dayOfWeek, exercise)) {
+        if (!workoutExerciseRepository.existsByUserIdAndScheduledDateAndExercise(userId, scheduledDate, exercise)) {
             workoutExerciseRepository.save(WorkoutExercise.builder()
                     .userId(userId)
-                    .dayOfWeek(dayOfWeek)
+                    .scheduledDate(scheduledDate)
                     .startTime(startTime)
                     .exercise(exercise)
                     .sets(sets)

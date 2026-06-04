@@ -123,14 +123,15 @@ export const api = {
   createExerciseCategoryMap: (data) => requestJson(`${API_BASE.workout}/exercise-category-maps`, 'POST', data),
   deleteExerciseCategoryMap: (id) => request(`${API_BASE.workout}/exercise-category-maps/${id}`, { method: 'DELETE' }),
 
-  getWorkoutExercises: (userId = null) => {
-    if (userId) return request(`${API_BASE.workout}/workout-exercises/user/${userId}`);
+  getWorkoutExercises: (userId = null, nextWeek = false) => {
+    if (userId) return request(`${API_BASE.workout}/workout-exercises/user/${userId}?nextWeek=${nextWeek}`);
     return request(`${API_BASE.workout}/workout-exercises`);
   },
   getWorkoutExercisesByDay: (userId, day) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/day/${day}`),
   getWorkoutStatistics: (userId) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/statistics`),
   createWorkoutExercise: (data) => requestJson(`${API_BASE.workout}/workout-exercises`, 'POST', data),
   updateWorkoutExercise: (id, data) => requestJson(`${API_BASE.workout}/workout-exercises/${id}`, 'PUT', data),
+  completeWorkoutExercise: (id) => request(`${API_BASE.workout}/workout-exercises/${id}/complete`, { method: 'PATCH' }),
   deleteWorkoutExercise: (id) => request(`${API_BASE.workout}/workout-exercises/${id}`, { method: 'DELETE' }),
 
   getCompletedWorkouts: () => request(`${API_BASE.workout}/completed-workouts`),

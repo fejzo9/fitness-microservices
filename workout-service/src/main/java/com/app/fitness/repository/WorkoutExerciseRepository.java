@@ -2,7 +2,7 @@ package com.app.fitness.repository;
 
 import com.app.fitness.model.Exercise;
 import com.app.fitness.model.WorkoutExercise;
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -10,13 +10,16 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WorkoutExerciseRepository extends JpaRepository<WorkoutExercise, Long> {
 
-    boolean existsByUserIdAndDayOfWeekAndExercise(Long userId, DayOfWeek dayOfWeek, Exercise exercise);
+    boolean existsByUserIdAndScheduledDateAndExercise(Long userId, LocalDate scheduledDate, Exercise exercise);
 
     @EntityGraph(attributePaths = {"exercise"})
     List<WorkoutExercise> findByUserId(Long userId);
 
     @EntityGraph(attributePaths = {"exercise"})
-    List<WorkoutExercise> findByUserIdAndDayOfWeek(Long userId, DayOfWeek dayOfWeek);
+    List<WorkoutExercise> findByUserIdAndScheduledDateBetween(Long userId, LocalDate from, LocalDate to);
+
+    @EntityGraph(attributePaths = {"exercise"})
+    List<WorkoutExercise> findByUserIdAndScheduledDate(Long userId, LocalDate scheduledDate);
 
     @Override
     @EntityGraph(attributePaths = {"exercise"})

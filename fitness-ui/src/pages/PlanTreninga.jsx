@@ -2,40 +2,44 @@ import * as React from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 
-const DAY_MAP = {
-  'MONDAY': 'pon',
-  'TUESDAY': 'uto',
-  'WEDNESDAY': 'sre',
-  'THURSDAY': 'cet',
-  'FRIDAY': 'pet',
-  'SATURDAY': 'sub',
-  'SUNDAY': 'ned'
-};
+const DAY_NAMES = ['Nedjelja', 'Ponedeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
 
-const REV_DAY_MAP = {
-  'pon': 'MONDAY',
-  'uto': 'TUESDAY',
-  'sre': 'WEDNESDAY',
-  'cet': 'THURSDAY',
-  'pet': 'FRIDAY',
-  'sub': 'SATURDAY',
-  'ned': 'SUNDAY'
-};
+// Vraća datum ponedjeljka za datu sedmicu (offset 0 = tekuća, 1 = iduća)
+function getWeekMonday(weekOffset = 0) {
+  const today = new Date();
+  const day = today.getDay(); // 0=ned, 1=pon...
+  const diff = (day === 0 ? -6 : 1 - day); // koliko dana do ponedjeljka
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + diff + weekOffset * 7);
+  monday.setHours(0, 0, 0, 0);
+  return monday;
+}
 
-const INITIAL_DANI = [
-  { id: "pon", ime: "Ponedeljak", datum: "22.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
-  { id: "uto", ime: "Utorak", datum: "23.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
-  { id: "sre", ime: "Sreda", datum: "24.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
-  { id: "cet", ime: "Četvrtak", datum: "25.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
-  { id: "pet", ime: "Petak", datum: "26.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
-  { id: "sub", ime: "Subota", datum: "27.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
-  { id: "ned", ime: "Nedelja", datum: "28.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] }
-];
+function buildWeekDays(weekOffset = 0) {
+  const monday = getWeekMonday(weekOffset);
+  return Array.from({ length: 7 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(monday.getDate() + i);
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return {
+      id: `${yyyy}-${mm}-${dd}`, // "YYYY-MM-DD"
+      ime: DAY_NAMES[d.getDay()],
+      datum: `${dd}.${mm}`,
+      dateObj: d,
+      tip: "Odmor",
+      trajanje: 0,
+      aktivan: true,
+      vezbe: []
+    };
+  });
+}
 
 export function PlanTreninga() {
   const { user } = useAuth();
-  // Stanje za dane i vježbe
-  const [dani, setDani] = React.useState(INITIAL_DANI);
+  const [weekOffset, setWeekOffset] = React.useState(0);
+  const [dani, setDani] = React.useState(() => buildWeekDays(0));
   const [sveVezbe, setSveVezbe] = React.useState([]);
   const [loading, setLoading] = React.useState(true);
   const [stats, setStats] = React.useState(null);
@@ -45,22 +49,25 @@ export function PlanTreninga() {
   const [modZaUredjivanje, setModZaUredjivanje] = React.useState(false);
 
   // Stanja za formu dodavanja
-  const [izabraniDan, setIzabraniDan] = React.useState("pon");
+  const [izabraniDan, setIzabraniDan] = React.useState("");
   const [izabranaVezbaId, setIzabranaVezbaId] = React.useState("");
-  const [detaljiVezbe, setDetaljiVezbe] = React.useState("");
-  const [dodatnoTrajanje, setDodatnoTrajanje] = React.useState("0");
+  const [sets, setSets] = React.useState("3");
+  const [reps, setReps] = React.useState("10");
+  const [startTime, setStartTime] = React.useState("10:00");
+  const [restSec, setRestSec] = React.useState("60");
 
   React.useEffect(() => {
     if (user?.id) {
-      fetchData();
+      fetchData(weekOffset);
     }
-  }, [user]);
+  }, [user, weekOffset]);
 
-  const fetchData = async () => {
+  const fetchData = async (offset) => {
     setLoading(true);
     try {
+      const nextWeek = offset === 1;
       const [exercises, allEx, statistics] = await Promise.all([
-        api.getWorkoutExercises(user.id),
+        api.getWorkoutExercises(user.id, nextWeek),
         api.getExercises(0, 100),
         api.getWorkoutStatistics(user.id)
       ]);
@@ -68,21 +75,29 @@ export function PlanTreninga() {
       setSveVezbe(allEx.content || []);
       setStats(statistics);
 
-      // Mapiranje vježbi po danima
-      const noviDani = INITIAL_DANI.map(dan => {
-        const vezbeZaDan = exercises
-          .filter(ex => DAY_MAP[ex.dayOfWeek] === dan.id)
+      const weekDays = buildWeekDays(offset);
+
+      // Mapiranje vežbi po scheduledDate
+      const todayStr = (() => { const n = new Date(); const dd = String(n.getDate()).padStart(2,'0'); const mm = String(n.getMonth()+1).padStart(2,'0'); return `${n.getFullYear()}-${mm}-${dd}`; })();
+
+      const noviDani = weekDays.map(dan => {
+        const vezbeZaDan = (exercises || [])
+          .filter(ex => ex.scheduledDate === dan.id)
+          .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
           .map(ex => ({
             id: ex.id,
             naziv: ex.exerciseName,
             detalji: `${ex.sets}×${ex.reps}`,
-            completed: ex.completed
+            startTime: ex.startTime ? ex.startTime.slice(0, 5) : null,
+            restSec: ex.restSec,
+            completed: ex.completed,
+            canComplete: dan.id <= todayStr
           }));
-        
+
         return {
           ...dan,
           vezbe: vezbeZaDan,
-          trajanje: vezbeZaDan.length * 15, // Aproksimacija trajanja
+          trajanje: vezbeZaDan.length * 15,
           tip: vezbeZaDan.length > 0 ? "Snaga" : "Odmor"
         };
       });
@@ -98,41 +113,50 @@ export function PlanTreninga() {
   // Funkcija za dodavanje vježbe
   const handleDodajVezbu = async (e) => {
     e.preventDefault();
-    if (!izabranaVezbaId || !detaljiVezbe.trim()) return;
-
-    const parts = detaljiVezbe.split(/[x×*]/i);
-    const sets = parseInt(parts[0]) || 3;
-    const reps = parseInt(parts[1]) || 10;
+    if (!izabranaVezbaId || !izabraniDan) return;
 
     const request = {
       userId: user.id,
       exerciseId: parseInt(izabranaVezbaId),
-      dayOfWeek: REV_DAY_MAP[izabraniDan],
-      sets: sets,
-      reps: reps,
-      startTime: "10:00:00", // Default
+      scheduledDate: izabraniDan,
+      sets: parseInt(sets) || 3,
+      reps: parseInt(reps) || 10,
+      startTime: startTime ? startTime + ":00" : "10:00:00",
+      restSec: parseInt(restSec) || 60,
       completed: false
     };
 
     try {
       await api.createWorkoutExercise(request);
-      await fetchData(); // Osveži podatke
-      
+      await fetchData(weekOffset);
+
       // Reset forme
       setIzabranaVezbaId("");
-      setDetaljiVezbe("");
-      setDodatnoTrajanje("0");
+      setSets("3");
+      setReps("10");
+      setStartTime("10:00");
+      setRestSec("60");
       setPrikaziFormu(false);
     } catch (error) {
       console.error("Error creating workout exercise:", error);
     }
   };
 
-  // Funkcija za brisanje pojedinačne vježbe
+  // Funkcija za označavanje vježbe kao završene
+  const oznaciCompleted = async (vezbaId) => {
+    try {
+      await api.completeWorkoutExercise(vezbaId);
+      await fetchData(weekOffset);
+    } catch (error) {
+      console.error("Error completing workout exercise:", error);
+    }
+  };
+
+  // Funkcija za brisanje pojedinačne vežbe
   const obrisiVezbu = async (danId, vezbaId) => {
     try {
       await api.deleteWorkoutExercise(vezbaId);
-      await fetchData();
+      await fetchData(weekOffset);
     } catch (error) {
       console.error("Error deleting workout exercise:", error);
     }
@@ -169,11 +193,11 @@ export function PlanTreninga() {
         {/* Action Buttons */}
         <div className="flex gap-3 mb-6">
           <button
-              onClick={() => { setPrikaziFormu(!prikaziFormu); setModZaUredjivanje(false); }}
+              onClick={() => { setPrikaziFormu(!prikaziFormu); setModZaUredjivanje(false); if (!prikaziFormu) setIzabraniDan(new Date().toISOString().slice(0, 10)); }}
               type="button"
               className={`px-5 py-2 text-sm rounded font-medium transition-colors cursor-pointer ${prikaziFormu ? 'bg-red-600 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
           >
-            {prikaziFormu ? "Zatvori" : "+ Novi plan"}
+            {prikaziFormu ? "Zatvori" : "+ Nova vježba"}
           </button>
           <button
               onClick={() => { setModZaUredjivanje(!modZaUredjivanje); setPrikaziFormu(false); }}
@@ -197,57 +221,78 @@ export function PlanTreninga() {
 
         {/* Forma za unos vježbe */}
         {prikaziFormu && (
-            <form onSubmit={handleDodajVezbu} className="bg-card border border-primary/40 rounded-lg p-4 mb-6 grid grid-cols-1 md:grid-cols-4 gap-3 items-end shadow-md">
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1 font-medium">Izaberi dan</label>
-                <select
-                    value={izabraniDan}
-                    onChange={(e) => setIzabraniDan(e.target.value)}
-                    className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
-                >
-                  {dani.map(dan => (
-                      <option key={dan.id} value={dan.id}>{dan.ime}</option>
-                  ))}
-                </select>
+            <form onSubmit={handleDodajVezbu} className="bg-card border border-primary/40 rounded-lg p-4 mb-6 shadow-md">
+              <h3 className="text-sm font-semibold text-foreground mb-3">Nova vježba</h3>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Datum</label>
+                  <input
+                      type="date"
+                      value={izabraniDan}
+                      onChange={(e) => setIzabraniDan(e.target.value)}
+                      className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
+                      required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Naziv vježbe</label>
+                  <select
+                      value={izabranaVezbaId}
+                      onChange={(e) => setIzabranaVezbaId(e.target.value)}
+                      className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
+                      required
+                  >
+                    <option value="">Izaberi vježbu</option>
+                    {sveVezbe.map(v => (
+                        <option key={v.id} value={v.id}>{v.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Vrijeme početka</label>
+                  <input
+                      type="time"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
+                  />
+                </div>
               </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1 font-medium">Naziv vježbe</label>
-                <select
-                    value={izabranaVezbaId}
-                    onChange={(e) => setIzabranaVezbaId(e.target.value)}
-                    className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
-                    required
-                >
-                  <option value="">Izaberi vježbu</option>
-                  {sveVezbe.map(v => (
-                      <option key={v.id} value={v.id}>{v.name}</option>
-                  ))}
-                </select>
-              </div>
-              <div>
-                <label className="block text-xs text-muted-foreground mb-1 font-medium">Serije / Ponavljanja</label>
-                <input
-                    type="text"
-                    placeholder="npr. 3×10"
-                    value={detaljiVezbe}
-                    onChange={(e) => setDetaljiVezbe(e.target.value)}
-                    className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
-                    required
-                />
-              </div>
-              <div className="flex gap-2">
-                <div className="w-1/2">
-                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Trajanje (min)</label>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-3 items-end">
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Serije</label>
                   <input
                       type="number"
-                      value={dodatnoTrajanje}
-                      onChange={(e) => setDodatnoTrajanje(e.target.value)}
+                      value={sets}
+                      onChange={(e) => setSets(e.target.value)}
+                      className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
+                      min="1"
+                      required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Ponavljanja</label>
+                  <input
+                      type="number"
+                      value={reps}
+                      onChange={(e) => setReps(e.target.value)}
+                      className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
+                      min="1"
+                      required
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Odmor (sekunde)</label>
+                  <input
+                      type="number"
+                      value={restSec}
+                      onChange={(e) => setRestSec(e.target.value)}
                       className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
                       min="0"
                   />
                 </div>
-                <button type="submit" className="w-1/2 bg-primary text-white text-sm font-medium rounded p-2 hover:bg-primary/90 transition-colors cursor-pointer">
-                  Sačuvaj
+                <button type="submit" className="bg-primary text-white text-sm font-medium rounded p-2 hover:bg-primary/90 transition-colors cursor-pointer">
+                  Sačuvaj vježbu
                 </button>
               </div>
             </form>
@@ -256,12 +301,26 @@ export function PlanTreninga() {
         {/* Week Overview Header */}
         <div className="bg-secondary border border-border rounded-lg p-4 mb-4">
           <div className="flex justify-between items-center">
-            <div className="text-sm font-medium text-foreground">Nedelja: 22.03.2026 – 28.03.2026</div>
+            <div className="text-sm font-medium text-foreground">
+              {dani.length > 0 && `Sedmica: ${dani[0].datum} – ${dani[6].datum}`}
+              {weekOffset === 0 && <span className="ml-2 text-xs text-primary">(tekuća)</span>}
+              {weekOffset === 1 && <span className="ml-2 text-xs text-emerald-400">(iduća)</span>}
+            </div>
             <div className="flex gap-2">
-              <button type="button" className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors">
+              <button
+                type="button"
+                onClick={() => setWeekOffset(o => Math.max(0, o - 1))}
+                disabled={weekOffset === 0}
+                className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 ← Prethodna
               </button>
-              <button type="button" className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors">
+              <button
+                type="button"
+                onClick={() => setWeekOffset(o => Math.min(1, o + 1))}
+                disabled={weekOffset === 1}
+                className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              >
                 Sledeća →
               </button>
             </div>
@@ -284,24 +343,33 @@ export function PlanTreninga() {
                       {imaVezbi ? (
                           dan.vezbe.map((vezba) => (
                               <div key={vezba.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
-                                <div className="pr-4">
+                                <div className="flex-1 min-w-0">
+                                  {vezba.startTime && (
+                                    <div className="text-xs text-muted-foreground mb-0.5">{vezba.startTime}</div>
+                                  )}
                                   <div className={`text-xs font-medium ${vezba.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
-                                    {vezba.naziv || 'Vježba'} {vezba.completed && '✓'}
+                                    {vezba.naziv || 'Vježba'}
                                   </div>
                                   <div className="text-xs text-primary font-semibold mt-0.5">{vezba.detalji}</div>
                                 </div>
-
-                                {/* OVDE JE BILA GREŠKA - ispravljeno na vezba.id */}
-                                {modZaUredjivanje && (
+                                <div className="flex gap-1 ml-1 shrink-0">
+                                  {!vezba.completed && vezba.canComplete && !modZaUredjivanje && (
                                     <button
-                                        type="button"
-                                        onClick={() => obrisiVezbu(dan.id, vezba.id)}
-                                        className="text-red-500 hover:text-red-700 text-xs font-bold px-1 rounded bg-red-500/10 hover:bg-red-500/20 cursor-pointer transition-colors align-middle"
-                                        title="Obriši vježbu"
-                                    >
-                                      ✕
-                                    </button>
-                                )}
+                                      type="button"
+                                      onClick={() => oznaciCompleted(vezba.id)}
+                                      className="text-emerald-500 hover:text-emerald-700 text-xs font-bold px-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition-colors"
+                                      title="Označi kao završeno"
+                                    >✓</button>
+                                  )}
+                                  {modZaUredjivanje && (
+                                    <button
+                                      type="button"
+                                      onClick={() => obrisiVezbu(dan.id, vezba.id)}
+                                      className="text-red-500 hover:text-red-700 text-xs font-bold px-1 rounded bg-red-500/10 hover:bg-red-500/20 cursor-pointer transition-colors"
+                                      title="Obriši vježbu"
+                                    >✕</button>
+                                  )}
+                                </div>
                               </div>
                           ))
                       ) : (

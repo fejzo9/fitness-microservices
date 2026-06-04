@@ -12,6 +12,7 @@ public interface WorkoutExerciseMapper {
 
     @Mapping(source = "exercise.id", target = "exerciseId")
     @Mapping(source = "exercise.name", target = "exerciseName")
+    @Mapping(target = "dayOfWeek", ignore = true)
     WorkoutExerciseResponse toResponse(WorkoutExercise workoutExercise);
 
     @Mapping(target = "id", ignore = true)

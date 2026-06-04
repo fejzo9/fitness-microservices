@@ -1,11 +1,9 @@
 package com.app.fitness.model;
 
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -37,9 +35,8 @@ public class WorkoutExercise {
     @Column(name = "user_id")
     private Long userId;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "day_of_week")
-    private DayOfWeek dayOfWeek;
+    @Column(name = "scheduled_date")
+    private LocalDate scheduledDate;
 
     @Column(name = "start_time")
     private LocalTime startTime;
