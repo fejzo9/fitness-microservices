@@ -41,7 +41,12 @@ public class ExerciseController {
     private final ExerciseService exerciseService;
 
     @GetMapping
-    public ResponseEntity<PageResponse<ExerciseResponse>> getAll(Pageable pageable) {
+    public ResponseEntity<PageResponse<ExerciseResponse>> getAll(
+            @RequestParam(required = false) Long categoryId,
+            Pageable pageable) {
+        if (categoryId != null) {
+            return ResponseEntity.ok(exerciseService.findByCategory(categoryId, pageable));
+        }
         return ResponseEntity.ok(exerciseService.findAll(pageable));
     }
 

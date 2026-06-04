@@ -15,8 +15,11 @@ export function Biblioteka() {
 
   useEffect(() => {
     fetchCategories();
+  }, []);
+
+  useEffect(() => {
     fetchExercises();
-  }, [currentPage, selectedCategory, searchTerm]);
+  }, [currentPage, selectedCategory]);
 
   const fetchCategories = async () => {
     try {
@@ -30,7 +33,9 @@ export function Biblioteka() {
   const fetchExercises = async () => {
     try {
       setLoading(true);
+      console.log('Fetching exercises with:', { currentPage, searchTerm, selectedCategory });
       const data = await api.getExercises(currentPage, 9, searchTerm, selectedCategory);
+      console.log('Exercises response:', data);
       setExercises(data.content || []);
       setTotalPages(data.totalPages || 1);
       setTotalElements(data.totalElements || 0);
@@ -117,7 +122,18 @@ export function Biblioteka() {
             </label>
             <select
               value={selectedCategory || ''}
-              onChange={(e) => setSelectedCategory(e.target.value || null)}
+              onChange={(e) => {
+                const value = e.target.value || null;
+                setSelectedCategory(value);
+                setCurrentPage(0);
+                // Update active filter to match dropdown selection
+                if (value) {
+                  const selectedCat = categories.find(c => c.id === parseInt(value));
+                  setActiveFilter(selectedCat?.name || 'Svi');
+                } else {
+                  setActiveFilter('Svi');
+                }
+              }}
               className="w-full bg-secondary border border-border rounded px-4 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
             >
               <option value="">Sve kategorije</option>
@@ -152,6 +168,7 @@ export function Biblioteka() {
             onClick={() => {
               setActiveFilter('Svi');
               setSelectedCategory(null);
+              setCurrentPage(0);
             }}
             className={`px-3 py-1 text-xs rounded font-medium transition-colors ${
               activeFilter === 'Svi'
@@ -166,8 +183,10 @@ export function Biblioteka() {
               key={cat.id}
               type="button"
               onClick={() => {
+                console.log('Quick filter clicked:', cat.name, 'ID:', cat.id);
                 setActiveFilter(cat.name);
                 setSelectedCategory(cat.id);
+                setCurrentPage(0);
               }}
               className={`px-3 py-1 text-xs rounded font-medium transition-colors ${
                 activeFilter === cat.name
@@ -205,9 +224,6 @@ export function Biblioteka() {
               <p className="text-xs text-muted-foreground mb-4 leading-relaxed">
                 {exercise.description || 'Nema opisa'}
               </p>
-              <button type="button" className="w-full bg-secondary border border-border text-foreground px-3 py-2 text-xs rounded hover:bg-primary hover:text-white hover:border-primary transition-colors">
-                + Dodaj u plan
-              </button>
             </div>
           </div>
         ))}

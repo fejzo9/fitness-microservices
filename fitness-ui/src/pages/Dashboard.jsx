@@ -55,18 +55,6 @@ export function Dashboard() {
         <h2 className="text-xl font-normal border-b border-border pb-3">Dashboard</h2>
       </div>
 
-      {/* Quick Action Buttons */}
-      <div className="flex gap-4 mb-6">
-        <button type="button" className="border-2 border-border bg-primary text-primary-foreground px-5 py-2 text-sm">
-          + Add Workout
-        </button>
-        <button type="button" className="border-2 border-border bg-card text-card-foreground px-5 py-2 text-sm">
-          + Add Meal
-        </button>
-        <button type="button" className="border-2 border-border bg-card text-card-foreground px-5 py-2 text-sm">
-          + Add Progress Entry
-        </button>
-      </div>
 
       {/* Dashboard Cards Grid */}
       <div className="grid grid-cols-2 gap-6 mb-6">

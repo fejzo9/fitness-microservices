@@ -27,4 +27,7 @@ public interface ExerciseRepository extends JpaRepository<Exercise, Long> {
 
     @Query("SELECT e FROM Exercise e LEFT JOIN FETCH e.categories WHERE LOWER(e.name) LIKE LOWER(CONCAT('%', :name, '%')) ORDER BY e.id")
     Page<Exercise> findByNameContainingIgnoreCase(String name, Pageable pageable);
+
+    @Query("SELECT DISTINCT e FROM Exercise e LEFT JOIN FETCH e.categories c WHERE c.id = :categoryId ORDER BY e.id")
+    Page<Exercise> findByCategoriesId(Long categoryId, Pageable pageable);
 }

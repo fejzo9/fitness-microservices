@@ -159,7 +159,7 @@ export function Napredak() {
         </div>
 
         <div className="bg-card border border-border rounded-lg p-4 border-t-2 border-t-emerald-500">
-          <div className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Treninzi ove nedelje</div>
+          <div className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Treninzi ove nedjelje</div>
           <div
             className="text-3xl font-bold text-emerald-400 mb-1"
             style={{ fontFamily: "'Barlow Condensed', sans-serif" }}
@@ -183,7 +183,7 @@ export function Napredak() {
         </div>
 
         <div className="bg-card border border-border rounded-lg p-4 border-t-2 border-t-amber-500">
-          <div className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Ukupno vreme treninga</div>
+          <div className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Ukupno vrijeme treninga</div>
           <div
             className="text-3xl font-bold text-amber-400 mb-1"
             style={{ fontFamily: "'Barlow Condensed', sans-serif" }}

@@ -207,7 +207,7 @@ export function PlanTreninga() {
             {modZaUredjivanje ? "Završi uređivanje" : "Uredi plan"}
           </button>
           <button type="button" className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors">
-            Istorija
+            Historija
           </button>
         </div>
 

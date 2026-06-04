@@ -45,6 +45,11 @@ public class ExerciseService {
     }
 
     @Transactional(readOnly = true)
+    public PageResponse<ExerciseResponse> findByCategory(Long categoryId, Pageable pageable) {
+        return PageResponse.of(exerciseRepository.findByCategoriesId(categoryId, pageable).map(exerciseMapper::toResponse));
+    }
+
+    @Transactional(readOnly = true)
     public ExerciseResponse findById(Long id) {
         return exerciseRepository.findById(id)
                 .map(exerciseMapper::toResponse)
