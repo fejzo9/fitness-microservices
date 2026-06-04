@@ -22,9 +22,6 @@ export function Layout() {
       <header className="bg-sidebar border-b border-sidebar-border px-6 py-3 flex-shrink-0">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center gap-3">
-            <div className="w-8 h-8 bg-primary rounded flex items-center justify-center">
-              <span className="text-white text-xs font-bold" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>FT</span>
-            </div>
             <h1
               className="text-base font-semibold text-foreground tracking-wide uppercase"
               style={{ fontFamily: "'Barlow Condensed', sans-serif", letterSpacing: "0.08em" }}

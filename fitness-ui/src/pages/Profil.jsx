@@ -373,14 +373,13 @@ export function Profil() {
           )}
         </div>
 
-        {/* Danger zone */}
-        <div className="bg-card border border-destructive/30 rounded-lg p-6">
-          <h3 className="text-base font-semibold text-foreground mb-1" style={BARLOW}>Zona opasnosti</h3>
-          <p className="text-xs text-muted-foreground mb-4">Ove akcije su nepovratne.</p>
+        {/* Logout Section */}
+        <div className="bg-card border border-border rounded-lg p-6 flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">Želite da završite sesiju?</span>
           <button
             type="button"
             onClick={logout}
-            className="bg-destructive/10 border border-destructive/40 text-destructive px-4 py-2 text-sm rounded hover:bg-destructive/20 transition-colors"
+            className="bg-secondary border border-border text-foreground px-6 py-2 text-sm rounded hover:bg-secondary/80 transition-colors font-medium"
           >
             Odjavi se
           </button>

@@ -60,8 +60,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <AuthProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="trener-panel" element={<TrenerRoute><TrenerPanel /></TrenerRoute>} />
-          <Route path="admin-panel" element={<AdminRoute><AdminPanel /></AdminRoute>} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
           <Route path="/" element={<ProtectedRoute><Layout /></ProtectedRoute>}>
@@ -71,8 +69,8 @@ ReactDOM.createRoot(document.getElementById('root')).render(
             <Route path="ishrana" element={<Ishrana />} />
             <Route path="napredak" element={<Napredak />} />
             <Route path="profil" element={<Profil />} />
-            <Route path="trener-panel" element={<TrenerPanel />} />
-            <Route path="admin-panel" element={<AdminPanel />} />
+            <Route path="trener-panel" element={<TrenerRoute><TrenerPanel /></TrenerRoute>} />
+            <Route path="admin-panel" element={<AdminRoute><AdminPanel /></AdminRoute>} />
           </Route>
         </Routes>
       </BrowserRouter>

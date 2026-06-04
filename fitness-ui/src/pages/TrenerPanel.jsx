@@ -3,13 +3,15 @@ import { api } from '../services/api';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
 
+const inputCls = "w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all";
+
 function Modal({ title, onClose, children }) {
   return (
     <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-lg w-full max-w-lg">
+      <div className="bg-card border border-border rounded-lg w-full max-w-lg shadow-xl animate-in fade-in zoom-in-95 duration-150">
         <div className="flex items-center justify-between p-5 border-b border-border">
           <h3 className="text-base font-semibold text-foreground" style={BARLOW}>{title}</h3>
-          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none">×</button>
+          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none cursor-pointer">×</button>
         </div>
         <div className="p-5">{children}</div>
       </div>
@@ -20,11 +22,8 @@ function Modal({ title, onClose, children }) {
 function Input({ label, ...props }) {
   return (
     <div>
-      {label && <label className="block text-xs text-muted-foreground mb-1">{label}</label>}
-      <input
-        className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        {...props}
-      />
+      {label && <label className="block text-xs text-muted-foreground mb-1 font-medium">{label}</label>}
+      <input className={inputCls} {...props} />
     </div>
   );
 }
@@ -111,8 +110,11 @@ export function TrenerPanel() {
 
   return (
     <>
-      <div className="mb-6">
-        <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide border-b border-border pb-3" style={BARLOW}>
+      <div className="mb-6 flex items-center gap-3">
+        <div className="w-10 h-10 bg-primary rounded flex items-center justify-center flex-shrink-0">
+          <span className="text-white text-lg font-bold" style={BARLOW}>FT</span>
+        </div>
+        <h2 className="text-3xl font-bold text-foreground uppercase tracking-wide border-b border-border pb-3 flex-1" style={BARLOW}>
           Trener Panel
         </h2>
       </div>
@@ -348,11 +350,11 @@ export function TrenerPanel() {
                 <Input label="Naziv dana" value={form.name || ''} onChange={f('name')} placeholder="npr. Ponedeljak – gornji dio" />
                 <Input label="ID plana treninga" type="number" value={form.workoutPlanId || ''} onChange={f('workoutPlanId')} placeholder="ID plana" />
                 <div>
-                  <label className="block text-xs text-muted-foreground mb-1">Dan u sedmici</label>
+                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Dan u sedmici</label>
                   <select
                     value={form.dayOfWeek || ''}
                     onChange={(e) => setForm(prev => ({ ...prev, dayOfWeek: e.target.value }))}
-                    className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
+                    className={inputCls}
                   >
                     <option value="">Odaberite dan</option>
                     {['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'].map(d => (
