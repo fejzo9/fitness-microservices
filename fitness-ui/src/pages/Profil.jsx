@@ -170,7 +170,7 @@ export function Profil() {
         </h2>
       </div>
 
-      <div className="max-w-2xl space-y-6">
+      <div className="max-w-2xl w-full space-y-6">
         {/* Avatar & Name card */}
         <div className="bg-card border border-border rounded-lg p-6 flex items-center gap-5">
           <div className="w-20 h-20 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center flex-shrink-0">
@@ -209,16 +209,16 @@ export function Profil() {
 
           {editing ? (
             <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Ime" value={form.firstName} onChange={f('firstName')} placeholder="Ime" />
                 <Input label="Prezime" value={form.lastName} onChange={f('lastName')} placeholder="Prezime" />
               </div>
               <Input label="Email adresa" type="email" value={form.email} onChange={f('email')} placeholder="email@example.com" />
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Godine" type="number" value={form.age} onChange={f('age')} placeholder="Godine" />
                 <Input label="Visina (cm)" type="number" value={form.height} onChange={f('height')} placeholder="Visina (cm)" />
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input label="Težina (kg)" type="number" value={form.weight} onChange={f('weight')} placeholder="Težina (kg)" />
                 <div>
                   <label className="block text-xs text-muted-foreground mb-1">Pol</label>
@@ -304,7 +304,7 @@ export function Profil() {
                   ))}
                 </select>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <Input
                   label="Ciljna težina (kg)"
                   type="number"

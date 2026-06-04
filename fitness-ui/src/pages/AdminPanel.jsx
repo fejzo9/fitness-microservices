@@ -139,7 +139,7 @@ export function AdminPanel() {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {[
           { label: 'Ukupno korisnika', value: users.length.toLocaleString(), sub: `+${users.filter(u => {
             const date = new Date(u.createdAt);
@@ -161,9 +161,9 @@ export function AdminPanel() {
       </div>
 
       {/* Tab Navigation */}
-      <div className="flex gap-1 mb-6 bg-secondary border border-border rounded-lg p-1 w-fit">
-        {[{ id: 'users', label: 'Upravljanje korisnicima' }, { id: 'exercises', label: 'Biblioteka ve\u017ebi' }, { id: 'settings', label: 'Sistemske postavke' }].map(({ id, label }) => (
-          <button key={id} onClick={() => setActiveTab(id)} className={`px-5 py-2 text-sm rounded-md transition-colors ${activeTab === id ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>
+      <div className="flex flex-wrap gap-1 mb-6 bg-secondary border border-border rounded-lg p-1">
+        {[{ id: 'users', label: 'Upravljanje korisnicima' }, { id: 'exercises', label: 'Biblioteka vježbi' }, { id: 'settings', label: 'Sistemske postavke' }].map(({ id, label }) => (
+          <button key={id} onClick={() => setActiveTab(id)} className={`px-4 py-2 text-sm rounded-md transition-colors min-h-[40px] ${activeTab === id ? 'bg-primary text-white font-medium' : 'text-muted-foreground hover:text-foreground'}`}>{label}</button>
         ))}
       </div>
 
@@ -176,8 +176,8 @@ export function AdminPanel() {
                 <h3 className="text-base font-bold text-foreground uppercase tracking-wide" style={BARLOW}>Lista korisnika</h3>
                 <button type="button" onClick={() => openModal('user')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">+ Dodaj korisnika</button>
               </div>
-              <div className="flex gap-3 mb-4">
-                <input type="text" placeholder="Pretraži po imenu ili email-u..." value={userSearch} onChange={e => setUserSearch(e.target.value)} className={`flex-1 ${inputCls}`} />
+              <div className="flex flex-wrap gap-3 mb-4">
+                <input type="text" placeholder="Pretraži po imenu ili email-u..." value={userSearch} onChange={e => setUserSearch(e.target.value)} className={`flex-1 min-w-[200px] ${inputCls}`} />
                 <select value={userRoleFilter} onChange={e => setUserRoleFilter(e.target.value)} className={inputCls.replace('w-full', 'w-auto')}>
                   <option value="">Sve uloge</option>
                   {roles.map(r => <option key={r.id} value={r.name}>{r.name}</option>)}
@@ -188,7 +188,8 @@ export function AdminPanel() {
                   <option>Neaktivni</option>
                 </select>
               </div>
-              <div className="border border-border rounded-lg overflow-hidden">
+              {/* Desktop tabela — skrivena na mobilnom */}
+              <div className="hidden md:block border border-border rounded-lg overflow-hidden">
                 <div className="grid grid-cols-12 border-b border-border bg-secondary">
                   {[{ l: 'Ime', s: 'col-span-3' },{ l: 'Email', s: 'col-span-3' },{ l: 'Uloga', s: 'col-span-2' },{ l: 'Status', s: 'col-span-2' },{ l: 'Akcije', s: 'col-span-2' }].map(({ l, s }, i) => (
                     <div key={l} className={`${s} p-3 ${i < 4 ? 'border-r border-border' : ''}`}><span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{l}</span></div>
@@ -201,7 +202,7 @@ export function AdminPanel() {
                       <div className="text-sm text-foreground font-medium">{user.firstName || user.lastName ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : user.username}</div>
                       <div className="text-xs text-muted-foreground">{formatDate(user.createdAt)}</div>
                     </div>
-                    <div className="col-span-3 p-3 border-r border-border"><span className="text-sm text-muted-foreground">{user.email || '\u2014'}</span></div>
+                    <div className="col-span-3 p-3 border-r border-border"><span className="text-sm text-muted-foreground">{user.email || '—'}</span></div>
                     <div className="col-span-2 p-3 border-r border-border flex items-center justify-center"><span className={`text-xs px-2 py-1 rounded border font-medium ${rb.cls}`}>{rb.label}</span></div>
                     <div className="col-span-2 p-3 border-r border-border flex items-center justify-center">
                       <span className="text-xs px-2 py-1 rounded border bg-emerald-900/40 text-emerald-400 border-emerald-800/50">Aktivan</span>
@@ -213,10 +214,34 @@ export function AdminPanel() {
                   </div>
                 ); })}
               </div>
+
+              {/* Mobilni card layout */}
+              <div className="md:hidden space-y-3">
+                {paginatedUsers.length === 0 && <div className="p-8 text-center text-muted-foreground text-sm">Nema korisnika.</div>}
+                {paginatedUsers.map(user => { const rb = getRoleBadge(user.roleName); return (
+                  <div key={user.id} className="bg-secondary border border-border rounded-lg p-4">
+                    <div className="flex items-start justify-between mb-3">
+                      <div>
+                        <div className="text-sm font-semibold text-foreground">{user.firstName || user.lastName ? `${user.firstName || ''} ${user.lastName || ''}`.trim() : user.username}</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{user.email || '—'}</div>
+                        <div className="text-xs text-muted-foreground">{formatDate(user.createdAt)}</div>
+                      </div>
+                      <div className="flex flex-col items-end gap-1.5">
+                        <span className={`text-xs px-2 py-1 rounded border font-medium ${rb.cls}`}>{rb.label}</span>
+                        <span className="text-xs px-2 py-1 rounded border bg-emerald-900/40 text-emerald-400 border-emerald-800/50">Aktivan</span>
+                      </div>
+                    </div>
+                    <div className="flex gap-2">
+                      <button type="button" onClick={() => openModal('user', user)} className="flex-1 bg-card border border-border text-foreground px-3 py-2 text-xs rounded hover:bg-secondary/80 transition-colors min-h-[36px]">Uredi</button>
+                      <button type="button" onClick={() => handleDelete('user', user.id)} className="flex-1 bg-destructive/15 border border-destructive/30 text-destructive px-3 py-2 text-xs rounded hover:bg-destructive/25 transition-colors min-h-[36px]">Obriši</button>
+                    </div>
+                  </div>
+                ); })}
+              </div>
               {filteredUsers.length > 0 && (
-                <div className="flex items-center justify-between mt-4">
+                <div className="flex flex-wrap items-center justify-between gap-3 mt-4">
                   <span className="text-sm text-muted-foreground">Prikazano {userPage * usersPerPage + 1}&ndash;{Math.min((userPage + 1) * usersPerPage, filteredUsers.length)} od {filteredUsers.length}</span>
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button disabled={userPage === 0} onClick={() => setUserPage(p => p - 1)} className="bg-secondary border border-border text-muted-foreground px-3 py-1 text-sm rounded hover:bg-secondary/80 transition-colors disabled:opacity-40">◀ Prethodna</button>
                     {pageNums(userPage, userTotalPages).map(i => (
                       <button key={i} onClick={() => setUserPage(i)} className={`px-3 py-1 text-sm rounded font-medium transition-colors ${userPage === i ? 'bg-primary text-white' : 'bg-secondary border border-border text-foreground hover:bg-secondary/80'}`}>{i + 1}</button>

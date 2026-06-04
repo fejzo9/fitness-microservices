@@ -43,7 +43,7 @@ export function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="bg-card border border-border rounded-lg p-8">
           {/* Logo and Title */}

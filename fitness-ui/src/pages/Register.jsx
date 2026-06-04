@@ -50,7 +50,7 @@ export function Register() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center p-6">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 py-8">
       <div className="w-full max-w-md">
         <div className="bg-card border border-border rounded-lg p-8">
           {/* Logo and Title */}
@@ -80,7 +80,7 @@ export function Register() {
               </div>
             )}
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm text-muted-foreground mb-2">
                   Ime

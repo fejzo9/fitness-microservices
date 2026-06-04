@@ -144,7 +144,7 @@ export function Napredak() {
       </div>
 
       {/* Key Metrics Summary Cards */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="bg-card border border-border rounded-lg p-4 border-t-2 border-t-primary">
           <div className="text-xs text-muted-foreground mb-2 uppercase tracking-wide">Trenutna težina</div>
           <div
@@ -195,7 +195,7 @@ export function Napredak() {
       </div>
 
       {/* Main Charts Row */}
-      <div className="grid grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 mb-6">
         {/* Body Weight Chart */}
         <div className="bg-card border border-border rounded-lg p-5">
           <div className="border-b border-border pb-3 mb-4">

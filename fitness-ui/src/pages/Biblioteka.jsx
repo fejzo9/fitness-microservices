@@ -88,9 +88,9 @@ export function Biblioteka() {
 
       {/* Search and Filter Section */}
       <div className="bg-card border border-border rounded-lg p-5 mb-6">
-        <div className="grid grid-cols-12 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-4">
           {/* Search Bar */}
-          <div className="col-span-7">
+          <div className="sm:col-span-2 lg:col-span-7">
             <label className="block text-sm text-muted-foreground mb-2">
               Pretraga vježbi
             </label>
@@ -113,7 +113,7 @@ export function Biblioteka() {
           </div>
 
           {/* Category Filter */}
-          <div className="col-span-3">
+          <div className="lg:col-span-3">
             <label className="block text-sm text-muted-foreground mb-2">
               Kategorija
             </label>
@@ -143,14 +143,14 @@ export function Biblioteka() {
           </div>
 
           {/* Search Button */}
-          <div className="col-span-2 flex items-end">
+          <div className="sm:col-span-2 lg:col-span-2 flex items-end">
             <button
               type="button"
               onClick={() => {
                 setCurrentPage(0);
                 fetchExercises();
               }}
-              className="w-full bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors"
+              className="w-full bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors min-h-[44px]"
             >
               Pretraži
             </button>
@@ -203,7 +203,7 @@ export function Biblioteka() {
       </div>
 
       {/* Exercise Grid */}
-      <div className="grid grid-cols-3 gap-5 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-5 mb-6">
         {exercises.map((exercise) => (
           <div key={exercise.id} className="bg-card border border-border rounded-lg overflow-hidden hover:border-primary/50 transition-colors group">
             <div className="bg-secondary border-b border-border p-3">
@@ -228,11 +228,11 @@ export function Biblioteka() {
 
       {/* Pagination */}
       <div className="bg-card border border-border rounded-lg p-4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-wrap items-center justify-between gap-3">
           <div className="text-sm text-muted-foreground">
             Prikazano {currentPage * 9 + 1}–{Math.min((currentPage + 1) * 9, totalElements)} od {totalElements}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap justify-center gap-2">
             <button
               type="button"
               className="bg-secondary border border-border text-muted-foreground px-3 py-1 text-sm rounded hover:bg-secondary/80 transition-colors disabled:opacity-50"

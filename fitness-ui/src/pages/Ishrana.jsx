@@ -130,7 +130,7 @@ export function Ishrana() {
 
       {/* Date Selector */}
       <div className="mb-6">
-        <div className="bg-card border border-border rounded-lg p-4 flex items-center gap-4">
+        <div className="bg-card border border-border rounded-lg p-4 flex flex-wrap items-center gap-2 md:gap-4">
           <span className="text-sm text-muted-foreground">Datum:</span>
           <button
             onClick={() => changeDate(-1)}
@@ -172,7 +172,7 @@ export function Ishrana() {
               />
             </div>
 
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
               <div>
                 <label className="block text-sm text-muted-foreground mb-2">Kalorije (kcal)</label>
                 <input type="number" value={calories} onChange={(e) => setCalories(e.target.value)} className={inputCls} placeholder="0" />
@@ -194,7 +194,7 @@ export function Ishrana() {
             <div>
               <button
                 onClick={handleAddMeal}
-                className="bg-primary text-white px-6 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors"
+                className="w-full sm:w-auto bg-primary text-white px-6 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors min-h-[44px]"
               >
                 + Dodaj obrok
               </button>
@@ -217,7 +217,7 @@ export function Ishrana() {
 
           {/* Daily Summary */}
           <div className="bg-secondary rounded-lg p-4 mb-4">
-            <div className="grid grid-cols-4 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
               <div className="text-center">
                 <div
                   className="text-2xl font-bold text-primary mb-1"
@@ -262,9 +262,9 @@ export function Ishrana() {
             <Spinner size="md" className="p-8" />
           )}
 
-          {/* Meals Table */}
+          {/* Meals Table — desktop */}
           {!loading && (
-            <div className="border border-border rounded-lg overflow-hidden">
+            <div className="hidden md:block border border-border rounded-lg overflow-hidden">
               {/* Table Header */}
               <div className="grid grid-cols-8 border-b border-border bg-secondary">
                 <div className="col-span-2 p-3 border-r border-border">
@@ -326,6 +326,40 @@ export function Ishrana() {
                       >
                         Obriši
                       </button>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          )}
+
+          {/* Meals Cards — mobilni layout */}
+          {!loading && (
+            <div className="md:hidden space-y-3">
+              {meals.length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  Nema unetih obroka za danas
+                </div>
+              ) : (
+                meals.map((meal) => (
+                  <div key={meal.id} className="bg-secondary rounded-lg p-4 border border-border">
+                    <div className="flex justify-between items-start mb-3">
+                      <div>
+                        <span className="text-sm font-medium text-foreground block">{meal.mealName}</span>
+                        <span className="text-xs text-muted-foreground">{formatTime(meal.mealTime)}</span>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteMeal(meal.id)}
+                        className="bg-destructive/10 border border-destructive/30 text-destructive px-2 py-1 text-xs rounded hover:bg-destructive/20 transition-colors min-h-[36px]"
+                      >
+                        Obriši
+                      </button>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <span className="text-primary">🔥 {parseFloat(meal.calories || 0).toFixed(0)} kcal</span>
+                      <span className="text-emerald-400">💪 {parseFloat(meal.proteinG || 0).toFixed(0)}g proteini</span>
+                      <span className="text-blue-400">🍞 {parseFloat(meal.carbsG || 0).toFixed(0)}g ugljeni h.</span>
+                      <span className="text-amber-400">🥑 {parseFloat(meal.fatsG || 0).toFixed(0)}g masti</span>
                     </div>
                   </div>
                 ))

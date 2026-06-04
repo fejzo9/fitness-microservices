@@ -191,22 +191,22 @@ export function PlanTreninga() {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex gap-3 mb-6">
+        <div className="flex flex-wrap gap-2 mb-6">
           <button
               onClick={() => { setPrikaziFormu(!prikaziFormu); setModZaUredjivanje(false); if (!prikaziFormu) setIzabraniDan(new Date().toISOString().slice(0, 10)); }}
               type="button"
-              className={`px-5 py-2 text-sm rounded font-medium transition-colors cursor-pointer ${prikaziFormu ? 'bg-red-600 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
+              className={`px-5 py-2 text-sm rounded font-medium transition-colors cursor-pointer flex-shrink-0 min-h-[44px] ${prikaziFormu ? 'bg-red-600 text-white' : 'bg-primary text-white hover:bg-primary/90'}`}
           >
             {prikaziFormu ? "Zatvori" : "+ Nova vježba"}
           </button>
           <button
               onClick={() => { setModZaUredjivanje(!modZaUredjivanje); setPrikaziFormu(false); }}
               type="button"
-              className={`px-5 py-2 text-sm rounded font-medium border transition-colors cursor-pointer ${modZaUredjivanje ? 'bg-amber-600 text-white border-transparent' : 'bg-secondary border-border text-foreground hover:bg-secondary/80'}`}
+              className={`px-5 py-2 text-sm rounded font-medium border transition-colors cursor-pointer flex-shrink-0 min-h-[44px] ${modZaUredjivanje ? 'bg-amber-600 text-white border-transparent' : 'bg-secondary border-border text-foreground hover:bg-secondary/80'}`}
           >
             {modZaUredjivanje ? "Završi uređivanje" : "Uredi plan"}
           </button>
-          <button type="button" className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors">
+          <button type="button" className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors flex-shrink-0 min-h-[44px]">
             Historija
           </button>
         </div>
@@ -300,7 +300,7 @@ export function PlanTreninga() {
 
         {/* Week Overview Header */}
         <div className="bg-secondary border border-border rounded-lg p-4 mb-4">
-          <div className="flex justify-between items-center">
+          <div className="flex flex-wrap justify-between items-center gap-2">
             <div className="text-sm font-medium text-foreground">
               {dani.length > 0 && `Sedmica: ${dani[0].datum} – ${dani[6].datum}`}
               {weekOffset === 0 && <span className="ml-2 text-xs text-primary">(tekuća)</span>}
@@ -328,7 +328,8 @@ export function PlanTreninga() {
         </div>
 
         {/* Weekly Workout Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-7 gap-2 mb-6">
+        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+        <div className="grid grid-cols-7 gap-2 mb-6 min-w-[700px]">
           {dani.map((dan) => {
             const imaVezbi = dan.vezbe.length > 0;
             return (
@@ -407,8 +408,9 @@ export function PlanTreninga() {
           })}
         </div>
 
+        </div>
         {/* Weekly Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
           <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-primary">
             <div className="text-xs text-muted-foreground mb-2">Ukupno treninga</div>
             <div className="text-3xl font-bold text-primary" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
