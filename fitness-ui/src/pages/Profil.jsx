@@ -2,20 +2,9 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
 import { useToast } from '../contexts/ToastContext';
+import { Input } from '../components/Input';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
-
-function Input({ label, ...props }) {
-  return (
-    <div>
-      <label className="block text-xs text-muted-foreground mb-1">{label}</label>
-      <input
-        className="w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary"
-        {...props}
-      />
-    </div>
-  );
-}
 
 const GOAL_TYPES = [
   { value: 'WEIGHT_LOSS', label: 'Mršanje' },

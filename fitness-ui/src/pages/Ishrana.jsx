@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Spinner } from '../components/Spinner';
 import { useToast } from '../contexts/ToastContext';
+import { Input } from '../components/Input';
 
 export function Ishrana() {
   const toast = useToast();
@@ -91,8 +92,6 @@ export function Ishrana() {
   const totalCarbs = meals.reduce((sum, m) => sum + (parseFloat(m.carbsG) || 0), 0);
   const totalFats = meals.reduce((sum, m) => sum + (parseFloat(m.fatsG) || 0), 0);
 
-  const inputCls = "w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:border-primary transition-colors";
-
   const formatDate = (date) => {
     const months = ['Januar', 'Februar', 'Mart', 'April', 'Maj', 'Jun', 'Jul', 'Avgust', 'Septembar', 'Oktobar', 'Novembar', 'Decembar'];
     const day = date.getDate();
@@ -151,34 +150,19 @@ export function Ishrana() {
           </div>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm text-muted-foreground mb-2">Naziv obroka</label>
-              <input
-                type="text"
-                value={mealName}
-                onChange={(e) => setMealName(e.target.value)}
-                className={inputCls}
-                placeholder="npr. Doručak - Jaja sa hljebom"
-              />
-            </div>
+            <Input
+              label="Naziv obroka"
+              type="text"
+              value={mealName}
+              onChange={(e) => setMealName(e.target.value)}
+              placeholder="npr. Doručak - Jaja sa hljebom"
+            />
 
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 md:gap-4">
-              <div>
-                <label className="block text-sm text-muted-foreground mb-2">Kalorije (kcal)</label>
-                <input type="number" value={calories} onChange={(e) => setCalories(e.target.value)} className={inputCls} placeholder="0" />
-              </div>
-              <div>
-                <label className="block text-sm text-muted-foreground mb-2">Proteini (g)</label>
-                <input type="number" value={protein} onChange={(e) => setProtein(e.target.value)} className={inputCls} placeholder="0" />
-              </div>
-              <div>
-                <label className="block text-sm text-muted-foreground mb-2">Ugljeni hidrati (g)</label>
-                <input type="number" value={carbs} onChange={(e) => setCarbs(e.target.value)} className={inputCls} placeholder="0" />
-              </div>
-              <div>
-                <label className="block text-sm text-muted-foreground mb-2">Masti (g)</label>
-                <input type="number" value={fats} onChange={(e) => setFats(e.target.value)} className={inputCls} placeholder="0" />
-              </div>
+              <Input label="Kalorije (kcal)" type="number" value={calories} onChange={(e) => setCalories(e.target.value)} placeholder="0" />
+              <Input label="Proteini (g)" type="number" value={protein} onChange={(e) => setProtein(e.target.value)} placeholder="0" />
+              <Input label="Ugljeni hidrati (g)" type="number" value={carbs} onChange={(e) => setCarbs(e.target.value)} placeholder="0" />
+              <Input label="Masti (g)" type="number" value={fats} onChange={(e) => setFats(e.target.value)} placeholder="0" />
             </div>
 
             <div>

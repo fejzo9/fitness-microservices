@@ -1,34 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/Spinner';
+import { Modal } from '../components/Modal';
+import { Input } from '../components/Input';
 import { useToast } from '../contexts/ToastContext';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
-
-const inputCls = "w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all";
-
-function Modal({ title, onClose, children }) {
-  return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-      <div className="bg-card border border-border rounded-lg w-full max-w-lg shadow-xl animate-in fade-in zoom-in-95 duration-150">
-        <div className="flex items-center justify-between p-5 border-b border-border">
-          <h3 className="text-base font-semibold text-foreground" style={BARLOW}>{title}</h3>
-          <button type="button" onClick={onClose} className="text-muted-foreground hover:text-foreground text-xl leading-none cursor-pointer">×</button>
-        </div>
-        <div className="p-5">{children}</div>
-      </div>
-    </div>
-  );
-}
-
-function Input({ label, ...props }) {
-  return (
-    <div>
-      {label && <label className="block text-xs text-muted-foreground mb-1 font-medium">{label}</label>}
-      <input className={inputCls} {...props} />
-    </div>
-  );
-}
 
 export function TrenerPanel() {
   const [trainerClients, setTrainerClients] = useState([]);
