@@ -293,7 +293,7 @@ export function PlanTreninga() {
         <div className="bg-secondary border border-border rounded-lg p-4 mb-4">
           <div className="flex flex-wrap justify-between items-center gap-2">
             <div className="text-sm font-medium text-foreground">
-              {days.length > 0 && `Sedmica: ${days[0].datum} – ${days[6].datum}`}
+              {days.length > 0 && `Sedmica: ${days[0].date} – ${days[6].date}`}
               {weekOffset === 0 && <span className="ml-2 text-xs text-primary">(tekuća)</span>}
               {weekOffset === 1 && <span className="ml-2 text-xs text-emerald-400">(iduća)</span>}
             </div>
@@ -322,27 +322,27 @@ export function PlanTreninga() {
         <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
         <div className="grid grid-cols-7 gap-2 mb-6 min-w-[700px]">
           {days.map((day) => {
-            const hasExercises = day.vezbe.length > 0;
+            const hasExercises = day.exercises.length > 0;
             return (
-                <div key={dan.id} className={`bg-card border rounded-lg overflow-hidden flex flex-col justify-between min-h-[240px] transition-all ${editMode ? 'border-amber-500/50 shadow-sm' : 'border-border'}`}>
+                <div key={day.id} className={`bg-card border rounded-lg overflow-hidden flex flex-col justify-between min-h-[240px] transition-all ${editMode ? 'border-amber-500/50 shadow-sm' : 'border-border'}`}>
                   <div>
-                    <div className={`${dan.aktivan && hasExercises ? "bg-primary text-white" : "bg-secondary text-foreground"} p-2 text-center`}>
-                      <div className="text-xs font-semibold">{dan.ime}</div>
-                      <div className={`text-xs mt-0.5 ${dan.aktivan && hasExercises ? "text-white/80" : "text-muted-foreground"}`}>{dan.datum}</div>
+                    <div className={`${day.active && hasExercises ? "bg-primary text-white" : "bg-secondary text-foreground"} p-2 text-center`}>
+                      <div className="text-xs font-semibold">{day.name}</div>
+                      <div className={`text-xs mt-0.5 ${day.active && hasExercises ? "text-white/80" : "text-muted-foreground"}`}>{day.date}</div>
                     </div>
 
                     <div className="p-2.5 space-y-1.5">
                       {hasExercises ? (
-                          day.vezbe.map((exercise) => (
+                          day.exercises.map((exercise) => (
                               <div key={exercise.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
                                 <div className="flex-1 min-w-0">
                                   {exercise.startTime && (
                                     <div className="text-xs text-muted-foreground mb-0.5">{exercise.startTime}</div>
                                   )}
                                   <div className={`text-xs font-medium ${exercise.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
-                                    {exercise.naziv || 'Vježba'}
+                                    {exercise.name || 'Vježba'}
                                   </div>
-                                  <div className="text-xs text-primary font-semibold mt-0.5">{exercise.detalji}</div>
+                                  <div className="text-xs text-primary font-semibold mt-0.5">{exercise.details}</div>
                                 </div>
                                 <div className="flex gap-1 ml-1 shrink-0">
                                   {!exercise.completed && exercise.canComplete && !editMode && (
@@ -356,7 +356,7 @@ export function PlanTreninga() {
                                   {editMode && day.id >= todayStr && (
                                     <button
                                       type="button"
-                                      onClick={() => deleteExercise(dan.id, exercise.id)}
+                                      onClick={() => deleteExercise(day.id, exercise.id)}
                                       className="text-red-500 hover:text-red-700 text-xs font-bold px-1 rounded bg-red-500/10 hover:bg-red-500/20 cursor-pointer transition-colors"
                                       title="Obriši vježbu"
                                     >✕</button>
@@ -377,18 +377,18 @@ export function PlanTreninga() {
                     {hasExercises ? (
                         editMode ? (
                             <div className="flex items-center justify-center gap-1">
-                              <span>{dan.tip} · </span>
+                              <span>{day.type} · </span>
                               <input
                                   type="number"
-                                  value={dan.trajanje}
-                                  onChange={(e) => changeDuration(dan.id, e.target.value)}
+                                  value={day.duration}
+                                  onChange={(e) => changeDuration(day.id, e.target.value)}
                                   className="w-12 bg-card border border-border rounded text-center text-foreground p-0.5"
                                   min="0"
                               />
                               <span>min</span>
                             </div>
                         ) : (
-                            `${dan.tip} · ${dan.trajanje} min`
+                            `${day.type} · ${day.duration} min`
                         )
                     ) : (
                         "Odmor"
@@ -423,7 +423,7 @@ export function PlanTreninga() {
           <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-muted-foreground">
             <div className="text-xs text-muted-foreground mb-2">Dana odmora</div>
             <div className="text-3xl font-bold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {days.filter(d => d.vezbe.length === 0).length}
+              {days.filter(d => d.exercises.length === 0).length}
             </div>
           </div>
         </div>
