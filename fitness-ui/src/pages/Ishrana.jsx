@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { Spinner } from '../components/Spinner';
 
 export function Ishrana() {
   const [mealName, setMealName] = useState('');
@@ -258,9 +259,7 @@ export function Ishrana() {
 
           {/* Loading */}
           {loading && (
-            <div className="p-8 text-center text-sm text-muted-foreground">
-              Učitavanje...
-            </div>
+            <Spinner size="md" className="p-8" />
           )}
 
           {/* Meals Table */}

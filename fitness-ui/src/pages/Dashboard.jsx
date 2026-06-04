@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { Spinner } from '../components/Spinner';
 
 export function Dashboard() {
   const { user } = useAuth();
@@ -65,7 +66,7 @@ export function Dashboard() {
           </div>
           <div className="space-y-3">
             {loading ? (
-              <div className="text-center py-8 text-muted-foreground text-sm">Učitavanje...</div>
+              <Spinner size="md" className="py-8" />
             ) : todayExercises.length > 0 ? (
               todayExercises.map(ex => (
                 <div key={ex.id} className="flex justify-between items-start border-b border-border/50 pb-2">
@@ -108,7 +109,7 @@ export function Dashboard() {
             <h3 className="text-base font-normal">Dnevne kalorije</h3>
           </div>
           {loading ? (
-            <div className="text-center py-8 text-muted-foreground text-sm">Učitavanje...</div>
+            <Spinner size="md" className="py-8" />
           ) : todayMeals.length > 0 ? (
             <div className="space-y-4">
               {/* Total Summary */}
@@ -158,7 +159,7 @@ export function Dashboard() {
             <h3 className="text-base font-normal">Nedjeljne statistike</h3>
           </div>
           {loading ? (
-             <div className="text-center py-8 text-muted-foreground text-sm">Učitavanje...</div>
+             <Spinner size="md" className="py-8" />
           ) : stats ? (
             <div className="grid grid-cols-3 gap-4">
               <div className="text-center">

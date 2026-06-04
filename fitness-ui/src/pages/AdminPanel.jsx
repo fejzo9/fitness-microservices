@@ -1,5 +1,6 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/api';
+import { LoadingSpinner } from '../components/Spinner';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
 const inputCls = "w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all";
@@ -123,6 +124,10 @@ export function AdminPanel() {
   const getRoleBadge = (r) => { const n = (r || '').toUpperCase(); if (n === 'ADMIN') return { cls: 'bg-primary/15 text-primary border-primary/30', label: 'Admin' }; if (n === 'TRAINER') return { cls: 'bg-blue-900/40 text-blue-400 border-blue-800/50', label: 'Trener' }; return { cls: 'bg-secondary text-foreground border-border', label: r || 'Korisnik' }; };
   const getDiffBadge = (d) => { const v = (d || '').toLowerCase(); if (v === 'beginner') return { cls: 'bg-emerald-900/40 text-emerald-400 border-emerald-800/50', label: 'Po\u010detnik' }; if (v === 'intermediate') return { cls: 'bg-amber-900/40 text-amber-400 border-amber-800/50', label: 'Srednji' }; if (v === 'advanced') return { cls: 'bg-red-900/40 text-red-400 border-red-800/50', label: 'Napredni' }; return { cls: 'bg-secondary text-muted-foreground border-border', label: d || '\u2014' }; };
   const pageNums = (cur, tot) => { if (tot <= 5) return Array.from({ length: tot }, (_, i) => i); if (cur < 3) return [0,1,2,3,4]; if (cur > tot - 3) return [tot-5,tot-4,tot-3,tot-2,tot-1]; return [cur-2,cur-1,cur,cur+1,cur+2]; };
+
+  if (loading) {
+    return <LoadingSpinner message="Učitavanje admin panela..." size="xl" />;
+  }
 
   return (
     <>

@@ -13,46 +13,48 @@ import { TrenerPanel } from './pages/TrenerPanel'
 import { AdminPanel } from './pages/AdminPanel'
 import { Login } from './pages/Login'
 import { Register } from './pages/Register'
+import { LoadingSpinner } from './components/Spinner'
 import './styles/index.css'
 
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, loading } = useAuth();
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Učitavanje...</div>
+        <LoadingSpinner size="xl" />
       </div>
     );
   }
-  
+
   return isAuthenticated ? children : <Navigate to="/login" />;
 };
+
 const AdminRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Učitavanje...</div>
+        <LoadingSpinner size="xl" />
       </div>
     );
   }
-  
+
   return user?.roleName === 'ADMIN' ? children : <Navigate to="/" />;
 };
 
 const TrenerRoute = ({ children }) => {
   const { user, loading } = useAuth();
-  
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-muted-foreground">Učitavanje...</div>
+        <LoadingSpinner size="xl" />
       </div>
     );
   }
-  
+
   return (user?.roleName === 'ADMIN' || user?.roleName === 'TRENER') ? children : <Navigate to="/" />;
 };
 ReactDOM.createRoot(document.getElementById('root')).render(

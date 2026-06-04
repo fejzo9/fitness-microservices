@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { LoadingSpinner } from '../components/Spinner';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
 
@@ -132,7 +133,7 @@ export function TrenerPanel() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center h-40 text-muted-foreground">Učitavanje...</div>
+        <LoadingSpinner message="Učitavanje podataka..." size="lg" />
       ) : (
         <>
           {/* Clients */}

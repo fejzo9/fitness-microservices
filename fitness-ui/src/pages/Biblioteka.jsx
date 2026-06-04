@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
+import { LoadingSpinner } from '../components/Spinner';
 
 export function Biblioteka() {
   const [exercises, setExercises] = useState([]);
@@ -62,11 +63,7 @@ export function Biblioteka() {
   };
 
   if (loading) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-muted-foreground">Učitavanje vježbi...</div>
-      </div>
-    );
+    return <LoadingSpinner message="Učitavanje vježbi..." size="lg" />;
   }
 
   if (error) {
