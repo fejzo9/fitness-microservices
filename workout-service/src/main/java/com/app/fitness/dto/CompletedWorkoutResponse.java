@@ -14,7 +14,6 @@ public class CompletedWorkoutResponse {
 
     private Long id;
     private Long userId;
-    private Long workoutPlanId;
     private LocalDate date;
     private Integer durationMin;
 }

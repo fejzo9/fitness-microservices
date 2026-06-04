@@ -1,4 +1,4 @@
-package com.fitness.workoutservice.model;
+package com.app.fitness.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -8,13 +8,8 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.persistence.CascadeType;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
-import java.util.List;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
@@ -23,13 +18,13 @@ import lombok.Setter;
 import lombok.ToString;
 
 @Entity
-@Table(name = "workout_days")
+@Table(name = "completed_exercises")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class WorkoutDay {
+public class CompletedExercise {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -37,20 +32,19 @@ public class WorkoutDay {
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workout_plan_id", nullable = false)
+    @JoinColumn(name = "completed_workout_id", nullable = false)
     @ToString.Exclude
-    private WorkoutPlan workoutPlan;
-
-    @NotBlank
-    @Size(max = 50)
-    @Column(nullable = false, length = 50)
-    private String dayName;
+    private CompletedWorkout completedWorkout;
 
     @NotNull
-    @Column(nullable = false)
-    private Integer orderIndex;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "exercise_id", nullable = false)
+    @ToString.Exclude
+    private Exercise exercise;
 
-    @Builder.Default
-    @OneToMany(mappedBy = "workoutDay", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<WorkoutExercise> workoutExercises = new java.util.ArrayList<>();
+    @Column(name = "sets_done")
+    private Integer setsDone;
+
+    @Column(name = "reps_done")
+    private Integer repsDone;
 }

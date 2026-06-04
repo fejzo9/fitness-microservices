@@ -1,4 +1,39 @@
+import { useState, useEffect } from 'react';
+import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+
 export function Dashboard() {
+  const { user } = useAuth();
+  const [todayExercises, setTodayExercises] = useState([]);
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?.id) {
+      fetchDashboardData();
+    }
+  }, [user]);
+
+  const fetchDashboardData = async () => {
+    setLoading(true);
+    try {
+      const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY'];
+      const today = days[new Date().getDay()];
+      
+      const [ex, statistics] = await Promise.all([
+        api.getWorkoutExercisesByDay(user.id, today),
+        api.getWorkoutStatistics(user.id)
+      ]);
+      
+      setTodayExercises(ex || []);
+      setStats(statistics);
+    } catch (error) {
+      console.error("Error fetching dashboard data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="p-6 max-w-7xl mx-auto">
       {/* Page Title */}
@@ -27,9 +62,22 @@ export function Dashboard() {
             <h3 className="text-base font-normal">Današnji trening</h3>
           </div>
           <div className="space-y-3">
-            <div className="text-center py-8 text-muted-foreground text-sm">
-              Nema planiranih treninga za danas
-            </div>
+            {loading ? (
+              <div className="text-center py-8 text-muted-foreground text-sm">Učitavanje...</div>
+            ) : todayExercises.length > 0 ? (
+              todayExercises.map(ex => (
+                <div key={ex.id} className="flex justify-between items-center border-b border-border/50 pb-2">
+                  <span className={`text-sm ${ex.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
+                    {ex.exerciseName}
+                  </span>
+                  <span className="text-xs text-primary font-medium">{ex.sets}×{ex.reps}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                Nema planiranih treninga za danas
+              </div>
+            )}
           </div>
         </div>
 
@@ -51,9 +99,28 @@ export function Dashboard() {
           <div className="border-b border-border pb-3 mb-4">
             <h3 className="text-base font-normal">Nedeljne statistike</h3>
           </div>
-          <div className="text-center py-8 text-muted-foreground text-sm">
-            Nema podataka o nedeljnim statistikama
-          </div>
+          {loading ? (
+             <div className="text-center py-8 text-muted-foreground text-sm">Učitavanje...</div>
+          ) : stats ? (
+            <div className="grid grid-cols-3 gap-4">
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1">Ukupno vježbi</div>
+                <div className="text-xl font-bold text-primary">{stats.totalPlannedExercises}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1">Završeno</div>
+                <div className="text-xl font-bold text-emerald-400">{stats.totalCompletedExercises}</div>
+              </div>
+              <div className="text-center">
+                <div className="text-xs text-muted-foreground mb-1">Procenat</div>
+                <div className="text-xl font-bold text-blue-400">{stats.completionPercentage}%</div>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-8 text-muted-foreground text-sm">
+              Nema podataka o nedeljnim statistikama
+            </div>
+          )}
         </div>
 
         {/* Recent Activity Card */}

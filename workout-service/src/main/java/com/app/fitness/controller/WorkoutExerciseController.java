@@ -2,34 +2,20 @@ package com.app.fitness.controller;
 
 import com.app.fitness.dto.WorkoutExerciseRequest;
 import com.app.fitness.dto.WorkoutExerciseResponse;
+import com.app.fitness.dto.WorkoutWeeklyStatisticsResponse;
 import com.app.fitness.service.WorkoutExerciseService;
 import jakarta.validation.Valid;
+import java.time.DayOfWeek;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
- * REST controller for managing exercises assigned to a workout day.
+ * REST controller for managing workout exercises.
  *
  * <p>Base URL: /api/workout-exercises
- *
- * <p>Endpoints:
- * <ul>
- *   <li>GET    /api/workout-exercises         - Retrieve all workout exercises</li>
- *   <li>GET    /api/workout-exercises/{id}    - Retrieve a workout exercise by ID</li>
- *   <li>POST   /api/workout-exercises         - Assign an exercise to a workout day</li>
- *   <li>PUT    /api/workout-exercises/{id}    - Update an existing workout exercise</li>
- *   <li>DELETE /api/workout-exercises/{id}    - Remove an exercise from a workout day</li>
- * </ul>
  */
 @RestController
 @RequestMapping("/api/workout-exercises")
@@ -46,6 +32,23 @@ public class WorkoutExerciseController {
     @GetMapping("/{id}")
     public ResponseEntity<WorkoutExerciseResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(workoutExerciseService.findById(id));
+    }
+
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<WorkoutExerciseResponse>> getByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(workoutExerciseService.findByUserId(userId));
+    }
+
+    @GetMapping("/user/{userId}/day/{day}")
+    public ResponseEntity<List<WorkoutExerciseResponse>> getByUserIdAndDay(
+            @PathVariable Long userId,
+            @PathVariable DayOfWeek day) {
+        return ResponseEntity.ok(workoutExerciseService.findByUserIdAndDay(userId, day));
+    }
+
+    @GetMapping("/user/{userId}/statistics")
+    public ResponseEntity<WorkoutWeeklyStatisticsResponse> getWeeklyStatistics(@PathVariable Long userId) {
+        return ResponseEntity.ok(workoutExerciseService.getWeeklyStatistics(userId));
     }
 
     @PostMapping

@@ -9,11 +9,9 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class WorkoutPlanResponse {
-
-    private Long id;
+public class WorkoutWeeklyStatisticsResponse {
     private Long userId;
-    private String name;
-    private String description;
-    private Boolean isActive;
+    private Integer totalPlannedExercises;
+    private Integer totalCompletedExercises;
+    private Double completionPercentage;
 }

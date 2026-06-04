@@ -1,5 +1,7 @@
 package com.app.fitness.dto;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -12,8 +14,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WorkoutExerciseRequest {
 
-    @NotNull(message = "Workout day ID must not be null")
-    private Long workoutDayId;
+    @NotNull(message = "User ID must not be null")
+    private Long userId;
+
+    @NotNull(message = "Day of week must not be null")
+    private DayOfWeek dayOfWeek;
+
+    private LocalTime startTime;
+
+    private Boolean completed;
 
     @NotNull(message = "Exercise ID must not be null")
     private Long exerciseId;

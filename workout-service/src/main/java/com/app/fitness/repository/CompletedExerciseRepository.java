@@ -1,8 +1,8 @@
 package com.app.fitness.repository;
 
-import com.fitness.workoutservice.model.CompletedExercise;
-import com.fitness.workoutservice.model.CompletedWorkout;
-import com.fitness.workoutservice.model.Exercise;
+import com.app.fitness.model.CompletedExercise;
+import com.app.fitness.model.CompletedWorkout;
+import com.app.fitness.model.Exercise;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;

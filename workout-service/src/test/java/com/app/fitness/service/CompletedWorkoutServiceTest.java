@@ -8,7 +8,7 @@ import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.exception.ServiceUnavailableException;
 import com.app.fitness.mapper.CompletedWorkoutMapper;
 import com.app.fitness.repository.CompletedWorkoutRepository;
-import com.fitness.workoutservice.model.CompletedWorkout;
+import com.app.fitness.model.CompletedWorkout;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -51,7 +51,6 @@ class CompletedWorkoutServiceTest {
     void setUp() {
         request = CompletedWorkoutRequest.builder()
                 .userId(1L)
-                .workoutPlanId(10L)
                 .date(LocalDate.of(2026, 5, 14))
                 .durationMin(60)
                 .build();
@@ -61,7 +60,6 @@ class CompletedWorkoutServiceTest {
         response = CompletedWorkoutResponse.builder()
                 .id(1L)
                 .userId(1L)
-                .workoutPlanId(10L)
                 .date(LocalDate.of(2026, 5, 14))
                 .durationMin(60)
                 .build();

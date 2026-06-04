@@ -1,89 +1,44 @@
 import * as React from 'react';
+import { api } from '../services/api';
+import { useAuth } from '../contexts/AuthContext';
+
+const DAY_MAP = {
+  'MONDAY': 'pon',
+  'TUESDAY': 'uto',
+  'WEDNESDAY': 'sre',
+  'THURSDAY': 'cet',
+  'FRIDAY': 'pet',
+  'SATURDAY': 'sub',
+  'SUNDAY': 'ned'
+};
+
+const REV_DAY_MAP = {
+  'pon': 'MONDAY',
+  'uto': 'TUESDAY',
+  'sre': 'WEDNESDAY',
+  'cet': 'THURSDAY',
+  'pet': 'FRIDAY',
+  'sub': 'SATURDAY',
+  'ned': 'SUNDAY'
+};
+
+const INITIAL_DANI = [
+  { id: "pon", ime: "Ponedeljak", datum: "22.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
+  { id: "uto", ime: "Utorak", datum: "23.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
+  { id: "sre", ime: "Sreda", datum: "24.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
+  { id: "cet", ime: "Četvrtak", datum: "25.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
+  { id: "pet", ime: "Petak", datum: "26.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
+  { id: "sub", ime: "Subota", datum: "27.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] },
+  { id: "ned", ime: "Nedelja", datum: "28.03", tip: "Trening", trajanje: 0, aktivan: true, vezbe: [] }
+];
 
 export function PlanTreninga() {
+  const { user } = useAuth();
   // Stanje za dane i vežbe
-  const [dani, setDani] = React.useState([
-    {
-      id: "pon",
-      ime: "Ponedeljak",
-      datum: "22.03",
-      tip: "Snaga",
-      trajanje: 60,
-      aktivan: true,
-      vezbe: [
-        { id: 1, naziv: "Bench Press", detalji: "3×10" },
-        { id: 2, naziv: "Squats", detalji: "4×8" },
-        { id: 3, naziv: "Pull-ups", detalji: "3×12" }
-      ]
-    },
-    {
-      id: "uto",
-      ime: "Utorak",
-      datum: "23.03",
-      tip: "Kardio",
-      trajanje: 50,
-      aktivan: false,
-      vezbe: [
-        { id: 1, naziv: "Trčanje", detalji: "30 min" },
-        { id: 2, naziv: "Bicikl", detalji: "20 min" }
-      ]
-    },
-    {
-      id: "sre",
-      ime: "Sreda",
-      datum: "24.03",
-      tip: "Odmor",
-      trajanje: 0,
-      aktivan: false,
-      vezbe: []
-    },
-    {
-      id: "cet",
-      ime: "Četvrtak",
-      datum: "25.03",
-      tip: "Snaga",
-      trajanje: 55,
-      aktivan: true,
-      vezbe: [
-        { id: 1, naziv: "Deadlift", detalji: "3×8" },
-        { id: 2, naziv: "Shoulder Press", detalji: "3×10" },
-        { id: 3, naziv: "Rows", detalji: "3×12" }
-      ]
-    },
-    {
-      id: "pet",
-      ime: "Petak",
-      datum: "26.03",
-      tip: "Fleks.",
-      trajanje: 45,
-      aktivan: false,
-      vezbe: [
-        { id: 1, naziv: "Yoga", detalji: "45 min" }
-      ]
-    },
-    {
-      id: "sub",
-      ime: "Subota",
-      datum: "27.03",
-      tip: "Noge",
-      trajanje: 50,
-      aktivan: true,
-      vezbe: [
-        { id: 1, naziv: "Leg Press", detalji: "4×10" },
-        { id: 2, fontName: "Lunges", detalji: "3×12" }, // Ispravljen i sitan typo u ključu ako je postojao
-        { id: 3, naziv: "Calf Raises", detalji: "3×15" }
-      ]
-    },
-    {
-      id: "ned",
-      ime: "Nedelja",
-      datum: "28.03",
-      tip: "Odmor",
-      trajanje: 0,
-      aktivan: false,
-      vezbe: []
-    }
-  ]);
+  const [dani, setDani] = React.useState(INITIAL_DANI);
+  const [sveVezbe, setSveVezbe] = React.useState([]);
+  const [loading, setLoading] = React.useState(true);
+  const [stats, setStats] = React.useState(null);
 
   // Stanja za interfejs
   const [prikaziFormu, setPrikaziFormu] = React.useState(false);
@@ -91,59 +46,96 @@ export function PlanTreninga() {
 
   // Stanja za formu dodavanja
   const [izabraniDan, setIzabraniDan] = React.useState("pon");
-  const [nazivVezbe, setNazivVezbe] = React.useState("");
+  const [izabranaVezbaId, setIzabranaVezbaId] = React.useState("");
   const [detaljiVezbe, setDetaljiVezbe] = React.useState("");
   const [dodatnoTrajanje, setDodatnoTrajanje] = React.useState("0");
 
+  React.useEffect(() => {
+    if (user?.id) {
+      fetchData();
+    }
+  }, [user]);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      const [exercises, allEx, statistics] = await Promise.all([
+        api.getWorkoutExercises(user.id),
+        api.getExercises(0, 100),
+        api.getWorkoutStatistics(user.id)
+      ]);
+
+      setSveVezbe(allEx.content || []);
+      setStats(statistics);
+
+      // Mapiranje vežbi po danima
+      const noviDani = INITIAL_DANI.map(dan => {
+        const vezbeZaDan = exercises
+          .filter(ex => DAY_MAP[ex.dayOfWeek] === dan.id)
+          .map(ex => ({
+            id: ex.id,
+            naziv: ex.exerciseName,
+            detalji: `${ex.sets}×${ex.reps}`,
+            completed: ex.completed
+          }));
+        
+        return {
+          ...dan,
+          vezbe: vezbeZaDan,
+          trajanje: vezbeZaDan.length * 15, // Aproksimacija trajanja
+          tip: vezbeZaDan.length > 0 ? "Snaga" : "Odmor"
+        };
+      });
+
+      setDani(noviDani);
+    } catch (error) {
+      console.error("Error fetching workout data:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   // Funkcija za dodavanje vežbe
-  const handleDodajVezbu = (e) => {
+  const handleDodajVezbu = async (e) => {
     e.preventDefault();
-    if (!nazivVezbe.trim() || !detaljiVezbe.trim()) return;
+    if (!izabranaVezbaId || !detaljiVezbe.trim()) return;
 
-    setDani((prethodniDani) =>
-        prethodniDani.map((dan) => {
-          if (dan.id === izabraniDan) {
-            return {
-              ...dan,
-              tip: dan.tip === "Odmor" ? "Snaga" : dan.tip,
-              trajanje: dan.trajanje + Number(dodatnoTrajanje || 0),
-              vezbe: [
-                ...dan.vezbe,
-                {
-                  id: Date.now(),
-                  naziv: nazivVezbe,
-                  detalji: detaljiVezbe
-                }
-              ]
-            };
-          }
-          return dan;
-        })
-    );
+    const parts = detaljiVezbe.split(/[x×*]/i);
+    const sets = parseInt(parts[0]) || 3;
+    const reps = parseInt(parts[1]) || 10;
 
-    // Reset forme
-    setNazivVezbe("");
-    setDetaljiVezbe("");
-    setDodatnoTrajanje("0");
-    setPrikaziFormu(false);
+    const request = {
+      userId: user.id,
+      exerciseId: parseInt(izabranaVezbaId),
+      dayOfWeek: REV_DAY_MAP[izabraniDan],
+      sets: sets,
+      reps: reps,
+      startTime: "10:00:00", // Default
+      completed: false
+    };
+
+    try {
+      await api.createWorkoutExercise(request);
+      await fetchData(); // Osveži podatke
+      
+      // Reset forme
+      setIzabranaVezbaId("");
+      setDetaljiVezbe("");
+      setDodatnoTrajanje("0");
+      setPrikaziFormu(false);
+    } catch (error) {
+      console.error("Error creating workout exercise:", error);
+    }
   };
 
   // Funkcija za brisanje pojedinačne vežbe
-  const obrisiVezbu = (danId, vezbaId) => {
-    setDani((prethodniDani) =>
-        prethodniDani.map((dan) => {
-          if (dan.id === danId) {
-            const filtriraneVezbe = dan.vezbe.filter((v) => v.id !== vezbaId);
-            return {
-              ...dan,
-              vezbe: filtriraneVezbe,
-              tip: filtriraneVezbe.length === 0 ? "Odmor" : dan.tip,
-              trajanje: filtriraneVezbe.length === 0 ? 0 : Math.max(0, dan.trajanje - 15)
-            };
-          }
-          return dan;
-        })
-    );
+  const obrisiVezbu = async (danId, vezbaId) => {
+    try {
+      await api.deleteWorkoutExercise(vezbaId);
+      await fetchData();
+    } catch (error) {
+      console.error("Error deleting workout exercise:", error);
+    }
   };
 
   // Funkcija za promenu trajanja direktno u uređivanju
@@ -220,14 +212,17 @@ export function PlanTreninga() {
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1 font-medium">Naziv vežbe</label>
-                <input
-                    type="text"
-                    placeholder="npr. Bench Press"
-                    value={nazivVezbe}
-                    onChange={(e) => setNazivVezbe(e.target.value)}
+                <select
+                    value={izabranaVezbaId}
+                    onChange={(e) => setIzabranaVezbaId(e.target.value)}
                     className="w-full bg-secondary border border-border rounded p-2 text-sm text-foreground focus:outline-none focus:border-primary"
                     required
-                />
+                >
+                  <option value="">Izaberi vežbu</option>
+                  {sveVezbe.map(v => (
+                      <option key={v.id} value={v.id}>{v.name}</option>
+                  ))}
+                </select>
               </div>
               <div>
                 <label className="block text-xs text-muted-foreground mb-1 font-medium">Serije / Ponavljanja</label>
@@ -290,7 +285,9 @@ export function PlanTreninga() {
                           dan.vezbe.map((vezba) => (
                               <div key={vezba.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
                                 <div className="pr-4">
-                                  <div className="text-xs font-medium text-foreground">{vezba.naziv || 'Vežba'}</div>
+                                  <div className={`text-xs font-medium ${vezba.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
+                                    {vezba.naziv || 'Vežba'} {vezba.completed && '✓'}
+                                  </div>
                                   <div className="text-xs text-primary font-semibold mt-0.5">{vezba.detalji}</div>
                                 </div>
 
@@ -347,25 +344,25 @@ export function PlanTreninga() {
           <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-primary">
             <div className="text-xs text-muted-foreground mb-2">Ukupno treninga</div>
             <div className="text-3xl font-bold text-primary" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {ukupnoTreninga}
+              {stats?.totalPlannedExercises || 0}
             </div>
           </div>
           <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-emerald-500">
-            <div className="text-xs text-muted-foreground mb-2">Ukupno vreme</div>
+            <div className="text-xs text-muted-foreground mb-2">Završeno</div>
             <div className="text-3xl font-bold text-emerald-400" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {ukupnoVreme} min
+              {stats?.totalCompletedExercises || 0}
             </div>
           </div>
           <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-blue-500">
-            <div className="text-xs text-muted-foreground mb-2">Prosečno trajanje</div>
+            <div className="text-xs text-muted-foreground mb-2">Procenat</div>
             <div className="text-3xl font-bold text-blue-400" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {prosecnoTrajanje} min
+              {stats?.completionPercentage || 0}%
             </div>
           </div>
           <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-muted-foreground">
             <div className="text-xs text-muted-foreground mb-2">Dana odmora</div>
             <div className="text-3xl font-bold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {danaOdmora}
+              {dani.filter(d => d.vezbe.length === 0).length}
             </div>
           </div>
         </div>

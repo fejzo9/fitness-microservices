@@ -4,7 +4,7 @@ import com.app.fitness.config.RabbitMQConfig;
 import com.app.fitness.event.UserDeletionEvent;
 import com.app.fitness.event.UserDeletionResponseEvent;
 import com.app.fitness.repository.CompletedWorkoutRepository;
-import com.app.fitness.repository.WorkoutPlanRepository;
+import com.app.fitness.repository.WorkoutExerciseRepository;
 import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class UserDeletionListener {
 
     private final CompletedWorkoutRepository completedWorkoutRepository;
-    private final WorkoutPlanRepository workoutPlanRepository;
+    private final WorkoutExerciseRepository workoutExerciseRepository;
     private final RabbitTemplate rabbitTemplate;
     private final EntityManager entityManager;
 
@@ -32,7 +32,7 @@ public class UserDeletionListener {
             if (event.getType() == UserDeletionEvent.Type.START) {
                 // Lokalna transakcija
                 completedWorkoutRepository.deleteByUserId(event.getUserId());
-                workoutPlanRepository.deleteByUserId(event.getUserId());
+                workoutExerciseRepository.deleteByUserId(event.getUserId());
                 
                 // Osiguraj da se SQL izvrši unutar try-catch bloka
                 entityManager.flush();

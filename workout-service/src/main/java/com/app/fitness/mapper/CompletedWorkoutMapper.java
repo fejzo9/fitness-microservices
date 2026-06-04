@@ -2,7 +2,7 @@ package com.app.fitness.mapper;
 
 import com.app.fitness.dto.CompletedWorkoutRequest;
 import com.app.fitness.dto.CompletedWorkoutResponse;
-import com.fitness.workoutservice.model.CompletedWorkout;
+import com.app.fitness.model.CompletedWorkout;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.MappingTarget;

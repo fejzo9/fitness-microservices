@@ -1,9 +1,9 @@
 const API_BASE = {
-  auth: 'http://localhost:8080/auth',
-  user: 'http://localhost:8080/users',
-  nutrition: 'http://localhost:8080/nutrition',
-  workout: 'http://localhost:8080/workouts',
-  notification: 'http://localhost:8080/notifications',
+  auth: '/auth',
+  user: '/users',
+  nutrition: '/nutrition',
+  workout: '/workouts',
+  notification: '/notifications',
 };
 
 const getAuthHeader = () => {
@@ -115,21 +115,12 @@ export const api = {
   createExerciseCategoryMap: (data) => requestJson(`${API_BASE.workout}/exercise-category-maps`, 'POST', data),
   deleteExerciseCategoryMap: (id) => request(`${API_BASE.workout}/exercise-category-maps/${id}`, { method: 'DELETE' }),
 
-  getWorkoutPlans: (userId) => {
-    if (!userId) return request(`${API_BASE.workout}/workout-plans`);
-    if (userId === 'undefined' || userId === 'null') return Promise.resolve([]);
-    return request(`${API_BASE.workout}/workout-plans/user/${userId}`);
+  getWorkoutExercises: (userId = null) => {
+    if (userId) return request(`${API_BASE.workout}/workout-exercises/user/${userId}`);
+    return request(`${API_BASE.workout}/workout-exercises`);
   },
-  createWorkoutPlan: (data) => requestJson(`${API_BASE.workout}/workout-plans`, 'POST', data),
-  updateWorkoutPlan: (id, data) => requestJson(`${API_BASE.workout}/workout-plans/${id}`, 'PUT', data),
-  deleteWorkoutPlan: (id) => request(`${API_BASE.workout}/workout-plans/${id}`, { method: 'DELETE' }),
-
-  getWorkoutDays: () => request(`${API_BASE.workout}/workout-days`),
-  createWorkoutDay: (data) => requestJson(`${API_BASE.workout}/workout-days`, 'POST', data),
-  updateWorkoutDay: (id, data) => requestJson(`${API_BASE.workout}/workout-days/${id}`, 'PUT', data),
-  deleteWorkoutDay: (id) => request(`${API_BASE.workout}/workout-days/${id}`, { method: 'DELETE' }),
-
-  getWorkoutExercises: () => request(`${API_BASE.workout}/workout-exercises`),
+  getWorkoutExercisesByDay: (userId, day) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/day/${day}`),
+  getWorkoutStatistics: (userId) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/statistics`),
   createWorkoutExercise: (data) => requestJson(`${API_BASE.workout}/workout-exercises`, 'POST', data),
   updateWorkoutExercise: (id, data) => requestJson(`${API_BASE.workout}/workout-exercises/${id}`, 'PUT', data),
   deleteWorkoutExercise: (id) => request(`${API_BASE.workout}/workout-exercises/${id}`, { method: 'DELETE' }),

@@ -1,6 +1,6 @@
 package com.app.fitness.repository;
 
-import com.fitness.workoutservice.model.ExerciseCategory;
+import com.app.fitness.model.ExerciseCategory;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;

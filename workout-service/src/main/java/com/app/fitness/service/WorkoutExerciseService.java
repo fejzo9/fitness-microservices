@@ -2,15 +2,15 @@ package com.app.fitness.service;
 
 import com.app.fitness.dto.WorkoutExerciseRequest;
 import com.app.fitness.dto.WorkoutExerciseResponse;
+import com.app.fitness.dto.WorkoutWeeklyStatisticsResponse;
 import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.mapper.WorkoutExerciseMapper;
 import com.app.fitness.repository.ExerciseRepository;
-import com.app.fitness.repository.WorkoutDayRepository;
 import com.app.fitness.repository.WorkoutExerciseRepository;
-import com.fitness.workoutservice.model.Exercise;
-import com.fitness.workoutservice.model.WorkoutDay;
-import com.fitness.workoutservice.model.WorkoutExercise;
+import com.app.fitness.model.Exercise;
+import com.app.fitness.model.WorkoutExercise;
+import java.time.DayOfWeek;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,13 +21,26 @@ import org.springframework.transaction.annotation.Transactional;
 public class WorkoutExerciseService {
 
     private final WorkoutExerciseRepository workoutExerciseRepository;
-    private final WorkoutDayRepository workoutDayRepository;
     private final ExerciseRepository exerciseRepository;
     private final WorkoutExerciseMapper workoutExerciseMapper;
 
     @Transactional(readOnly = true)
     public List<WorkoutExerciseResponse> findAll() {
         return workoutExerciseRepository.findAll().stream()
+                .map(workoutExerciseMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkoutExerciseResponse> findByUserId(Long userId) {
+        return workoutExerciseRepository.findByUserId(userId).stream()
+                .map(workoutExerciseMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<WorkoutExerciseResponse> findByUserIdAndDay(Long userId, DayOfWeek day) {
+        return workoutExerciseRepository.findByUserIdAndDayOfWeek(userId, day).stream()
                 .map(workoutExerciseMapper::toResponse)
                 .toList();
     }
@@ -41,18 +54,15 @@ public class WorkoutExerciseService {
 
     @Transactional
     public WorkoutExerciseResponse create(WorkoutExerciseRequest request) {
-        WorkoutDay day = workoutDayRepository.findById(request.getWorkoutDayId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Workout day not found with id: " + request.getWorkoutDayId()));
         Exercise exercise = exerciseRepository.findById(request.getExerciseId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Exercise not found with id: " + request.getExerciseId()));
-        if (workoutExerciseRepository.existsByWorkoutDayAndExercise(day, exercise)) {
+        if (workoutExerciseRepository.existsByUserIdAndDayOfWeekAndExercise(
+                request.getUserId(), request.getDayOfWeek(), exercise)) {
             throw new DuplicateResourceException(
-                    "Exercise already assigned to this workout day");
+                    "Exercise already assigned to this user on this day");
         }
         WorkoutExercise workoutExercise = workoutExerciseMapper.toEntity(request);
-        workoutExercise.setWorkoutDay(day);
         workoutExercise.setExercise(exercise);
         return workoutExerciseMapper.toResponse(workoutExerciseRepository.save(workoutExercise));
     }
@@ -61,16 +71,28 @@ public class WorkoutExerciseService {
     public WorkoutExerciseResponse update(Long id, WorkoutExerciseRequest request) {
         WorkoutExercise workoutExercise = workoutExerciseRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Workout exercise not found with id: " + id));
-        WorkoutDay day = workoutDayRepository.findById(request.getWorkoutDayId())
-                .orElseThrow(() -> new ResourceNotFoundException(
-                        "Workout day not found with id: " + request.getWorkoutDayId()));
         Exercise exercise = exerciseRepository.findById(request.getExerciseId())
                 .orElseThrow(() -> new ResourceNotFoundException(
                         "Exercise not found with id: " + request.getExerciseId()));
         workoutExerciseMapper.updateEntity(request, workoutExercise);
-        workoutExercise.setWorkoutDay(day);
         workoutExercise.setExercise(exercise);
         return workoutExerciseMapper.toResponse(workoutExerciseRepository.save(workoutExercise));
+    }
+
+    @Transactional(readOnly = true)
+    public WorkoutWeeklyStatisticsResponse getWeeklyStatistics(Long userId) {
+        List<WorkoutExercise> exercises = workoutExerciseRepository.findByUserId(userId);
+        int total = exercises.size();
+        long completed = exercises.stream()
+                .filter(ex -> Boolean.TRUE.equals(ex.getCompleted()))
+                .count();
+        double percentage = total > 0 ? (double) completed / total * 100 : 0.0;
+        return WorkoutWeeklyStatisticsResponse.builder()
+                .userId(userId)
+                .totalPlannedExercises(total)
+                .totalCompletedExercises((int) completed)
+                .completionPercentage(percentage)
+                .build();
     }
 
     @Transactional

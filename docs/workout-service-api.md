@@ -1,7 +1,7 @@
 # Workout Service API
 
 ## Svrha servisa
-`workout-service` upravlja katalogom vjezbi, kategorijama, planovima treninga, rasporedom dana i evidencijom odradenih treninga. Servis takoder sadrzi pomocne endpoint-e za load testing i health provjeru instance.
+`workout-service` upravlja katalogom vjezbi, kategorijama, vjezbama za treninge korisnika i evidencijom odradenih treninga. Servis takoder sadrzi pomocne endpoint-e za load testing i health provjeru instance.
 
 ## Base URL
 `http://localhost:8083` kada se servis pokrece kroz `docker-compose`.
@@ -41,35 +41,16 @@ Napomena: unutar samog servisa je konfiguriran `server.port=8081`, pa je standal
 | POST | `/api/exercise-category-maps` | Kreira novu vezu izmedu vjezbe i kategorije. |
 | DELETE | `/api/exercise-category-maps/{id}` | Brise vezu. Vraca `204 No Content`. |
 
-### Workout Plans
-
-| Method | Path | Opis |
-| --- | --- | --- |
-| GET | `/api/workout-plans` | Vraca sve planove treninga. |
-| GET | `/api/workout-plans/user/{userId}` | Vraca sve planove za korisnika. |
-| GET | `/api/workout-plans/{id}` | Vraca plan treninga po ID-u. |
-| POST | `/api/workout-plans` | Kreira novi plan treninga. |
-| PUT | `/api/workout-plans/{id}` | Azurira postojeci plan treninga. |
-| DELETE | `/api/workout-plans/{id}` | Brise plan treninga. Vraca `204 No Content`. |
-
-### Workout Days
-
-| Method | Path | Opis |
-| --- | --- | --- |
-| GET | `/api/workout-days` | Vraca sve dane treninga. |
-| GET | `/api/workout-days/plan/{workoutPlanId}` | Vraca dane za odredeni plan treninga. |
-| GET | `/api/workout-days/{id}` | Vraca dan treninga po ID-u. |
-| POST | `/api/workout-days` | Kreira novi dan treninga. `workoutPlanId` je obavezan. |
-| PUT | `/api/workout-days/{id}` | Azurira postojeci dan treninga. |
-| DELETE | `/api/workout-days/{id}` | Brise dan treninga. Vraca `204 No Content`. |
-
 ### Workout Exercises
 
 | Method | Path | Opis |
 | --- | --- | --- |
-| GET | `/api/workout-exercises` | Vraca sve vjezbe dodijeljene danima treninga. |
+| GET | `/api/workout-exercises` | Vraca sve vjezbe dodijeljene korisnicima. |
 | GET | `/api/workout-exercises/{id}` | Vraca workout exercise po ID-u. |
-| POST | `/api/workout-exercises` | Dodjeljuje vjezbu danu treninga. |
+| GET | `/api/workout-exercises/user/{userId}` | Vraca sve vjezbe za korisnika. |
+| GET | `/api/workout-exercises/user/{userId}/day/{day}` | Vraca vjezbe za korisnika za odredeni dan (npr. `MONDAY`). |
+| GET | `/api/workout-exercises/user/{userId}/statistics` | Vraca nedjeljnu statistiku za korisnika. |
+| POST | `/api/workout-exercises` | Dodjeljuje vjezbu korisniku. |
 | PUT | `/api/workout-exercises/{id}` | Azurira workout exercise zapis. |
 | DELETE | `/api/workout-exercises/{id}` | Brise workout exercise zapis. Vraca `204 No Content`. |
 
@@ -201,17 +182,9 @@ Response `400 Bad Request`:
 | `ExerciseCategoryRequest` | `name` je obavezan, ne smije biti prazan, max `100` znakova. |
 | `ExerciseCategoryRequest` | `description` je opcionalan string. |
 | `ExerciseCategoryMapRequest` | `exerciseId` i `categoryId` su obavezni `Long` ID-evi. |
-| `WorkoutPlanRequest` | `userId` je obavezan `Long`. |
-| `WorkoutPlanRequest` | `name` je obavezan, ne smije biti prazan, max `150` znakova. |
-| `WorkoutPlanRequest` | `description` je opcionalan string. |
-| `WorkoutPlanRequest` | `isActive` je obavezan `Boolean`. |
-| `WorkoutDayRequest` | `workoutPlanId` je obavezan `Long`. |
-| `WorkoutDayRequest` | `dayName` je obavezan, ne smije biti prazan, max `50` znakova. |
-| `WorkoutDayRequest` | `orderIndex` je obavezan `Integer`. |
-| `WorkoutExerciseRequest` | `workoutDayId` i `exerciseId` su obavezni `Long` ID-evi. |
+| `WorkoutExerciseRequest` | `userId`, `dayOfWeek` i `exerciseId` su obavezni. |
 | `WorkoutExerciseRequest` | `sets`, `reps` i `restSec` su opcionalni `Integer`. |
 | `CompletedWorkoutRequest` | `userId` je obavezan `Long`. |
-| `CompletedWorkoutRequest` | `workoutPlanId` je opcionalan `Long`. |
 | `CompletedWorkoutRequest` | `date` je obavezan `LocalDate` u ISO formatu `yyyy-MM-dd`. |
 | `CompletedWorkoutRequest` | `durationMin` je opcionalan `Integer`. |
 | `CompletedExerciseRequest` | `completedWorkoutId` i `exerciseId` su obavezni `Long` ID-evi. |

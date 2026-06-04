@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 @SpringBootApplication
 @EnableFeignClients
-@EntityScan(basePackages = "com.fitness.workoutservice.model")
+@EntityScan(basePackages = "com.app.fitness.model")
 @EnableJpaRepositories(basePackages = "com.app.fitness.repository")
 @EnableDiscoveryClient
 public class FitnessApplication {

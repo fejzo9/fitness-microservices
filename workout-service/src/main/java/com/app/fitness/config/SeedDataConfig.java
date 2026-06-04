@@ -4,17 +4,15 @@ import com.app.fitness.repository.CompletedExerciseRepository;
 import com.app.fitness.repository.CompletedWorkoutRepository;
 import com.app.fitness.repository.ExerciseCategoryRepository;
 import com.app.fitness.repository.ExerciseRepository;
-import com.app.fitness.repository.WorkoutDayRepository;
 import com.app.fitness.repository.WorkoutExerciseRepository;
-import com.app.fitness.repository.WorkoutPlanRepository;
-import com.fitness.workoutservice.model.CompletedExercise;
-import com.fitness.workoutservice.model.CompletedWorkout;
-import com.fitness.workoutservice.model.Exercise;
-import com.fitness.workoutservice.model.ExerciseCategory;
-import com.fitness.workoutservice.model.WorkoutDay;
-import com.fitness.workoutservice.model.WorkoutExercise;
-import com.fitness.workoutservice.model.WorkoutPlan;
+import com.app.fitness.model.CompletedExercise;
+import com.app.fitness.model.CompletedWorkout;
+import com.app.fitness.model.Exercise;
+import com.app.fitness.model.ExerciseCategory;
+import com.app.fitness.model.WorkoutExercise;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -26,8 +24,6 @@ public class SeedDataConfig {
     CommandLineRunner seedWorkoutData(
             ExerciseCategoryRepository exerciseCategoryRepository,
             ExerciseRepository exerciseRepository,
-            WorkoutPlanRepository workoutPlanRepository,
-            WorkoutDayRepository workoutDayRepository,
             WorkoutExerciseRepository workoutExerciseRepository,
             CompletedWorkoutRepository completedWorkoutRepository,
             CompletedExerciseRepository completedExerciseRepository) {
@@ -67,84 +63,90 @@ public class SeedDataConfig {
             mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Running", "Cardio");
             mapExerciseToCategoryIfMissing(exerciseRepository, exerciseCategoryRepository, "Jump Rope", "Cardio");
 
-            WorkoutPlan plan = createPlanIfMissing(workoutPlanRepository);
-
-            createWorkoutDayIfMissing(workoutDayRepository, plan, "Monday", 1);
-            createWorkoutDayIfMissing(workoutDayRepository, plan, "Wednesday", 2);
-            createWorkoutDayIfMissing(workoutDayRepository, plan, "Friday", 3);
+            Long testUserId = 1L;
 
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
-                    workoutDayRepository,
                     exerciseRepository,
-                    plan,
-                    "Monday",
+                    testUserId,
+                    DayOfWeek.MONDAY,
+                    LocalTime.of(8, 0),
                     "Bench Press",
                     4,
                     10,
                     90);
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
-                    workoutDayRepository,
                     exerciseRepository,
-                    plan,
-                    "Monday",
+                    testUserId,
+                    DayOfWeek.MONDAY,
+                    LocalTime.of(8, 45),
                     "Push Up",
                     3,
                     15,
                     60);
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
-                    workoutDayRepository,
                     exerciseRepository,
-                    plan,
-                    "Wednesday",
+                    testUserId,
+                    DayOfWeek.WEDNESDAY,
+                    LocalTime.of(17, 0),
                     "Pull Up",
                     3,
                     8,
                     90);
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
-                    workoutDayRepository,
                     exerciseRepository,
-                    plan,
-                    "Wednesday",
+                    testUserId,
+                    DayOfWeek.WEDNESDAY,
+                    LocalTime.of(17, 30),
                     "Barbell Row",
                     4,
                     10,
                     90);
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
-                    workoutDayRepository,
                     exerciseRepository,
-                    plan,
-                    "Friday",
+                    testUserId,
+                    DayOfWeek.THURSDAY,
+                    LocalTime.of(10, 0),
+                    "Running",
+                    1,
+                    1,
+                    0);
+            addWorkoutExerciseIfMissing(
+                    workoutExerciseRepository,
+                    exerciseRepository,
+                    testUserId,
+                    DayOfWeek.FRIDAY,
+                    LocalTime.of(18, 0),
                     "Squat",
                     4,
                     12,
                     120);
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
-                    workoutDayRepository,
                     exerciseRepository,
-                    plan,
-                    "Friday",
+                    testUserId,
+                    DayOfWeek.FRIDAY,
+                    LocalTime.of(18, 45),
                     "Lunges",
                     3,
                     12,
                     60);
             addWorkoutExerciseIfMissing(
                     workoutExerciseRepository,
-                    workoutDayRepository,
                     exerciseRepository,
-                    plan,
-                    "Friday",
+                    testUserId,
+                    DayOfWeek.FRIDAY,
+                    LocalTime.of(19, 15),
                     "Jump Rope",
                     1,
                     1,
                     30);
 
-            CompletedWorkout completedWorkout = createCompletedWorkoutIfMissing(completedWorkoutRepository, plan.getId());
+            CompletedWorkout completedWorkout = createCompletedWorkoutIfMissing(completedWorkoutRepository, testUserId);
 
             createCompletedExerciseIfMissing(completedExerciseRepository, exerciseRepository, completedWorkout, "Bench Press", 4, 10);
             createCompletedExerciseIfMissing(completedExerciseRepository, exerciseRepository, completedWorkout, "Push Up", 3, 15);
@@ -191,82 +193,49 @@ public class SeedDataConfig {
         }
     }
 
-    private WorkoutPlan createPlanIfMissing(WorkoutPlanRepository repository) {
-        Long userId = 3L;
-        String planName = "Beginner Strength Plan";
-
-        if (!repository.existsByUserIdAndName(userId, planName)) {
-            repository.save(WorkoutPlan.builder()
-                    .userId(userId)
-                    .name(planName)
-                    .description("Weekly beginner workout plan")
-                    .isActive(true)
-                    .build());
-        }
-
-        return repository.findFirstByUserIdAndName(userId, planName)
-                .orElseThrow(() -> new IllegalStateException("Workout plan not found"));
-    }
-
-    private void createWorkoutDayIfMissing(
-            WorkoutDayRepository repository,
-            WorkoutPlan workoutPlan,
-            String dayName,
-            int orderIndex) {
-
-        if (!repository.existsByWorkoutPlanAndDayName(workoutPlan, dayName)) {
-            repository.save(WorkoutDay.builder()
-                    .workoutPlan(workoutPlan)
-                    .dayName(dayName)
-                    .orderIndex(orderIndex)
-                    .build());
-        }
-    }
-
     private void addWorkoutExerciseIfMissing(
             WorkoutExerciseRepository workoutExerciseRepository,
-            WorkoutDayRepository workoutDayRepository,
             ExerciseRepository exerciseRepository,
-            WorkoutPlan plan,
-            String dayName,
+            Long userId,
+            DayOfWeek dayOfWeek,
+            LocalTime startTime,
             String exerciseName,
             int sets,
             int reps,
             int restSec) {
 
-        WorkoutDay workoutDay = workoutDayRepository.findFirstByWorkoutPlanAndDayName(plan, dayName)
-                .orElseThrow(() -> new IllegalStateException("Workout day not found: " + dayName));
         Exercise exercise = exerciseRepository.findFirstByName(exerciseName)
                 .orElseThrow(() -> new IllegalStateException("Exercise not found: " + exerciseName));
 
-        if (!workoutExerciseRepository.existsByWorkoutDayAndExercise(workoutDay, exercise)) {
+        if (!workoutExerciseRepository.existsByUserIdAndDayOfWeekAndExercise(userId, dayOfWeek, exercise)) {
             workoutExerciseRepository.save(WorkoutExercise.builder()
-                    .workoutDay(workoutDay)
+                    .userId(userId)
+                    .dayOfWeek(dayOfWeek)
+                    .startTime(startTime)
                     .exercise(exercise)
                     .sets(sets)
                     .reps(reps)
                     .restSec(restSec)
+                    .completed(false)
                     .build());
         }
     }
 
     private CompletedWorkout createCompletedWorkoutIfMissing(
             CompletedWorkoutRepository repository,
-            Long workoutPlanId) {
+            Long userId) {
 
-        Long userId = 3L;
         LocalDate date = LocalDate.parse("2026-04-10");
 
-        if (!repository.existsByUserIdAndWorkoutPlanIdAndDate(userId, workoutPlanId, date)) {
+        if (!repository.existsByUserIdAndDate(userId, date)) {
             repository.save(CompletedWorkout.builder()
                     .userId(userId)
-                    .workoutPlanId(workoutPlanId)
                     .date(date)
                     .durationMin(65)
                     .build());
         }
 
-        return repository.findFirstByUserIdAndWorkoutPlanIdAndDate(userId, workoutPlanId, date)
+        return repository.findByUserIdAndDate(userId, date)
                 .orElseThrow(() -> new IllegalStateException("Completed workout not found"));
     }
 

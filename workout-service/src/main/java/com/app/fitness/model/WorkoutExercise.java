@@ -1,7 +1,11 @@
-package com.fitness.workoutservice.model;
+package com.app.fitness.model;
 
+import java.time.DayOfWeek;
+import java.time.LocalTime;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -30,11 +34,19 @@ public class WorkoutExercise {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "workout_day_id", nullable = false)
-    @ToString.Exclude
-    private WorkoutDay workoutDay;
+    @Column(name = "user_id")
+    private Long userId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "day_of_week")
+    private DayOfWeek dayOfWeek;
+
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @Builder.Default
+    @Column(name = "completed")
+    private Boolean completed = false;
 
     @NotNull
     @ManyToOne(fetch = FetchType.LAZY)
@@ -42,12 +54,16 @@ public class WorkoutExercise {
     @ToString.Exclude
     private Exercise exercise;
 
-    @Column
+    @Column(name = "sets")
     private Integer sets;
 
-    @Column
+    @Column(name = "reps")
     private Integer reps;
 
-    @Column
+    @Column(name = "rest_sec")
     private Integer restSec;
+
+    // Privremeno polje kako bi Hibernate uklonio NOT NULL ograničenje sa stare kolone
+    @Column(name = "workout_day_id", nullable = true)
+    private Long workoutDayId;
 }

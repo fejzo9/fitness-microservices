@@ -157,18 +157,13 @@ Each service exposes a full CRUD REST API. All responses use JSON. Validation er
 | GET | `/api/exercise-category-maps` | List all exercise-category mappings |
 | POST | `/api/exercise-category-maps` | Create mapping |
 | DELETE | `/api/exercise-category-maps/{id}` | Delete mapping |
-| GET | `/api/workout-plans` | List all workout plans |
-| POST | `/api/workout-plans` | Create workout plan |
-| PUT | `/api/workout-plans/{id}` | Update workout plan |
-| DELETE | `/api/workout-plans/{id}` | Delete workout plan |
-| GET | `/api/workout-days` | List all workout days |
-| POST | `/api/workout-days` | Create workout day (requires `workoutPlanId`) |
-| PUT | `/api/workout-days/{id}` | Update workout day |
-| DELETE | `/api/workout-days/{id}` | Delete workout day |
 | GET | `/api/workout-exercises` | List all workout exercises |
-| POST | `/api/workout-exercises` | Assign exercise to workout day |
+| GET | `/api/workout-exercises/user/{userId}` | List exercises for specific user |
+| GET | `/api/workout-exercises/user/{userId}/day/{day}` | List exercises for user on specific day |
+| GET | `/api/workout-exercises/user/{userId}/statistics` | Get weekly statistics for user |
+| POST | `/api/workout-exercises` | Create a workout exercise |
 | PUT | `/api/workout-exercises/{id}` | Update workout exercise |
-| DELETE | `/api/workout-exercises/{id}` | Remove exercise from day |
+| DELETE | `/api/workout-exercises/{id}` | Remove exercise |
 | GET | `/api/completed-workouts` | List all completed workouts |
 | POST | `/api/completed-workouts` | Log a completed workout |
 | PUT | `/api/completed-workouts/{id}` | Update completed workout |
@@ -236,8 +231,6 @@ The same approach applies to `auth-service`, `notification-service`, `nutrition-
 - `ProgressEntry`
 
 ### workout-service
-- `WorkoutPlan`
-- `WorkoutDay`
 - `WorkoutExercise`
 - `Exercise`
 - `ExerciseCategory`

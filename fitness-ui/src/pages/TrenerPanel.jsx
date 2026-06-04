@@ -45,16 +45,12 @@ export function TrenerPanel() {
   const fetchAll = async () => {
     setLoading(true);
     try {
-      const [tc, notifs, plans, days] = await Promise.all([
+      const [tc, notifs] = await Promise.all([
         api.getTrainerClients(),
         api.getNotifications(),
-        api.getWorkoutPlans(),
-        api.getWorkoutDays(),
       ]);
       setTrainerClients(tc || []);
       setNotifications(notifs || []);
-      setWorkoutPlans(plans || []);
-      setWorkoutDays(days || []);
     } catch {
       setError('Greška pri učitavanju podataka');
     } finally {
@@ -75,12 +71,6 @@ export function TrenerPanel() {
       } else if (modal.type === 'notification') {
         if (modal.data) await api.updateNotification(modal.data.id, form);
         else await api.createNotification(form);
-      } else if (modal.type === 'plan') {
-        if (modal.data) await api.updateWorkoutPlan(modal.data.id, form);
-        else await api.createWorkoutPlan(form);
-      } else if (modal.type === 'day') {
-        if (modal.data) await api.updateWorkoutDay(modal.data.id, form);
-        else await api.createWorkoutDay(form);
       }
       await fetchAll();
       closeModal();
@@ -93,8 +83,6 @@ export function TrenerPanel() {
     try {
       if (type === 'client') await api.deleteTrainerClient(id);
       else if (type === 'notification') await api.deleteNotification(id);
-      else if (type === 'plan') await api.deleteWorkoutPlan(id);
-      else if (type === 'day') await api.deleteWorkoutDay(id);
       await fetchAll();
     } catch { alert('Greška pri brisanju'); }
   };
@@ -103,8 +91,6 @@ export function TrenerPanel() {
 
   const TABS = [
     ['clients', 'Klijenti', trainerClients.length],
-    ['plans', 'Planovi treninga', workoutPlans.length],
-    ['days', 'Dani treninga', workoutDays.length],
     ['notifications', 'Obavijesti', notifications.length],
   ];
 
@@ -120,7 +106,7 @@ export function TrenerPanel() {
       </div>
 
       {/* Stats row */}
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-4 mb-6">
         {TABS.map(([, label, count]) => (
           <div key={label} className="bg-card border border-border rounded-lg p-4 text-center">
             <div className="text-xs text-muted-foreground mb-1">{label}</div>
@@ -201,85 +187,6 @@ export function TrenerPanel() {
             </>
           )}
 
-          {/* Workout Plans */}
-          {activeTab === 'plans' && (
-            <>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-muted-foreground">{workoutPlans.length} planova</span>
-                <button type="button" onClick={() => openModal('plan')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
-                  + Novi plan
-                </button>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                {workoutPlans.length === 0 && (
-                  <div className="col-span-2 bg-card border border-border rounded-lg p-8 text-center text-muted-foreground text-sm">Nema planova treninga.</div>
-                )}
-                {workoutPlans.map((plan) => (
-                  <div key={plan.id} className="bg-card border border-border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="font-semibold text-foreground" style={BARLOW}>{plan.name || `Plan #${plan.id}`}</div>
-                      <span className="text-xs text-muted-foreground">#{plan.id}</span>
-                    </div>
-                    {plan.description && <p className="text-xs text-muted-foreground mb-3">{plan.description}</p>}
-                    <div className="text-xs text-muted-foreground mb-3">
-                      {plan.userId && <span>Korisnik: #{plan.userId}</span>}
-                    </div>
-                    <div className="flex gap-2">
-                      <button type="button" onClick={() => openModal('plan', plan)} className="bg-secondary border border-border text-foreground px-3 py-1.5 text-xs rounded hover:bg-secondary/80">Uredi</button>
-                      <button type="button" onClick={() => handleDelete('plan', plan.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-3 py-1.5 text-xs rounded hover:bg-destructive/20">Obriši</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </>
-          )}
-
-          {/* Workout Days */}
-          {activeTab === 'days' && (
-            <>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-sm text-muted-foreground">{workoutDays.length} dana treninga</span>
-                <button type="button" onClick={() => openModal('day')} className="bg-primary text-white px-4 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
-                  + Novi dan
-                </button>
-              </div>
-              <div className="bg-card border border-border rounded-lg overflow-hidden">
-                {workoutDays.length === 0 && (
-                  <div className="p-8 text-center text-muted-foreground text-sm">Nema definisanih dana treninga.</div>
-                )}
-                {workoutDays.length > 0 && (
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-border bg-secondary">
-                        <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium">ID</th>
-                        <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium">Naziv</th>
-                        <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium">Plan ID</th>
-                        <th className="text-left px-4 py-3 text-xs text-muted-foreground font-medium">Dan</th>
-                        <th className="text-right px-4 py-3 text-xs text-muted-foreground font-medium">Akcije</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {workoutDays.map((day, i) => (
-                        <tr key={day.id} className={`border-b border-border ${i % 2 === 0 ? 'bg-card' : 'bg-secondary/30'}`}>
-                          <td className="px-4 py-3 text-muted-foreground">#{day.id}</td>
-                          <td className="px-4 py-3 text-foreground font-medium">{day.name || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground">#{day.workoutPlanId || '—'}</td>
-                          <td className="px-4 py-3 text-muted-foreground">{day.dayOfWeek || day.day || '—'}</td>
-                          <td className="px-4 py-3 text-right">
-                            <div className="flex gap-2 justify-end">
-                              <button type="button" onClick={() => openModal('day', day)} className="bg-secondary border border-border text-foreground px-2 py-1 text-xs rounded hover:bg-secondary/80">Uredi</button>
-                              <button type="button" onClick={() => handleDelete('day', day.id)} className="bg-destructive/10 border border-destructive/30 text-destructive px-2 py-1 text-xs rounded hover:bg-destructive/20">Obriši</button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                )}
-              </div>
-            </>
-          )}
-
           {/* Notifications */}
           {activeTab === 'notifications' && (
             <>
@@ -320,8 +227,6 @@ export function TrenerPanel() {
         <Modal
           title={
             modal.type === 'client' ? (modal.data ? 'Uredi klijenta' : 'Dodaj klijenta') :
-            modal.type === 'plan' ? (modal.data ? 'Uredi plan' : 'Novi plan treninga') :
-            modal.type === 'day' ? (modal.data ? 'Uredi dan' : 'Novi dan treninga') :
             (modal.data ? 'Uredi obavijest' : 'Nova obavijest')
           }
           onClose={closeModal}
@@ -334,34 +239,6 @@ export function TrenerPanel() {
                 <Input label="ID trenera" type="number" value={form.trainerId || ''} onChange={f('trainerId')} placeholder="ID trenera" />
                 <Input label="ID klijenta" type="number" value={form.clientId || ''} onChange={f('clientId')} placeholder="ID klijenta" />
                 <Input label="Datum početka" type="date" value={form.startDate || ''} onChange={f('startDate')} />
-              </>
-            )}
-
-            {modal.type === 'plan' && (
-              <>
-                <Input label="Naziv plana" value={form.name || ''} onChange={f('name')} placeholder="npr. Snaga – nedjelja 1" />
-                <Input label="Opis" value={form.description || ''} onChange={f('description')} placeholder="Opis plana..." />
-                <Input label="ID korisnika" type="number" value={form.userId || ''} onChange={f('userId')} placeholder="ID korisnika" />
-              </>
-            )}
-
-            {modal.type === 'day' && (
-              <>
-                <Input label="Naziv dana" value={form.name || ''} onChange={f('name')} placeholder="npr. Ponedeljak – gornji dio" />
-                <Input label="ID plana treninga" type="number" value={form.workoutPlanId || ''} onChange={f('workoutPlanId')} placeholder="ID plana" />
-                <div>
-                  <label className="block text-xs text-muted-foreground mb-1 font-medium">Dan u sedmici</label>
-                  <select
-                    value={form.dayOfWeek || ''}
-                    onChange={(e) => setForm(prev => ({ ...prev, dayOfWeek: e.target.value }))}
-                    className={inputCls}
-                  >
-                    <option value="">Odaberite dan</option>
-                    {['MONDAY','TUESDAY','WEDNESDAY','THURSDAY','FRIDAY','SATURDAY','SUNDAY'].map(d => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </div>
               </>
             )}
 

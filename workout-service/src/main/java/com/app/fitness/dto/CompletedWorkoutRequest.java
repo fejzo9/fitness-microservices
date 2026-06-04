@@ -16,8 +16,6 @@ public class CompletedWorkoutRequest {
     @NotNull(message = "User ID must not be null")
     private Long userId;
 
-    private Long workoutPlanId;
-
     @NotNull(message = "Date must not be null")
     private LocalDate date;
 

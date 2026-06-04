@@ -7,7 +7,7 @@ import com.app.fitness.dto.CompletedWorkoutResponse;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.mapper.CompletedWorkoutMapper;
 import com.app.fitness.repository.CompletedWorkoutRepository;
-import com.fitness.workoutservice.model.CompletedWorkout;
+import com.app.fitness.model.CompletedWorkout;
 import com.app.fitness.exception.ServiceUnavailableException;
 import java.util.List;
 import lombok.RequiredArgsConstructor;

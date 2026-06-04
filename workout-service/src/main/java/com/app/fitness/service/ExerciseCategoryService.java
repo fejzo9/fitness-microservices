@@ -6,7 +6,7 @@ import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.mapper.ExerciseCategoryMapper;
 import com.app.fitness.repository.ExerciseCategoryRepository;
-import com.fitness.workoutservice.model.ExerciseCategory;
+import com.app.fitness.model.ExerciseCategory;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

@@ -43,7 +43,7 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
     @Test
     void getAll_shouldReturnList() throws Exception {
         when(completedWorkoutService.findAll()).thenReturn(List.of(
-                new CompletedWorkoutResponse(1L, 3L, 7L, LocalDate.of(2026, 5, 10), 60)));
+                new CompletedWorkoutResponse(1L, 3L, LocalDate.of(2026, 5, 10), 60)));
 
         mockMvc.perform(get("/api/completed-workouts"))
                 .andExpect(status().isOk())
@@ -54,7 +54,7 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
     @Test
     void getByUserId_shouldReturnUserCompletedWorkouts() throws Exception {
         when(completedWorkoutService.findByUserId(3L)).thenReturn(List.of(
-                new CompletedWorkoutResponse(1L, 3L, 7L, LocalDate.of(2026, 5, 10), 60)));
+                new CompletedWorkoutResponse(1L, 3L, LocalDate.of(2026, 5, 10), 60)));
 
         mockMvc.perform(get("/api/completed-workouts/user/3"))
                 .andExpect(status().isOk())
@@ -64,11 +64,11 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
     @Test
     void getById_whenWorkoutExists_shouldReturnWorkout() throws Exception {
         when(completedWorkoutService.findById(1L))
-                .thenReturn(new CompletedWorkoutResponse(1L, 3L, 7L, LocalDate.of(2026, 5, 10), 60));
+                .thenReturn(new CompletedWorkoutResponse(1L, 3L, LocalDate.of(2026, 5, 10), 60));
 
         mockMvc.perform(get("/api/completed-workouts/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.workoutPlanId").value(7));
+                .andExpect(jsonPath("$.userId").value(3));
     }
 
     @Test
@@ -83,9 +83,9 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
 
     @Test
     void create_withValidRequest_shouldReturn201() throws Exception {
-        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, 7L, LocalDate.of(2026, 5, 10), 60);
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, LocalDate.of(2026, 5, 10), 60);
         when(completedWorkoutService.create(any(CompletedWorkoutRequest.class)))
-                .thenReturn(new CompletedWorkoutResponse(1L, 3L, 7L, LocalDate.of(2026, 5, 10), 60));
+                .thenReturn(new CompletedWorkoutResponse(1L, 3L, LocalDate.of(2026, 5, 10), 60));
 
         mockMvc.perform(post("/api/completed-workouts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -96,7 +96,7 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
 
     @Test
     void create_withInvalidRequest_shouldReturn400() throws Exception {
-        CompletedWorkoutRequest request = new CompletedWorkoutRequest(null, 7L, null, 60);
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(null, null, 60);
 
         mockMvc.perform(post("/api/completed-workouts")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -107,9 +107,9 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
 
     @Test
     void update_withValidRequest_shouldReturn200() throws Exception {
-        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, 8L, LocalDate.of(2026, 5, 11), 75);
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, LocalDate.of(2026, 5, 11), 75);
         when(completedWorkoutService.update(eq(1L), any(CompletedWorkoutRequest.class)))
-                .thenReturn(new CompletedWorkoutResponse(1L, 3L, 8L, LocalDate.of(2026, 5, 11), 75));
+                .thenReturn(new CompletedWorkoutResponse(1L, 3L, LocalDate.of(2026, 5, 11), 75));
 
         mockMvc.perform(put("/api/completed-workouts/1")
                         .contentType(MediaType.APPLICATION_JSON)
@@ -120,7 +120,7 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
 
     @Test
     void update_whenNotFound_shouldReturn404() throws Exception {
-        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, 8L, LocalDate.of(2026, 5, 11), 75);
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, LocalDate.of(2026, 5, 11), 75);
         when(completedWorkoutService.update(eq(99L), any(CompletedWorkoutRequest.class)))
                 .thenThrow(new ResourceNotFoundException("Completed workout not found with id: 99"));
 
@@ -149,7 +149,7 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
 
     @Test
     void create_whenAuthServiceUnavailable_shouldReturn503() throws Exception {
-        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, 7L, LocalDate.of(2026, 5, 10), 60);
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(3L, LocalDate.of(2026, 5, 10), 60);
         when(completedWorkoutService.create(any(CompletedWorkoutRequest.class)))
                 .thenThrow(new ServiceUnavailableException("auth-service not available. Try again"));
 
@@ -162,7 +162,7 @@ class CompletedWorkoutControllerTest extends ControllerTestSupport {
 
     @Test
     void create_whenUserNotFoundInAuthService_shouldReturn404() throws Exception {
-        CompletedWorkoutRequest request = new CompletedWorkoutRequest(99L, 7L, LocalDate.of(2026, 5, 10), 60);
+        CompletedWorkoutRequest request = new CompletedWorkoutRequest(99L, LocalDate.of(2026, 5, 10), 60);
         when(completedWorkoutService.create(any(CompletedWorkoutRequest.class)))
                 .thenThrow(new ResourceNotFoundException("User with ID=99 doesn't exist"));
 
