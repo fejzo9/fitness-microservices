@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { api } from '../services/api';
 
 export function Login() {
   const [username, setUsername] = useState('');
@@ -16,27 +17,18 @@ export function Login() {
     setLoading(true);
 
     try {
-      const response = await fetch('/auth/login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password }),
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          throw new Error('Pogrešna lozinka');
-        }
-        if (response.status === 404) {
-          throw new Error('Korisničko ime ne postoji');
-        }
-        throw new Error('Neuspješna prijava');
-      }
-
-      const data = await response.json();
+      const data = await api.login({ username, password });
       login(data.accessToken, data.refreshToken, data.user);
       navigate('/');
     } catch (err) {
-      setError(err.message || 'Greška pri prijavi');
+      const status = err.response?.status;
+      if (status === 401) {
+        setError('Pogrešna lozinka');
+      } else if (status === 404) {
+        setError('Korisničko ime ne postoji');
+      } else {
+        setError(err.message || 'Greška pri prijavi');
+      }
     } finally {
       setLoading(false);
     }

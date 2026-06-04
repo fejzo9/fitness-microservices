@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect } from 'react';
-import { api } from '../services/api';
+import { api, setLogoutCallback } from '../services/api';
 
 const AuthContext = createContext(null);
 
@@ -38,6 +38,11 @@ export const AuthProvider = ({ children }) => {
     setIsAuthenticated(false);
     setUser(null);
   };
+
+  // Registruj logout callback u axios interceptoru čim je dostupan
+  useEffect(() => {
+    setLogoutCallback(logout);
+  }, []);
 
   const refreshUser = async () => {
     if (user?.id) {

@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 const API_BASE = {
   auth: '/auth',
   user: '/users',
@@ -6,37 +8,115 @@ const API_BASE = {
   notification: '/notifications',
 };
 
-const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
-};
+// ── Axios instanca ────────────────────────────────────────────
+const axiosInstance = axios.create();
 
-const jsonHeaders = () => ({
-  'Content-Type': 'application/json',
-  ...getAuthHeader(),
+// Request interceptor — dodaje Bearer token na svaki zahtjev
+axiosInstance.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
 });
 
+// Sprječava višestruke istovremene refresh pozive
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach((prom) => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Response interceptor — automatski refresh na 401
+axiosInstance.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      const refreshToken = localStorage.getItem('refreshToken');
+
+      // Nema refresh tokena — odjavi korisnika
+      if (!refreshToken) {
+        _logoutCallback?.();
+        return Promise.reject(error);
+      }
+
+      if (isRefreshing) {
+        // Čekaj dok se refresh ne završi, pa ponovi zahtjev
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        })
+          .then((token) => {
+            originalRequest.headers['Authorization'] = `Bearer ${token}`;
+            return axiosInstance(originalRequest);
+          })
+          .catch((err) => Promise.reject(err));
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        const { data } = await axios.post(`${API_BASE.auth}/refresh`, { refreshToken });
+        const newToken = data.accessToken;
+        localStorage.setItem('token', newToken);
+        if (data.refreshToken) {
+          localStorage.setItem('refreshToken', data.refreshToken);
+        }
+        axiosInstance.defaults.headers['Authorization'] = `Bearer ${newToken}`;
+        processQueue(null, newToken);
+        originalRequest.headers['Authorization'] = `Bearer ${newToken}`;
+        return axiosInstance(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        _logoutCallback?.();
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+// Callback za odjavu koji postavlja AuthContext
+let _logoutCallback = null;
+export const setLogoutCallback = (fn) => {
+  _logoutCallback = fn;
+};
+
+// ── Pomoćne funkcije ──────────────────────────────────────────
 async function request(url, options = {}) {
-  const response = await fetch(url, { headers: getAuthHeader(), ...options });
-  if (response.status === 204) return null;
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
+  const response = await axiosInstance({ url, ...options });
+  return response.data ?? null;
 }
 
 async function requestJson(url, method, body) {
-  const response = await fetch(url, {
-    method,
-    headers: jsonHeaders(),
-    body: JSON.stringify(body),
-  });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
-  const text = await response.text();
-  return text ? JSON.parse(text) : null;
+  const response = await axiosInstance({ url, method, data: body });
+  return response.data ?? null;
 }
 
+// ── API metode ────────────────────────────────────────────────
 export const api = {
-  // ── AUTH SERVICE (/auth) ──────────────────────────────────
+  // ── AUTH — login / register / refresh ────────────────────────
+  login: (credentials) =>
+    axiosInstance.post(`${API_BASE.auth}/login`, credentials).then((r) => r.data),
+  register: (userData) =>
+    axiosInstance.post(`${API_BASE.auth}/register`, userData).then((r) => r.data),
+  refreshToken: (refreshToken) =>
+    axiosInstance.post(`${API_BASE.auth}/refresh`, { refreshToken }).then((r) => r.data),
+
+  // ── AUTH SERVICE (/auth) ──────────────────────────────────────
   getRoles: () => request(`${API_BASE.auth}/roles`),
   getRoleById: (id) => request(`${API_BASE.auth}/roles/${id}`),
   createRole: (data) => requestJson(`${API_BASE.auth}/roles`, 'POST', data),
@@ -50,7 +130,7 @@ export const api = {
   updateUserProfile: (id, data) => requestJson(`${API_BASE.auth}/users/${id}/profile`, 'PATCH', data),
   deleteUser: (id) => request(`${API_BASE.auth}/users/${id}`, { method: 'DELETE' }),
 
-  // ── USER SERVICE (/users) ──────────────────────────────────
+  // ── USER SERVICE (/users) ─────────────────────────────────────
   getFitnessGoals: () => request(`${API_BASE.user}/fitness-goals`),
   getFitnessGoalById: (id) => request(`${API_BASE.user}/fitness-goals/${id}`),
   getFitnessGoalsByUserId: (userId) => request(`${API_BASE.user}/fitness-goals/user/${userId}`),
@@ -65,14 +145,14 @@ export const api = {
   updateTrainerClient: (id, data) => requestJson(`${API_BASE.user}/trainer-clients/${id}`, 'PUT', data),
   deleteTrainerClient: (id) => request(`${API_BASE.user}/trainer-clients/${id}`, { method: 'DELETE' }),
 
-  // ── NOTIFICATION SERVICE (/notifications) ──────────────────
+  // ── NOTIFICATION SERVICE (/notifications) ─────────────────────
   getNotifications: () => request(`${API_BASE.notification}/notifications`),
   getNotificationById: (id) => request(`${API_BASE.notification}/notifications/${id}`),
   createNotification: (data) => requestJson(`${API_BASE.notification}/notifications`, 'POST', data),
   updateNotification: (id, data) => requestJson(`${API_BASE.notification}/notifications/${id}`, 'PUT', data),
   deleteNotification: (id) => request(`${API_BASE.notification}/notifications/${id}`, { method: 'DELETE' }),
 
-  // ── NUTRITION SERVICE (/nutrition) ─────────────────────────
+  // ── NUTRITION SERVICE (/nutrition) ────────────────────────────
   getMealLogs: () => request(`${API_BASE.nutrition}/meal-logs`),
   getMealLogById: (id) => request(`${API_BASE.nutrition}/meal-logs/${id}`),
   createMealLog: (data) => requestJson(`${API_BASE.nutrition}/meal-logs`, 'POST', data),

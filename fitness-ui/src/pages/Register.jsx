@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { api } from '../services/api';
 
 export function Register() {
   const [formData, setFormData] = useState({
@@ -31,19 +32,15 @@ export function Register() {
     setLoading(true);
 
     try {
-      const response = await fetch('/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
-
-      if (!response.ok) {
-        throw new Error('Neuspješna registracija');
-      }
-
+      await api.register(formData);
       navigate('/login');
     } catch (err) {
-      setError(err.message || 'Greška pri registraciji');
+      const status = err.response?.status;
+      if (status === 409) {
+        setError('Korisničko ime ili email već postoji');
+      } else {
+        setError(err.message || 'Greška pri registraciji');
+      }
     } finally {
       setLoading(false);
     }
