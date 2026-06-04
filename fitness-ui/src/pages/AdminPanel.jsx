@@ -1,6 +1,7 @@
 ﻿import { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/Spinner';
+import { useToast } from '../contexts/ToastContext';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
 const inputCls = "w-full bg-secondary border border-border rounded px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all";
@@ -29,6 +30,7 @@ function Input({ label, ...props }) {
 }
 
 export function AdminPanel() {
+  const toast = useToast();
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [categories, setCategories] = useState([]);
@@ -37,7 +39,6 @@ export function AdminPanel() {
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({});
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('');
@@ -63,7 +64,7 @@ export function AdminPanel() {
     try {
       const [u, r, cats] = await Promise.all([api.getUsers(), api.getRoles(), api.getExerciseCategories()]);
       setUsers(u || []); setRoles(r || []); setCategories(cats || []);
-    } catch { setError('Gre\u0161ka pri u\u010ditavanju podataka'); }
+    } catch { toast('Greška pri učitavanju podataka. Provjerite konekciju i pokušajte ponovo.', 'error'); }
     finally { setLoading(false); }
   };
 
@@ -73,21 +74,22 @@ export function AdminPanel() {
       if (data && data.content) setExData(data);
       else if (Array.isArray(data)) setExData({ content: data, totalElements: data.length, totalPages: 1 });
       else setExData({ content: [], totalElements: 0, totalPages: 0 });
-    } catch { setExData({ content: [], totalElements: 0, totalPages: 0 }); }
+    } catch { toast('Greška pri učitavanju vježbi.', 'error'); setExData({ content: [], totalElements: 0, totalPages: 0 }); }
   };
 
-  const openModal = (type, data = null) => { setModal({ type, data }); setForm(data || {}); setError(''); };
-  const closeModal = () => { setModal(null); setForm({}); setError(''); };
+  const openModal = (type, data = null) => { setModal({ type, data }); setForm(data || {}); };
+  const closeModal = () => { setModal(null); setForm({}); };
 
   const handleSave = async () => {
-    setSaving(true); setError('');
+    setSaving(true);
     try {
       if (modal.type === 'user') { if (modal.data) await api.updateUser(modal.data.id, form); else await api.createUser(form); }
       else if (modal.type === 'role') { if (modal.data) await api.updateRole(modal.data.id, form); else await api.createRole(form); }
       else if (modal.type === 'exercise') { if (modal.data) await api.updateExercise(modal.data.id, form); else await api.createExercise(form); }
       else if (modal.type === 'category') { if (modal.data) await api.updateExerciseCategory(modal.data.id, form); else await api.createExerciseCategory(form); }
       await fetchAll(); await fetchExercises(); closeModal();
-    } catch { setError('Gre\u0161ka pri \u010duvanju'); }
+      toast('Uspješno sačuvano.', 'success');
+    } catch { toast('Greška pri čuvanju. Pokušajte ponovo.', 'error'); }
     finally { setSaving(false); }
   };
 
@@ -99,7 +101,7 @@ export function AdminPanel() {
       else if (type === 'exercise') await api.deleteExercise(id);
       else if (type === 'category') await api.deleteExerciseCategory(id);
       await fetchAll(); await fetchExercises();
-    } catch { alert('Gre\u0161ka pri brisanju'); }
+    } catch { toast('Greška pri brisanju. Pokušajte ponovo.', 'error'); }
   };
 
   const f = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -480,7 +482,6 @@ export function AdminPanel() {
       {modal && (
         <Modal title={modal.type === 'user' ? (modal.data ? 'Uredi korisnika' : 'Novi korisnik') : modal.type === 'role' ? (modal.data ? 'Uredi ulogu' : 'Nova uloga') : modal.type === 'exercise' ? (modal.data ? 'Uredi ve\u017ebu' : 'Nova ve\u017eba') : (modal.data ? 'Uredi kategoriju' : 'Nova kategorija')} onClose={closeModal}>
           <div className="space-y-4">
-            {error && <div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm">{error}</div>}
             {modal.type === 'user' && (<>
               <div className="grid grid-cols-2 gap-3"><Input label="Ime" value={form.firstName || ''} onChange={f('firstName')} placeholder="Ime" /><Input label="Prezime" value={form.lastName || ''} onChange={f('lastName')} placeholder="Prezime" /></div>
               <Input label="Korisni\u010dko ime" value={form.username || ''} onChange={f('username')} placeholder="Username" />

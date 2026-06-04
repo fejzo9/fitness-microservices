@@ -1,6 +1,7 @@
 import * as React from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 const DAY_NAMES = ['Nedjelja', 'Ponedeljak', 'Utorak', 'Srijeda', 'Četvrtak', 'Petak', 'Subota'];
 
@@ -40,6 +41,7 @@ const todayStr = (() => { const n = new Date(); const dd = String(n.getDate()).p
 
 export function PlanTreninga() {
   const { user } = useAuth();
+  const toast = useToast();
   const [weekOffset, setWeekOffset] = React.useState(0);
   const [dani, setDani] = React.useState(() => buildWeekDays(0));
   const [sveVezbe, setSveVezbe] = React.useState([]);
@@ -104,7 +106,7 @@ export function PlanTreninga() {
 
       setDani(noviDani);
     } catch (error) {
-      console.error("Error fetching workout data:", error);
+      toast('Greška pri učitavanju plana treninga. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
       setLoading(false);
     }
@@ -138,7 +140,7 @@ export function PlanTreninga() {
       setRestSec("60");
       setPrikaziFormu(false);
     } catch (error) {
-      console.error("Error creating workout exercise:", error);
+      toast('Nije moguće dodati vježbu u plan. Pokušajte ponovo.', 'error');
     }
   };
 
@@ -148,7 +150,7 @@ export function PlanTreninga() {
       await api.completeWorkoutExercise(vezbaId);
       await fetchData(weekOffset);
     } catch (error) {
-      console.error("Error completing workout exercise:", error);
+      toast('Nije moguće označiti vježbu kao završenu. Pokušajte ponovo.', 'error');
     }
   };
 
@@ -158,7 +160,7 @@ export function PlanTreninga() {
       await api.deleteWorkoutExercise(vezbaId);
       await fetchData(weekOffset);
     } catch (error) {
-      console.error("Error deleting workout exercise:", error);
+      toast('Nije moguće obrisati vježbu iz plana. Pokušajte ponovo.', 'error');
     }
   };
 

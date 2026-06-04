@@ -2,9 +2,11 @@ import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Spinner } from '../components/Spinner';
+import { useToast } from '../contexts/ToastContext';
 
 export function Dashboard() {
   const { user } = useAuth();
+  const toast = useToast();
   const [todayExercises, setTodayExercises] = useState([]);
   const [stats, setStats] = useState(null);
   const [todayMeals, setTodayMeals] = useState([]);
@@ -34,7 +36,7 @@ export function Dashboard() {
       setStats(statistics);
       setTodayMeals(meals || []);
     } catch (error) {
-      console.error("Error fetching dashboard data:", error);
+      toast('Greška pri učitavanju podataka. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
       setLoading(false);
     }
@@ -45,7 +47,7 @@ export function Dashboard() {
       await api.completeWorkoutExercise(id);
       await fetchDashboardData();
     } catch (error) {
-      console.error("Error completing exercise:", error);
+      toast('Nije moguće označiti vježbu kao završenu. Pokušajte ponovo.', 'error');
     }
   };
 

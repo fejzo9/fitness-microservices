@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/Spinner';
+import { useToast } from '../contexts/ToastContext';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
 
@@ -38,8 +39,8 @@ export function TrenerPanel() {
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState(null);
   const [form, setForm] = useState({});
+  const toast = useToast();
   const [saving, setSaving] = useState(false);
-  const [error, setError] = useState('');
 
   useEffect(() => { fetchAll(); }, []);
 
@@ -53,18 +54,17 @@ export function TrenerPanel() {
       setTrainerClients(tc || []);
       setNotifications(notifs || []);
     } catch {
-      setError('Greška pri učitavanju podataka');
+      toast('Greška pri učitavanju podataka. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
       setLoading(false);
     }
   };
 
-  const openModal = (type, data = null) => { setModal({ type, data }); setForm(data || {}); setError(''); };
-  const closeModal = () => { setModal(null); setForm({}); setError(''); };
+  const openModal = (type, data = null) => { setModal({ type, data }); setForm(data || {}); };
+  const closeModal = () => { setModal(null); setForm({}); };
 
   const handleSave = async () => {
     setSaving(true);
-    setError('');
     try {
       if (modal.type === 'client') {
         if (modal.data) await api.updateTrainerClient(modal.data.id, form);
@@ -75,7 +75,8 @@ export function TrenerPanel() {
       }
       await fetchAll();
       closeModal();
-    } catch { setError('Greška pri čuvanju'); }
+      toast('Uspješno sačuvano.', 'success');
+    } catch { toast('Greška pri čuvanju. Pokušajte ponovo.', 'error'); }
     finally { setSaving(false); }
   };
 
@@ -85,7 +86,7 @@ export function TrenerPanel() {
       if (type === 'client') await api.deleteTrainerClient(id);
       else if (type === 'notification') await api.deleteNotification(id);
       await fetchAll();
-    } catch { alert('Greška pri brisanju'); }
+    } catch { toast('Greška pri brisanju. Pokušajte ponovo.', 'error'); }
   };
 
   const f = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -233,8 +234,6 @@ export function TrenerPanel() {
           onClose={closeModal}
         >
           <div className="space-y-4">
-            {error && <div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm">{error}</div>}
-
             {modal.type === 'client' && (
               <>
                 <Input label="ID trenera" type="number" value={form.trainerId || ''} onChange={f('trainerId')} placeholder="ID trenera" />

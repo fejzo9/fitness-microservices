@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { Spinner } from '../components/Spinner';
+import { useToast } from '../contexts/ToastContext';
 
 export function Ishrana() {
+  const toast = useToast();
   const [mealName, setMealName] = useState('');
   const [calories, setCalories] = useState('');
   const [protein, setProtein] = useState('');
@@ -11,7 +13,6 @@ export function Ishrana() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   // Get current user ID from localStorage (assuming it's stored after login)
   const userId = parseInt(localStorage.getItem('userId') || '1');
@@ -22,14 +23,12 @@ export function Ishrana() {
 
   const fetchMealsForDate = async (date) => {
     setLoading(true);
-    setError('');
     try {
       const dateStr = date.toISOString().split('T')[0];
       const data = await api.getMealEntriesByUserAndDate(userId, dateStr);
       setMeals(data || []);
     } catch (err) {
-      setError('Greška pri učitavanju obroka');
-      console.error(err);
+      toast('Greška pri učitavanju obroka. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
       setLoading(false);
     }
@@ -37,7 +36,7 @@ export function Ishrana() {
 
   const handleAddMeal = async () => {
     if (!mealName || !calories || !protein || !carbs || !fats) {
-      setError('Sva polja su obavezna');
+      toast('Sva polja su obavezna.', 'warning');
       return;
     }
 
@@ -61,13 +60,12 @@ export function Ishrana() {
       setProtein('');
       setCarbs('');
       setFats('');
-      setError('');
 
       // Refresh meals
       await fetchMealsForDate(selectedDate);
+      toast('Obrok je uspješno dodan.', 'success');
     } catch (err) {
-      setError('Greška pri dodavanju obroka');
-      console.error(err);
+      toast('Greška pri dodavanju obroka. Pokušajte ponovo.', 'error');
     }
   };
 
@@ -78,8 +76,7 @@ export function Ishrana() {
       await api.deleteMealEntry(id);
       await fetchMealsForDate(selectedDate);
     } catch (err) {
-      setError('Greška pri brisanju obroka');
-      console.error(err);
+      toast('Greška pri brisanju obroka. Pokušajte ponovo.', 'error');
     }
   };
 
@@ -120,13 +117,6 @@ export function Ishrana() {
           Plan ishrane
         </h2>
       </div>
-
-      {/* Error Message */}
-      {error && (
-        <div className="mb-6 bg-destructive/10 border border-destructive text-destructive px-4 py-3 rounded">
-          {error}
-        </div>
-      )}
 
       {/* Date Selector */}
       <div className="mb-6">

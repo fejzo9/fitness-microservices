@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
+import { useToast } from '../contexts/ToastContext';
 
 export function Napredak() {
   const { user } = useAuth();
+  const toast = useToast();
   const [metrics, setMetrics] = useState({
     currentWeight: null,
     weightChange: null,
@@ -114,7 +116,7 @@ export function Napredak() {
           setCalorieGoal(fitnessGoal.dailyCalorieGoal);
         }
       } catch (err) {
-        console.log('No active fitness goal');
+        // Nema aktivnog cilja — nije greška
       }
 
       setMetrics(prev => ({
@@ -125,7 +127,7 @@ export function Napredak() {
       }));
 
     } catch (error) {
-      console.error('Error fetching metrics:', error);
+      toast('Greška pri učitavanju podataka o napretku. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
       setLoading(false);
     }

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { api } from '../services/api';
+import { useToast } from '../contexts/ToastContext';
 
 const BARLOW = { fontFamily: "'Barlow Condensed', sans-serif" };
 
@@ -32,6 +33,7 @@ const TIME_FRAMES = [
 
 export function Profil() {
   const { user, logout, refreshUser } = useAuth();
+  const toast = useToast();
   const [editing, setEditing] = useState(false);
   const [form, setForm] = useState({
     username: user?.username || '',
@@ -44,8 +46,6 @@ export function Profil() {
     gender: user?.gender || '',
   });
   const [saving, setSaving] = useState(false);
-  const [success, setSuccess] = useState('');
-  const [error, setError] = useState('');
   
   const [activeGoal, setActiveGoal] = useState(null);
   const [goalForm, setGoalForm] = useState({
@@ -55,8 +55,6 @@ export function Profil() {
   });
   const [editingGoal, setEditingGoal] = useState(false);
   const [savingGoal, setSavingGoal] = useState(false);
-  const [goalSuccess, setGoalSuccess] = useState('');
-  const [goalError, setGoalError] = useState('');
 
   const f = (key) => (e) => setForm(prev => ({ ...prev, [key]: e.target.value }));
   const fg = (key) => (e) => setGoalForm(prev => ({ ...prev, [key]: e.target.value }));
@@ -98,8 +96,6 @@ export function Profil() {
 
   const handleSave = async () => {
     setSaving(true);
-    setError('');
-    setSuccess('');
     try {
       if (user?.id) {
         const profileData = {
@@ -112,11 +108,11 @@ export function Profil() {
         };
         await api.updateUserProfile(user.id, profileData);
         await refreshUser();
-        setSuccess('Profil uspješno ažuriran.');
+        toast('Profil uspješno ažuriran.', 'success');
       }
       setEditing(false);
     } catch {
-      setError('Greška pri čuvanju profila.');
+      toast('Greška pri čuvanju profila. Pokušajte ponovo.', 'error');
     } finally {
       setSaving(false);
     }
@@ -124,8 +120,6 @@ export function Profil() {
   
   const handleSaveGoal = async () => {
     setSavingGoal(true);
-    setGoalError('');
-    setGoalSuccess('');
     try {
       const goalData = {
         userId: user.id,
@@ -149,12 +143,11 @@ export function Profil() {
       // Kreiraj novi aktivan cilj
       const newGoal = await api.createFitnessGoal(goalData);
       setActiveGoal(newGoal);
-      setGoalSuccess('Cilj uspješno sačuvan.');
+      toast('Cilj uspješno sačuvan.', 'success');
       setEditingGoal(false);
       await loadActiveGoal();
     } catch (err) {
-      setGoalError('Greška pri čuvanju cilja.');
-      console.error('Error saving goal:', err);
+      toast('Greška pri čuvanju cilja. Pokušajte ponovo.', 'error');
     } finally {
       setSavingGoal(false);
     }
@@ -196,16 +189,13 @@ export function Profil() {
             {!editing && (
               <button
                 type="button"
-                onClick={() => { setEditing(true); setSuccess(''); setError(''); }}
+                onClick={() => setEditing(true)}
                 className="bg-secondary border border-border text-foreground px-4 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors"
               >
                 Uredi profil
               </button>
             )}
           </div>
-
-          {success && <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-2 rounded text-sm mb-4">{success}</div>}
-          {error && <div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm mb-4">{error}</div>}
 
           {editing ? (
             <div className="space-y-4">
@@ -278,16 +268,13 @@ export function Profil() {
             {!editingGoal && (
               <button
                 type="button"
-                onClick={() => { setEditingGoal(true); setGoalSuccess(''); setGoalError(''); }}
+                onClick={() => setEditingGoal(true)}
                 className="bg-secondary border border-border text-foreground px-4 py-1.5 text-sm rounded hover:bg-secondary/80 transition-colors"
               >
                 {activeGoal ? 'Promijeni cilj' : 'Postavi cilj'}
               </button>
             )}
           </div>
-
-          {goalSuccess && <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 px-3 py-2 rounded text-sm mb-4">{goalSuccess}</div>}
-          {goalError && <div className="bg-destructive/10 border border-destructive text-destructive px-3 py-2 rounded text-sm mb-4">{goalError}</div>}
 
           {editingGoal ? (
             <div className="space-y-4">

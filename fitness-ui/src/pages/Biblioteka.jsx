@@ -1,12 +1,13 @@
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/Spinner';
+import { useToast } from '../contexts/ToastContext';
 
 export function Biblioteka() {
+  const toast = useToast();
   const [exercises, setExercises] = useState([]);
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
   const [totalElements, setTotalElements] = useState(0);
@@ -27,23 +28,19 @@ export function Biblioteka() {
       const data = await api.getExerciseCategories();
       setCategories(data || []);
     } catch (err) {
-      console.error('Error fetching categories:', err);
+      toast('Greška pri učitavanju kategorija vježbi.', 'error');
     }
   };
 
   const fetchExercises = async () => {
     try {
       setLoading(true);
-      console.log('Fetching exercises with:', { currentPage, searchTerm, selectedCategory });
       const data = await api.getExercises(currentPage, 9, searchTerm, selectedCategory);
-      console.log('Exercises response:', data);
       setExercises(data.content || []);
       setTotalPages(data.totalPages || 1);
       setTotalElements(data.totalElements || 0);
-      setError(null);
     } catch (err) {
-      setError('Greška pri učitavanju vježbi');
-      console.error(err);
+      toast('Greška pri učitavanju vježbi. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
       setLoading(false);
     }
@@ -64,14 +61,6 @@ export function Biblioteka() {
 
   if (loading) {
     return <LoadingSpinner message="Učitavanje vježbi..." size="lg" />;
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-64">
-        <div className="text-destructive">{error}</div>
-      </div>
-    );
   }
 
   return (
