@@ -36,6 +36,8 @@ function buildWeekDays(weekOffset = 0) {
   });
 }
 
+const todayStr = (() => { const n = new Date(); const dd = String(n.getDate()).padStart(2,'0'); const mm = String(n.getMonth()+1).padStart(2,'0'); return `${n.getFullYear()}-${mm}-${dd}`; })();
+
 export function PlanTreninga() {
   const { user } = useAuth();
   const [weekOffset, setWeekOffset] = React.useState(0);
@@ -65,7 +67,7 @@ export function PlanTreninga() {
   const fetchData = async (offset) => {
     setLoading(true);
     try {
-      const nextWeek = offset === 1;
+      const nextWeek = offset > 0;
       const [exercises, allEx, statistics] = await Promise.all([
         api.getWorkoutExercises(user.id, nextWeek),
         api.getExercises(0, 100),
@@ -78,8 +80,6 @@ export function PlanTreninga() {
       const weekDays = buildWeekDays(offset);
 
       // Mapiranje vežbi po scheduledDate
-      const todayStr = (() => { const n = new Date(); const dd = String(n.getDate()).padStart(2,'0'); const mm = String(n.getMonth()+1).padStart(2,'0'); return `${n.getFullYear()}-${mm}-${dd}`; })();
-
       const noviDani = weekDays.map(dan => {
         const vezbeZaDan = (exercises || [])
           .filter(ex => ex.scheduledDate === dan.id)
@@ -361,7 +361,7 @@ export function PlanTreninga() {
                                       title="Označi kao završeno"
                                     >✓</button>
                                   )}
-                                  {modZaUredjivanje && (
+                                  {modZaUredjivanje && dan.id >= todayStr && (
                                     <button
                                       type="button"
                                       onClick={() => obrisiVezbu(dan.id, vezba.id)}
