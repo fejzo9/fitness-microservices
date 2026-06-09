@@ -1,4 +1,4 @@
-﻿import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { api } from '../services/api';
 import { LoadingSpinner } from '../components/Spinner';
 import { Modal } from '../components/Modal';
@@ -309,87 +309,6 @@ export function AdminPanel() {
           {/* System Settings Section */}
           {activeTab === 'settings' && (
             <div className="space-y-5">
-              {/* General Settings */}
-              <div className="bg-card border border-border rounded-lg p-5">
-                <div className="border-b border-border pb-3 mb-4">
-                  <h3
-                    className="text-base font-bold text-foreground uppercase tracking-wide"
-                    style={BARLOW}
-                  >
-                    Opšte postavke
-                  </h3>
-                </div>
-                <div className="space-y-4">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-sm text-muted-foreground mb-2">Naziv aplikacije</label>
-                      <input type="text" defaultValue="Fitness i Trening Menadžer" className={`w-full ${inputCls}`} />
-                    </div>
-                    <div>
-                      <label className="block text-sm text-muted-foreground mb-2">Jezik interfejsa</label>
-                      <select className={`w-full ${inputCls}`}>
-                        <option>Srpski</option>
-                        <option>English</option>
-                      </select>
-                    </div>
-                  </div>
-                  <div>
-                    <label className="block text-sm text-muted-foreground mb-2">Email za kontakt</label>
-                    <input type="email" defaultValue="admin@fitnessmanager.com" className={`w-full ${inputCls}`} />
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input type="checkbox" id="enableRegistration" defaultChecked className="w-4 h-4 accent-primary" />
-                    <label htmlFor="enableRegistration" className="text-sm text-foreground">Omogući registraciju novih korisnika</label>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <input type="checkbox" id="requireEmailVerification" className="w-4 h-4 accent-primary" />
-                    <label htmlFor="requireEmailVerification" className="text-sm text-foreground">Zahtevaj verifikaciju email adrese</label>
-                  </div>
-                </div>
-              </div>
-
-              {/* User Permissions */}
-              <div className="bg-card border border-border rounded-lg p-5">
-                <div className="border-b border-border pb-3 mb-4">
-                  <h3
-                    className="text-base font-bold text-foreground uppercase tracking-wide"
-                    style={BARLOW}
-                  >
-                    Dozvole po ulogama
-                  </h3>
-                </div>
-                <div className="border border-border rounded-lg overflow-hidden">
-                  <div className="grid grid-cols-5 border-b border-border bg-secondary">
-                    {['Dozvola','Admin','Trener','Korisnik','Akcije'].map((h, i) => (
-                      <div key={h} className={`p-3 ${i < 4 ? 'border-r border-border' : ''}`}>
-                        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{h}</span>
-                      </div>
-                    ))}
-                  </div>
-                  {[
-                    { name: 'Upravljanje korisnicima', admin: true, trainer: false, user: false },
-                    { name: 'Kreiranje planova treninga', admin: true, trainer: true, user: false },
-                    { name: 'Pristup biblioteci vježbi', admin: true, trainer: true, user: true },
-                    { name: 'Dodavanje vježbi', admin: true, trainer: true, user: false },
-                    { name: 'Praćenje sopstvenog napretka', admin: true, trainer: true, user: true },
-                  ].map((p, i, arr) => (
-                    <div key={i} className={`grid grid-cols-5 hover:bg-secondary/50 transition-colors ${i < arr.length - 1 ? 'border-b border-border' : ''}`}>
-                      <div className="p-3 border-r border-border">
-                        <span className="text-sm text-foreground">{p.name}</span>
-                      </div>
-                      {[p.admin, p.trainer, p.user].map((val, j) => (
-                        <div key={j} className="p-3 border-r border-border text-center">
-                          <input type="checkbox" defaultChecked={val} className="w-4 h-4 accent-primary" />
-                        </div>
-                      ))}
-                      <div className="p-3 text-center">
-                        <button className="bg-secondary border border-border text-foreground px-3 py-1 text-xs rounded hover:bg-secondary/80 transition-colors">Sačuvaj</button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
               {/* Roles */}
               <div className="bg-card border border-border rounded-lg p-5">
                 <div className="border-b border-border pb-3 mb-4 flex items-center justify-between">
@@ -414,44 +333,7 @@ export function AdminPanel() {
                 </div>
               </div>
 
-              {/* System Maintenance */}
-              <div className="bg-card border border-border rounded-lg p-5">
-                <div className="border-b border-border pb-3 mb-4">
-                  <h3
-                    className="text-base font-bold text-foreground uppercase tracking-wide"
-                    style={BARLOW}
-                  >
-                    Održavanje sistema
-                  </h3>
-                </div>
-                <div className="grid grid-cols-3 gap-4">
-                  {[
-                    { title: 'Baza podataka', action: 'Napravi bekap', info: `${users.length} korisnika u bazi` },
-                    { title: 'Keširanje', action: 'Očisti keš', info: `${categories.length} kategorija keširano` },
-                    { title: 'Logovi sistema', action: 'Preuzmi logove', info: 'Poslednja aktivnost: Danas' },
-                  ].map(({ title, action, info }) => (
-                    <div key={title} className="bg-secondary border border-border rounded-lg p-4">
-                      <div
-                        className="text-sm font-bold text-foreground uppercase tracking-wide mb-3"
-                        style={BARLOW}
-                      >
-                        {title}
-                      </div>
-                      <button className="w-full bg-card border border-border text-foreground px-3 py-2 text-sm mb-2 rounded hover:bg-secondary transition-colors">
-                        {action}
-                      </button>
-                      <div className="text-xs text-muted-foreground">{info}</div>
-                    </div>
-                  ))}
-                </div>
-              </div>
 
-              {/* Save Settings Button */}
-              <div className="flex justify-end">
-                <button className="bg-primary text-white px-6 py-2 text-sm rounded font-medium hover:bg-primary/90 transition-colors">
-                  Sačuvaj sve postavke
-                </button>
-              </div>
             </div>
           )}
         </>
