@@ -55,6 +55,9 @@ public class UserService implements UserDetailsService {
 
     @Transactional
     public UserResponse create(UserRequest request) {
+        if (request.getPassword() == null || request.getPassword().isEmpty()) {
+            throw new IllegalArgumentException("Password must not be blank for new user creation");
+        }
         if (userRepository.existsByUsername(request.getUsername())) {
             throw new DuplicateResourceException("Username already exists: " + request.getUsername());
         }

@@ -24,7 +24,6 @@ public class UserRequest {
     @Size(max = 150, message = "Email must not exceed 150 characters")
     private String email;
 
-    @NotBlank(message = "Password must not be blank")
     @Size(min = 6, max = 255, message = "Password must be between 6 and 255 characters")
     private String password;
 
