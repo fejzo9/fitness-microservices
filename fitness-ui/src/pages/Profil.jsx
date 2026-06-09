@@ -161,11 +161,9 @@ export function Profil() {
           <div>
             <div className="text-xl font-bold text-foreground" style={BARLOW}>{user?.username || 'Korisnik'}</div>
             <div className="text-sm text-muted-foreground mt-0.5">{user?.email || ''}</div>
-            {user?.roles?.length > 0 && (
+            {user?.roleName && (
               <div className="flex gap-2 mt-2">
-                {user.roles.map((r, i) => (
-                  <span key={i} className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{r}</span>
-                ))}
+                <span className="text-xs bg-primary/10 text-primary px-2 py-0.5 rounded">{user.roleName}</span>
               </div>
             )}
           </div>

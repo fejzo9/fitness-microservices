@@ -131,7 +131,7 @@ export function Layout() {
                   {label}
                 </Link>
             ))}
-            {(isAdmin || isTrener) && (
+            {isTrener && (
                 <Link
                     to="/trener-panel"
                     className={`flex items-center px-3 py-3 lg:py-2.5 text-sm rounded transition-colors min-h-[44px] ${

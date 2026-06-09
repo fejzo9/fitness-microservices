@@ -56,7 +56,7 @@ const TrenerRoute = ({ children }) => {
     );
   }
 
-  return (user?.roleName === 'ADMIN' || user?.roleName === 'TRENER') ? children : <Navigate to="/" />;
+  return user?.roleName === 'TRENER' ? children : <Navigate to="/" />;
 };
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
