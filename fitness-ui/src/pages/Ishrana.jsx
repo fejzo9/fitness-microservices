@@ -3,8 +3,10 @@ import { api } from '../services/api';
 import { Spinner } from '../components/Spinner';
 import { useToast } from '../contexts/ToastContext';
 import { Input } from '../components/Input';
+import { useAuth } from '../contexts/AuthContext';
 
 export function Ishrana() {
+  const { user } = useAuth();
   const toast = useToast();
   const [mealName, setMealName] = useState('');
   const [calories, setCalories] = useState('');
@@ -15,8 +17,8 @@ export function Ishrana() {
   const [meals, setMeals] = useState([]);
   const [loading, setLoading] = useState(false);
 
-  // Get current user ID from localStorage (assuming it's stored after login)
-  const userId = parseInt(localStorage.getItem('userId') || '1');
+  // Get current user ID from AuthContext, fallback to localStorage or '1'
+  const userId = user?.id || parseInt(localStorage.getItem('userId') || '1');
 
   useEffect(() => {
     fetchMealsForDate(selectedDate);

@@ -17,7 +17,8 @@ export function Layout() {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const isActive = (path) => location.pathname === path;
   const isAdmin = user?.roleName === 'ADMIN';
-  const isTrener = user?.roleName === 'TRENER';
+  const role = user?.roleName || '';
+  const isTrener = role === 'TRAINER' || role === 'TRENER';
 
   // Zatvori sidebar pri navigaciji
   useEffect(() => {

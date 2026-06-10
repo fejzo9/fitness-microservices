@@ -42,7 +42,7 @@ const AdminRoute = ({ children }) => {
     );
   }
 
-  return user?.roleName === 'ADMIN' ? children : <Navigate to="/" />;
+  return (user?.roleName === 'ADMIN') ? children : <Navigate to="/" />;
 };
 
 const TrenerRoute = ({ children }) => {
@@ -56,7 +56,8 @@ const TrenerRoute = ({ children }) => {
     );
   }
 
-  return user?.roleName === 'TRENER' ? children : <Navigate to="/" />;
+  const role = user?.roleName || '';
+  return (role === 'TRAINER' || role === 'TRENER') ? children : <Navigate to="/" />;
 };
 ReactDOM.createRoot(document.getElementById('root')).render(
   <React.StrictMode>
