@@ -53,6 +53,13 @@ public class WorkoutExerciseController {
         return ResponseEntity.ok(workoutExerciseService.findCompletedByUserId(userId));
     }
 
+    @GetMapping("/user/{userId}/history")
+    public ResponseEntity<org.springframework.data.domain.Page<WorkoutExerciseResponse>> getHistoryByUserId(
+            @PathVariable Long userId,
+            org.springframework.data.domain.Pageable pageable) {
+        return ResponseEntity.ok(workoutExerciseService.findHistoryByUserId(userId, pageable));
+    }
+
     @GetMapping("/user/{userId}/statistics")
     public ResponseEntity<WorkoutWeeklyStatisticsResponse> getWeeklyStatistics(@PathVariable Long userId) {
         return ResponseEntity.ok(workoutExerciseService.getWeeklyStatistics(userId));

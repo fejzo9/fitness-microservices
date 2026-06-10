@@ -47,6 +47,12 @@ export function PlanTreninga() {
   const [loading, setLoading] = React.useState(true);
   const [stats, setStats] = React.useState(null);
 
+  const [showHistory, setShowHistory] = React.useState(false);
+  const [historyData, setHistoryData] = React.useState([]);
+  const [historyPage, setHistoryPage] = React.useState(0);
+  const [historyTotalPages, setHistoryTotalPages] = React.useState(0);
+  const [historyLoading, setHistoryLoading] = React.useState(false);
+
   const [showForm, setShowForm] = React.useState(false);
   const [editMode, setEditMode] = React.useState(false);
 
@@ -156,6 +162,29 @@ export function PlanTreninga() {
     }
   };
 
+  const fetchHistory = async (page = 0) => {
+    if (!user?.id) return;
+    setHistoryLoading(true);
+    try {
+      const data = await api.getWorkoutHistory(user.id, page, 10);
+      setHistoryData(data.content || []);
+      setHistoryTotalPages(data.totalPages || 0);
+      setHistoryPage(page);
+    } catch (error) {
+      toast('Greška pri učitavanju historije treninga.', 'error');
+    } finally {
+      setHistoryLoading(false);
+    }
+  };
+
+  const toggleHistory = () => {
+    const newState = !showHistory;
+    setShowHistory(newState);
+    if (newState) {
+      fetchHistory(0);
+    }
+  };
+
   const changeDuration = (dayId, newDuration) => {
     setDays((prev) =>
         prev.map((day) =>
@@ -197,13 +226,17 @@ export function PlanTreninga() {
           >
             {editMode ? "Završi uređivanje" : "Uredi plan"}
           </button>
-          <button type="button" className="bg-secondary border border-border text-foreground px-5 py-2 text-sm rounded hover:bg-secondary/80 transition-colors flex-shrink-0 min-h-[44px]">
-            Historija
+          <button
+              onClick={toggleHistory}
+              type="button"
+              className={`px-5 py-2 text-sm rounded font-medium border transition-colors cursor-pointer flex-shrink-0 min-h-[44px] ${showHistory ? 'bg-primary text-white border-transparent' : 'bg-secondary border-border text-foreground hover:bg-secondary/80'}`}
+          >
+            {showHistory ? "Zatvori historiju" : "Historija"}
           </button>
         </div>
 
         {/* Režim obaveštenja za uređivanje */}
-        {editMode && (
+        {!showHistory && editMode && (
             <div className="bg-amber-500/10 border border-amber-500/30 text-amber-500 rounded-lg p-3 mb-6 text-sm flex justify-between items-center animate-pulse">
               <span>U režimu ste za uređivanje. Možete uklanjati vježbe sa crvenim "X" i menjati minutažu na dnu svakog dana.</span>
               <button type="button" onClick={() => setEditMode(false)} className="underline text-xs font-bold cursor-pointer">Završi</button>
@@ -211,7 +244,7 @@ export function PlanTreninga() {
         )}
 
         {/* Forma za unos vježbe */}
-        {showForm && (
+        {!showHistory && showForm && (
             <form onSubmit={handleAddExercise} className="bg-card border border-primary/40 rounded-lg p-4 mb-6 shadow-md">
               <h3 className="text-sm font-semibold text-foreground mb-3">Nova vježba</h3>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
@@ -289,144 +322,225 @@ export function PlanTreninga() {
             </form>
         )}
 
-        {/* Week Overview Header */}
-        <div className="bg-secondary border border-border rounded-lg p-4 mb-4">
-          <div className="flex flex-wrap justify-between items-center gap-2">
-            <div className="text-sm font-medium text-foreground">
-              {days.length > 0 && `Sedmica: ${days[0].date} – ${days[6].date}`}
-              {weekOffset === 0 && <span className="ml-2 text-xs text-primary">(tekuća)</span>}
-              {weekOffset === 1 && <span className="ml-2 text-xs text-emerald-400">(iduća)</span>}
+        {/* Historija vježbi */}
+        {showHistory && (
+            <div className="bg-card border border-border rounded-lg overflow-hidden mb-6 shadow-sm">
+              <div className="bg-secondary/50 p-4 border-b border-border flex justify-between items-center">
+                <h3 className="font-bold text-lg uppercase tracking-wider" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                  Sve dodane vježbe (Historija)
+                </h3>
+              </div>
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border-collapse">
+                  <thead>
+                    <tr className="bg-secondary/30 border-b border-border">
+                      <th className="p-3 text-xs font-bold uppercase text-muted-foreground tracking-wider">Datum</th>
+                      <th className="p-3 text-xs font-bold uppercase text-muted-foreground tracking-wider">Vježba</th>
+                      <th className="p-3 text-xs font-bold uppercase text-muted-foreground tracking-wider text-center">Serije</th>
+                      <th className="p-3 text-xs font-bold uppercase text-muted-foreground tracking-wider text-center">Ponavljanja</th>
+                      <th className="p-3 text-xs font-bold uppercase text-muted-foreground tracking-wider text-center">Odmor (s)</th>
+                      <th className="p-3 text-xs font-bold uppercase text-muted-foreground tracking-wider text-center">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {historyLoading ? (
+                        <tr><td colSpan="6" className="p-8 text-center text-muted-foreground">Učitavanje historije...</td></tr>
+                    ) : historyData.length > 0 ? (
+                        historyData.map((ex) => (
+                            <tr key={ex.id} className="hover:bg-secondary/20 transition-colors">
+                              <td className="p-3 text-sm font-medium text-foreground">{ex.scheduledDate}</td>
+                              <td className="p-3 text-sm text-foreground">{ex.exerciseName}</td>
+                              <td className="p-3 text-sm text-foreground text-center">{ex.sets}</td>
+                              <td className="p-3 text-sm text-foreground text-center">{ex.reps}</td>
+                              <td className="p-3 text-sm text-foreground text-center">{ex.restSec || 0}</td>
+                              <td className="p-3 text-sm text-center">
+                                {ex.completed ? (
+                                    <span className="bg-emerald-500/10 text-emerald-500 text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-emerald-500/20">Završeno</span>
+                                ) : (
+                                    <span className="bg-amber-500/10 text-amber-500 text-[10px] font-bold uppercase px-2 py-0.5 rounded border border-amber-500/20">Planirano</span>
+                                )}
+                              </td>
+                            </tr>
+                        ))
+                    ) : (
+                        <tr><td colSpan="6" className="p-8 text-center text-muted-foreground italic">Nema zapisa u historiji.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              
+              {/* Paginacija */}
+              {historyTotalPages > 1 && (
+                  <div className="bg-secondary/30 p-3 border-t border-border flex items-center justify-between">
+                    <div className="text-xs text-muted-foreground">
+                      Stranica {historyPage + 1} od {historyTotalPages}
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                          onClick={() => fetchHistory(historyPage - 1)}
+                          disabled={historyPage === 0 || historyLoading}
+                          className="px-3 py-1 bg-card border border-border text-foreground text-xs rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Prethodna
+                      </button>
+                      <button
+                          onClick={() => fetchHistory(historyPage + 1)}
+                          disabled={historyPage === historyTotalPages - 1 || historyLoading}
+                          className="px-3 py-1 bg-card border border-border text-foreground text-xs rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Sljedeća
+                      </button>
+                    </div>
+                  </div>
+              )}
             </div>
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={() => setWeekOffset(o => Math.max(0, o - 1))}
-                disabled={weekOffset === 0}
-                className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                ← Prethodna
-              </button>
-              <button
-                type="button"
-                onClick={() => setWeekOffset(o => Math.min(1, o + 1))}
-                disabled={weekOffset === 1}
-                className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
-              >
-                Sledeća →
-              </button>
+        )}
+
+        {/* Week Overview Header */}
+        {!showHistory && (
+          <div className="bg-secondary border border-border rounded-lg p-4 mb-4">
+            <div className="flex flex-wrap justify-between items-center gap-2">
+              <div className="text-sm font-medium text-foreground">
+                {days.length > 0 && `Sedmica: ${days[0].date} – ${days[6].date}`}
+                {weekOffset === 0 && <span className="ml-2 text-xs text-primary">(tekuća)</span>}
+                {weekOffset === 1 && <span className="ml-2 text-xs text-emerald-400">(iduća)</span>}
+              </div>
+              <div className="flex gap-2">
+                <button
+                  type="button"
+                  onClick={() => setWeekOffset(o => Math.max(0, o - 1))}
+                  disabled={weekOffset === 0}
+                  className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  ← Prethodna
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setWeekOffset(o => Math.min(1, o + 1))}
+                  disabled={weekOffset === 1}
+                  className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Sledeća →
+                </button>
+              </div>
             </div>
           </div>
-        </div>
+        )}
 
         {/* Weekly Workout Grid */}
-        <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
-        <div className="grid grid-cols-7 gap-2 mb-6 min-w-[700px]">
-          {days.map((day) => {
-            const hasExercises = day.exercises.length > 0;
-            return (
-                <div key={day.id} className={`bg-card border rounded-lg overflow-hidden flex flex-col justify-between min-h-[240px] transition-all ${editMode ? 'border-amber-500/50 shadow-sm' : 'border-border'}`}>
-                  <div>
-                    <div className={`${day.active && hasExercises ? "bg-primary text-white" : "bg-secondary text-foreground"} p-2 text-center`}>
-                      <div className="text-xs font-semibold">{day.name}</div>
-                      <div className={`text-xs mt-0.5 ${day.active && hasExercises ? "text-white/80" : "text-muted-foreground"}`}>{day.date}</div>
+        {!showHistory && (
+          <div className="overflow-x-auto -mx-4 px-4 md:mx-0 md:px-0">
+          <div className="grid grid-cols-7 gap-2 mb-6 min-w-[700px]">
+            {days.map((day) => {
+              const hasExercises = day.exercises.length > 0;
+              return (
+                  <div key={day.id} className={`bg-card border rounded-lg overflow-hidden flex flex-col justify-between min-h-[240px] transition-all ${editMode ? 'border-amber-500/50 shadow-sm' : 'border-border'}`}>
+                    <div>
+                      <div className={`${day.active && hasExercises ? "bg-primary text-white" : "bg-secondary text-foreground"} p-2 text-center`}>
+                        <div className="text-xs font-semibold">{day.name}</div>
+                        <div className={`text-xs mt-0.5 ${day.active && hasExercises ? "text-white/80" : "text-muted-foreground"}`}>{day.date}</div>
+                      </div>
+
+                      <div className="p-2.5 space-y-1.5">
+                        {hasExercises ? (
+                            day.exercises.map((exercise) => (
+                                <div key={exercise.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
+                                  <div className="flex-1 min-w-0">
+                                    {exercise.startTime && (
+                                      <div className="text-xs text-muted-foreground mb-0.5">{exercise.startTime}</div>
+                                    )}
+                                    <div className={`text-xs font-medium ${exercise.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
+                                      {exercise.name || 'Vježba'}
+                                    </div>
+                                    <div className="text-xs text-primary font-semibold mt-0.5">{exercise.details}</div>
+                                  </div>
+                                  <div className="flex gap-1 ml-1 shrink-0">
+                                    {!exercise.completed && exercise.canComplete && !editMode && (
+                                      <button
+                                        type="button"
+                                        onClick={() => markAsCompleted(exercise.id)}
+                                        className="text-emerald-500 hover:text-emerald-700 text-xs font-bold px-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition-colors"
+                                        title="Označi kao završeno"
+                                      >✓</button>
+                                    )}
+                                    {editMode && day.id >= todayStr && (
+                                      <button
+                                        type="button"
+                                        onClick={() => deleteExercise(day.id, exercise.id)}
+                                        className="text-red-500 hover:text-red-700 text-xs font-bold px-1 rounded bg-red-500/10 hover:bg-red-500/20 cursor-pointer transition-colors"
+                                        title="Obriši vježbu"
+                                      >✕</button>
+                                    )}
+                                  </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className="text-center text-xs text-muted-foreground italic py-6">
+                              Dan odmora
+                            </div>
+                        )}
+                      </div>
                     </div>
 
-                    <div className="p-2.5 space-y-1.5">
+                    {/* Donji deo kartice sa vremenom */}
+                    <div className="border-t border-border p-2 text-xs text-muted-foreground text-center bg-secondary/30">
                       {hasExercises ? (
-                          day.exercises.map((exercise) => (
-                              <div key={exercise.id} className="bg-secondary rounded p-1.5 flex justify-between items-start group relative">
-                                <div className="flex-1 min-w-0">
-                                  {exercise.startTime && (
-                                    <div className="text-xs text-muted-foreground mb-0.5">{exercise.startTime}</div>
-                                  )}
-                                  <div className={`text-xs font-medium ${exercise.completed ? 'text-emerald-500 line-through' : 'text-foreground'}`}>
-                                    {exercise.name || 'Vježba'}
-                                  </div>
-                                  <div className="text-xs text-primary font-semibold mt-0.5">{exercise.details}</div>
-                                </div>
-                                <div className="flex gap-1 ml-1 shrink-0">
-                                  {!exercise.completed && exercise.canComplete && !editMode && (
-                                    <button
-                                      type="button"
-                                      onClick={() => markAsCompleted(exercise.id)}
-                                      className="text-emerald-500 hover:text-emerald-700 text-xs font-bold px-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition-colors"
-                                      title="Označi kao završeno"
-                                    >✓</button>
-                                  )}
-                                  {editMode && day.id >= todayStr && (
-                                    <button
-                                      type="button"
-                                      onClick={() => deleteExercise(day.id, exercise.id)}
-                                      className="text-red-500 hover:text-red-700 text-xs font-bold px-1 rounded bg-red-500/10 hover:bg-red-500/20 cursor-pointer transition-colors"
-                                      title="Obriši vježbu"
-                                    >✕</button>
-                                  )}
-                                </div>
+                          editMode ? (
+                              <div className="flex items-center justify-center gap-1">
+                                <span>{day.type} · </span>
+                                <input
+                                    type="number"
+                                    value={day.duration}
+                                    onChange={(e) => changeDuration(day.id, e.target.value)}
+                                    className="w-12 bg-card border border-border rounded text-center text-foreground p-0.5"
+                                    min="0"
+                                />
+                                <span>min</span>
                               </div>
-                          ))
+                          ) : (
+                              `${day.type} · ${day.duration} min`
+                          )
                       ) : (
-                          <div className="text-center text-xs text-muted-foreground italic py-6">
-                            Dan odmora
-                          </div>
+                          "Odmor"
                       )}
                     </div>
                   </div>
+              );
+            })}
+          </div>
 
-                  {/* Donji deo kartice sa vremenom */}
-                  <div className="border-t border-border p-2 text-xs text-muted-foreground text-center bg-secondary/30">
-                    {hasExercises ? (
-                        editMode ? (
-                            <div className="flex items-center justify-center gap-1">
-                              <span>{day.type} · </span>
-                              <input
-                                  type="number"
-                                  value={day.duration}
-                                  onChange={(e) => changeDuration(day.id, e.target.value)}
-                                  className="w-12 bg-card border border-border rounded text-center text-foreground p-0.5"
-                                  min="0"
-                              />
-                              <span>min</span>
-                            </div>
-                        ) : (
-                            `${day.type} · ${day.duration} min`
-                        )
-                    ) : (
-                        "Odmor"
-                    )}
-                  </div>
-                </div>
-            );
-          })}
-        </div>
+          </div>
+        )}
 
-        </div>
         {/* Weekly Summary */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-          <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-primary">
-            <div className="text-xs text-muted-foreground mb-2">Ukupno treninga</div>
-            <div className="text-3xl font-bold text-primary" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {stats?.totalPlannedExercises || 0}
+        {!showHistory && (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+            <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-primary">
+              <div className="text-xs text-muted-foreground mb-2">Ukupno treninga</div>
+              <div className="text-3xl font-bold text-primary" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {stats?.totalPlannedExercises || 0}
+              </div>
+            </div>
+            <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-emerald-500">
+              <div className="text-xs text-muted-foreground mb-2">Završeno</div>
+              <div className="text-3xl font-bold text-emerald-400" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {stats?.totalCompletedExercises || 0}
+              </div>
+            </div>
+            <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-blue-500">
+              <div className="text-xs text-muted-foreground mb-2">Procenat</div>
+              <div className="text-3xl font-bold text-blue-400" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {stats?.completionPercentage || 0}%
+              </div>
+            </div>
+            <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-muted-foreground">
+              <div className="text-xs text-muted-foreground mb-2">Dana odmora</div>
+              <div className="text-3xl font-bold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
+                {days.filter(d => d.exercises.length === 0).length}
+              </div>
             </div>
           </div>
-          <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-emerald-500">
-            <div className="text-xs text-muted-foreground mb-2">Završeno</div>
-            <div className="text-3xl font-bold text-emerald-400" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {stats?.totalCompletedExercises || 0}
-            </div>
-          </div>
-          <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-blue-500">
-            <div className="text-xs text-muted-foreground mb-2">Procenat</div>
-            <div className="text-3xl font-bold text-blue-400" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {stats?.completionPercentage || 0}%
-            </div>
-          </div>
-          <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-muted-foreground">
-            <div className="text-xs text-muted-foreground mb-2">Dana odmora</div>
-            <div className="text-3xl font-bold text-foreground" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-              {days.filter(d => d.exercises.length === 0).length}
-            </div>
-          </div>
-        </div>
+        )}
       </div>
   );
 }

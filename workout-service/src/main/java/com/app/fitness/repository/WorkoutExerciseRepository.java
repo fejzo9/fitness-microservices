@@ -16,6 +16,9 @@ public interface WorkoutExerciseRepository extends JpaRepository<WorkoutExercise
     List<WorkoutExercise> findByUserId(Long userId);
 
     @EntityGraph(attributePaths = {"exercise"})
+    org.springframework.data.domain.Page<WorkoutExercise> findByUserId(Long userId, org.springframework.data.domain.Pageable pageable);
+
+    @EntityGraph(attributePaths = {"exercise"})
     List<WorkoutExercise> findByUserIdAndScheduledDateBetween(Long userId, LocalDate from, LocalDate to);
 
     @EntityGraph(attributePaths = {"exercise"})

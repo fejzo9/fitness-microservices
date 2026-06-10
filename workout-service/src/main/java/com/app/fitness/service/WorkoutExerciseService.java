@@ -65,6 +65,12 @@ public class WorkoutExerciseService {
     }
 
     @Transactional(readOnly = true)
+    public org.springframework.data.domain.Page<WorkoutExerciseResponse> findHistoryByUserId(Long userId, org.springframework.data.domain.Pageable pageable) {
+        return workoutExerciseRepository.findByUserId(userId, pageable)
+                .map(this::toResponseWithDay);
+    }
+
+    @Transactional(readOnly = true)
     public List<WorkoutExerciseResponse> findByUserIdAndDay(Long userId, DayOfWeek day) {
         LocalDate[] range = currentWeekRange();
         // Nađi datum u tekućoj sedmici koji odgovara traženom danu

@@ -210,6 +210,8 @@ export const api = {
     if (userId) return request(`${API_BASE.workout}/workout-exercises/user/${userId}?nextWeek=${nextWeek}`);
     return request(`${API_BASE.workout}/workout-exercises`);
   },
+  getWorkoutHistory: (userId, page = 0, size = 10) => 
+    request(`${API_BASE.workout}/workout-exercises/user/${userId}/history?page=${page}&size=${size}&sort=scheduledDate,desc`),
   getWorkoutExercisesByDay: (userId, day) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/day/${day}`),
   getWorkoutStatistics: (userId) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/statistics`),
   createWorkoutExercise: (data) => requestJson(`${API_BASE.workout}/workout-exercises`, 'POST', data),
