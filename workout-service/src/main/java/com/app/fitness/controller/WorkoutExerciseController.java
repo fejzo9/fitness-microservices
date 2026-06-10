@@ -48,6 +48,11 @@ public class WorkoutExerciseController {
         return ResponseEntity.ok(workoutExerciseService.findByUserIdAndDay(userId, day));
     }
 
+    @GetMapping("/user/{userId}/completed")
+    public ResponseEntity<List<WorkoutExerciseResponse>> getCompletedByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(workoutExerciseService.findCompletedByUserId(userId));
+    }
+
     @GetMapping("/user/{userId}/statistics")
     public ResponseEntity<WorkoutWeeklyStatisticsResponse> getWeeklyStatistics(@PathVariable Long userId) {
         return ResponseEntity.ok(workoutExerciseService.getWeeklyStatistics(userId));

@@ -130,6 +130,9 @@ export const api = {
   updateUserProfile: (id, data) => requestJson(`${API_BASE.auth}/users/${id}/profile`, 'PATCH', data),
   deleteUser: (id) => request(`${API_BASE.auth}/users/${id}`, { method: 'DELETE' }),
 
+  getWeightHistoryByUserId: (userId) => request(`${API_BASE.auth}/weight-history/user/${userId}`),
+  addWeightEntry: (data) => requestJson(`${API_BASE.auth}/weight-history`, 'POST', data),
+
   // ── USER SERVICE (/users) ─────────────────────────────────────
   getFitnessGoals: () => request(`${API_BASE.user}/fitness-goals`),
   getFitnessGoalById: (id) => request(`${API_BASE.user}/fitness-goals/${id}`),
@@ -215,11 +218,14 @@ export const api = {
   deleteWorkoutExercise: (id) => request(`${API_BASE.workout}/workout-exercises/${id}`, { method: 'DELETE' }),
 
   getCompletedWorkouts: () => request(`${API_BASE.workout}/completed-workouts`),
+  getCompletedWorkoutsByUserId: (userId) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/completed`),
   createCompletedWorkout: (data) => requestJson(`${API_BASE.workout}/completed-workouts`, 'POST', data),
   updateCompletedWorkout: (id, data) => requestJson(`${API_BASE.workout}/completed-workouts/${id}`, 'PUT', data),
   deleteCompletedWorkout: (id) => request(`${API_BASE.workout}/completed-workouts/${id}`, { method: 'DELETE' }),
 
   getCompletedExercises: () => request(`${API_BASE.workout}/completed-exercises`),
+  getCompletedExercisesByUserId: (userId) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/completed`),
+  getCompletedExercisesByExerciseId: (exerciseId) => request(`${API_BASE.workout}/completed-exercises/exercise/${exerciseId}`),
   createCompletedExercise: (data) => requestJson(`${API_BASE.workout}/completed-exercises`, 'POST', data),
   updateCompletedExercise: (id, data) => requestJson(`${API_BASE.workout}/completed-exercises/${id}`, 'PUT', data),
   deleteCompletedExercise: (id) => request(`${API_BASE.workout}/completed-exercises/${id}`, { method: 'DELETE' }),

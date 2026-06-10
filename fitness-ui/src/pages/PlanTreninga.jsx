@@ -157,9 +157,9 @@ export function PlanTreninga() {
   };
 
   const changeDuration = (dayId, newDuration) => {
-    setDani((previousDays) =>
-        previousDays.map((day) =>
-            day.id === dayId ? { ...dan, trajanje: Number(newDuration) || 0 } : dan
+    setDays((prev) =>
+        prev.map((day) =>
+            day.id === dayId ? { ...day, duration: Number(newDuration) || 0 } : day
         )
     );
   };
@@ -234,7 +234,7 @@ export function PlanTreninga() {
                       required
                   >
                     <option value="">Izaberi vježbu</option>
-                    {sveVezbe.map(v => (
+                    {allExercises.map(v => (
                         <option key={v.id} value={v.id}>{v.name}</option>
                     ))}
                   </select>

@@ -78,6 +78,13 @@ public class WorkoutExerciseService {
     }
 
     @Transactional(readOnly = true)
+    public List<WorkoutExerciseResponse> findCompletedByUserId(Long userId) {
+        return workoutExerciseRepository.findByUserIdAndCompletedTrue(userId).stream()
+                .map(this::toResponseWithDay)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public WorkoutExerciseResponse findById(Long id) {
         return workoutExerciseRepository.findById(id)
                 .map(this::toResponseWithDay)

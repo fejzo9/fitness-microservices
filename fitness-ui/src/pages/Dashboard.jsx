@@ -1,22 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../contexts/AuthContext';
 import { Spinner } from '../components/Spinner';
 import { useToast } from '../contexts/ToastContext';
+import { Input } from '../components/Input';
 
 export function Dashboard() {
-  const { user } = useAuth();
+  const { user, refreshUser } = useAuth();
   const toast = useToast();
   const [todayExercises, setTodayExercises] = useState([]);
   const [stats, setStats] = useState(null);
   const [todayMeals, setTodayMeals] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const [showWeightModal, setShowWeightModal] = useState(false);
+  const [newWeight, setNewWeight] = useState(user?.weight || '');
+  const [entryDate, setEntryDate] = useState(new Date().toISOString().split('T')[0]);
+  const [savingWeight, setSavingWeight] = useState(false);
+  const modalRef = useRef();
+
   useEffect(() => {
     if (user?.id) {
       fetchDashboardData();
     }
-  }, [user]);
+  }, [user?.id]);
 
   const fetchDashboardData = async () => {
     setLoading(true);
@@ -51,11 +58,47 @@ export function Dashboard() {
     }
   };
 
+  const handleWeightSubmit = async (e) => {
+    e.preventDefault();
+    if (!newWeight || !entryDate) return;
+
+    setSavingWeight(true);
+    try {
+      await api.addWeightEntry({
+        userId: user.id,
+        weight: parseInt(newWeight),
+        entryDate: entryDate
+      });
+
+      // Refresh local user state in context
+      await refreshUser();
+      
+      toast('Tjelesna težina uspješno evidentirana.', 'success');
+      setShowWeightModal(false);
+    } catch (error) {
+      toast('Greška pri spremanju težine.', 'error');
+    } finally {
+      setSavingWeight(false);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 max-w-7xl mx-auto">
       {/* Page Title */}
-      <div className="mb-6">
-        <h2 className="text-xl font-normal border-b border-border pb-3">Dashboard</h2>
+      <div className="mb-6 flex justify-between items-center border-b border-border pb-3">
+        <h2 className="text-xl font-normal">Dashboard</h2>
+        <div className="flex items-center gap-4">
+          <div className="text-sm">
+            <span className="text-muted-foreground">Težina: </span>
+            <span className="font-bold text-primary">{user?.weight || '--'} kg</span>
+          </div>
+          <button
+            onClick={() => setShowWeightModal(true)}
+            className="bg-primary text-primary-foreground px-3 py-1 text-sm hover:bg-primary/90 transition-colors"
+          >
+            + Unesi težinu
+          </button>
+        </div>
       </div>
 
 
@@ -194,6 +237,51 @@ export function Dashboard() {
           </div>
         </div>
       </div>
+
+      {/* Weight Entry Modal */}
+      {showWeightModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div ref={modalRef} className="bg-card border-2 border-border w-full max-w-md p-6 shadow-2xl">
+            <h3 className="text-xl font-normal border-b border-border pb-3 mb-5">Nova tjesna težina</h3>
+            <form onSubmit={handleWeightSubmit} className="space-y-4">
+              <Input
+                label="Datum unosa"
+                type="date"
+                value={entryDate}
+                onChange={(e) => setEntryDate(e.target.value)}
+                required
+                max={new Date().toISOString().split('T')[0]}
+              />
+              <Input
+                label="Težina (kg)"
+                type="number"
+                value={newWeight}
+                onChange={(e) => setNewWeight(e.target.value)}
+                placeholder="npr. 85"
+                required
+                min="30"
+                max="300"
+              />
+              <div className="flex gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => setShowWeightModal(false)}
+                  className="flex-1 bg-secondary text-foreground py-2 hover:bg-secondary/80 transition-colors border border-border"
+                >
+                  Odustani
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingWeight}
+                  className="flex-1 bg-primary text-primary-foreground py-2 hover:bg-primary/90 transition-colors disabled:opacity-50"
+                >
+                  {savingWeight ? 'Spremanje...' : 'Spremi'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
