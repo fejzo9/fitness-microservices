@@ -42,6 +42,11 @@ spring:
           filters:
             - RewritePath=/notifications/(?<segment>.*), /api/$\{segment}
 
+# Internal Service Configuration
+internal:
+  service:
+    key: ${INTERNAL_SERVICE_KEY:my-super-secret-internal-key}
+
 eureka:
   client:
     serviceUrl:

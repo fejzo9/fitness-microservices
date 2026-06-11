@@ -130,10 +130,12 @@ services:
       DB_PASSWORD: password
       EUREKA_CLIENT_SERVICE_URL_DEFAULTZONE: http://eureka-service:8761/eureka
       RABBIT_HOST: rabbitmq
+      MAIL_HOST: mailhog
     depends_on:
       - notification-db
       - eureka-service # Added dependency
       - rabbitmq
+      - mailhog
     networks:
       - fitness-network
 
@@ -243,6 +245,16 @@ services:
       - notification-db
       - nutrition-db
       - workout-db
+    networks:
+      - fitness-network
+
+  # Mailhog for email mocking
+  mailhog:
+    image: mailhog/mailhog
+    container_name: mailhog
+    ports:
+      - "1025:1025" # SMTP server
+      - "8025:8025" # Web UI
     networks:
       - fitness-network
 

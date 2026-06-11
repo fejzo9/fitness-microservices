@@ -1,5 +1,6 @@
 package com.app.fitness.config;
 
+import com.app.fitness.filter.InternalServiceFilter;
 import com.app.fitness.filter.JwtAuthFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
@@ -25,6 +26,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    private final InternalServiceFilter internalServiceFilter;
     private final UserDetailsService userDetailsService; // Will be implemented by UserService
 
     @Bean
@@ -33,10 +35,12 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register", "/auth/refresh-token").permitAll()
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/auth/users/{id}").hasAnyRole("ADMIN", "INTERNAL")
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(internalServiceFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
