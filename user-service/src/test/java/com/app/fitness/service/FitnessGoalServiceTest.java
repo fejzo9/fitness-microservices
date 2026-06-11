@@ -106,12 +106,8 @@ class FitnessGoalServiceTest {
     void findByUserId_shouldReturnMappedList() {
         FitnessGoal goal1 = FitnessGoal.builder().id(1L).userId(3L).goalType("Lose Weight").isActive(true).build();
         FitnessGoal goal2 = FitnessGoal.builder().id(2L).userId(3L).goalType("Build Muscle").isActive(false).build();
-        FitnessGoalResponse response1 = new FitnessGoalResponse(1L, 3L, "Lose Weight", null, true, null);
-        FitnessGoalResponse response2 = new FitnessGoalResponse(2L, 3L, "Build Muscle", null, false, null);
-        
+
         when(fitnessGoalRepository.findByUserId(3L)).thenReturn(List.of(goal1, goal2));
-        when(fitnessGoalMapper.toResponse(goal1)).thenReturn(response1);
-        when(fitnessGoalMapper.toResponse(goal2)).thenReturn(response2);
 
         List<FitnessGoalResponse> result = fitnessGoalService.findByUserId(3L);
 
@@ -163,7 +159,7 @@ class FitnessGoalServiceTest {
         FitnessGoalResponse result = fitnessGoalService.create(request);
 
         assertThat(result.getId()).isEqualTo(2L);
-        verify(fitnessGoalRepository).save(existingActiveGoal);
-        verify(existingActiveGoal).setIsActive(false);
+        verify(fitnessGoalRepository, times(2)).save(any(FitnessGoal.class));
+        assertThat(existingActiveGoal.getIsActive()).isFalse();
     }
 }
