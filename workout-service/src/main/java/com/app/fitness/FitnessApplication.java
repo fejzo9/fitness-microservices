@@ -6,8 +6,11 @@ import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.cloud.openfeign.EnableFeignClients;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 @SpringBootApplication
 @EnableFeignClients
+@EnableScheduling
 @EntityScan(basePackages = "com.app.fitness.model")
 @EnableJpaRepositories(basePackages = "com.app.fitness.repository")
 @EnableDiscoveryClient

@@ -27,6 +27,9 @@ public interface WorkoutExerciseRepository extends JpaRepository<WorkoutExercise
     @EntityGraph(attributePaths = {"exercise"})
     List<WorkoutExercise> findByUserIdAndCompletedTrue(Long userId);
 
+    @EntityGraph(attributePaths = {"exercise"})
+    List<WorkoutExercise> findByScheduledDate(LocalDate date);
+
     @Override
     @EntityGraph(attributePaths = {"exercise"})
     List<WorkoutExercise> findAll();

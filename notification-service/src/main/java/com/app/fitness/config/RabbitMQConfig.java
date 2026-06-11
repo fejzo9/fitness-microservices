@@ -11,17 +11,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RabbitMQConfig {
 
-    public static final String DELETION_EXCHANGE = "user.deletion.exchange";
-    public static final String DELETION_QUEUE = "workout.service.deletion.queue";
-    public static final String RESPONSE_EXCHANGE = "user.deletion.response.exchange";
     public static final String NOTIFICATION_EXCHANGE = "workout.notification.exchange";
     public static final String NOTIFICATION_QUEUE = "workout.notification.queue";
     public static final String NOTIFICATION_ROUTING_KEY = "workout.notification.key";
-
-    @Bean
-    public TopicExchange deletionExchange() {
-        return new TopicExchange(DELETION_EXCHANGE);
-    }
 
     @Bean
     public TopicExchange notificationExchange() {
@@ -36,16 +28,6 @@ public class RabbitMQConfig {
     @Bean
     public Binding notificationBinding(Queue notificationQueue, TopicExchange notificationExchange) {
         return BindingBuilder.bind(notificationQueue).to(notificationExchange).with(NOTIFICATION_ROUTING_KEY);
-    }
-
-    @Bean
-    public Queue deletionQueue() {
-        return new Queue(DELETION_QUEUE);
-    }
-
-    @Bean
-    public Binding deletionBinding(Queue deletionQueue, TopicExchange deletionExchange) {
-        return BindingBuilder.bind(deletionQueue).to(deletionExchange).with("user.deletion.request");
     }
 
     @Bean
