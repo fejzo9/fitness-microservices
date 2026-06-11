@@ -45,10 +45,10 @@ class UserControllerTest extends ControllerTestSupport {
     @Test
     void getAll_shouldReturnListOfUsers() throws Exception {
         when(userService.findAll()).thenReturn(List.of(
-                new UserResponse(1L, "admin1", "admin1@fitapp.com", "ADMIN", CREATED_AT),
-                new UserResponse(2L, "user1", "user1@fitapp.com", "USER", CREATED_AT)));
+                UserResponse.builder().id(1L).username("admin1").email("admin1@fitapp.com").roleName("ADMIN").createdAt(CREATED_AT).build(),
+                UserResponse.builder().id(2L).username("user1").email("user1@fitapp.com").roleName("USER").createdAt(CREATED_AT).build()));
 
-        mockMvc.perform(get("/api/users"))
+        mockMvc.perform(get("/auth/users"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].username").value("admin1"));
@@ -57,9 +57,9 @@ class UserControllerTest extends ControllerTestSupport {
     @Test
     void getById_whenUserExists_shouldReturnUser() throws Exception {
         when(userService.findById(1L))
-                .thenReturn(new UserResponse(1L, "admin1", "admin1@fitapp.com", "ADMIN", CREATED_AT));
+                .thenReturn(UserResponse.builder().id(1L).username("admin1").email("admin1@fitapp.com").roleName("ADMIN").createdAt(CREATED_AT).build());
 
-        mockMvc.perform(get("/api/users/1"))
+        mockMvc.perform(get("/auth/users/1"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.roleName").value("ADMIN"));
@@ -69,18 +69,23 @@ class UserControllerTest extends ControllerTestSupport {
     void getById_whenUserDoesNotExist_shouldReturn404() throws Exception {
         when(userService.findById(99L)).thenThrow(new ResourceNotFoundException("User not found with id: 99"));
 
-        mockMvc.perform(get("/api/users/99"))
+        mockMvc.perform(get("/auth/users/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }
 
     @Test
     void create_withValidRequest_shouldReturnCreatedUser() throws Exception {
-        UserRequest request = new UserRequest("newuser", "newuser@test.com", "hash123", 3L);
+        UserRequest request = UserRequest.builder()
+                .username("newuser")
+                .email("newuser@test.com")
+                .password("hash123")
+                .roleId(3L)
+                .build();
         when(userService.create(any(UserRequest.class)))
-                .thenReturn(new UserResponse(10L, "newuser", "newuser@test.com", "USER", CREATED_AT));
+                .thenReturn(UserResponse.builder().id(10L).username("newuser").email("newuser@test.com").roleName("USER").createdAt(CREATED_AT).build());
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/auth/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
@@ -90,9 +95,14 @@ class UserControllerTest extends ControllerTestSupport {
 
     @Test
     void create_withInvalidEmail_shouldReturn400() throws Exception {
-        UserRequest request = new UserRequest("newuser", "not-an-email", "hash123", 3L);
+        UserRequest request = UserRequest.builder()
+                .username("newuser")
+                .email("not-an-email")
+                .password("hash123")
+                .roleId(3L)
+                .build();
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/auth/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest())
@@ -102,11 +112,16 @@ class UserControllerTest extends ControllerTestSupport {
 
     @Test
     void create_whenUsernameAlreadyExists_shouldReturn409() throws Exception {
-        UserRequest request = new UserRequest("admin1", "admin1@fitapp.com", "hash123", 1L);
+        UserRequest request = UserRequest.builder()
+                .username("admin1")
+                .email("admin1@fitapp.com")
+                .password("hash123")
+                .roleId(1L)
+                .build();
         when(userService.create(any(UserRequest.class)))
                 .thenThrow(new DuplicateResourceException("Username already exists: admin1"));
 
-        mockMvc.perform(post("/api/users")
+        mockMvc.perform(post("/auth/users")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isConflict())
@@ -115,11 +130,16 @@ class UserControllerTest extends ControllerTestSupport {
 
     @Test
     void update_withValidRequest_shouldReturnUpdatedUser() throws Exception {
-        UserRequest request = new UserRequest("updateduser", "updated@test.com", "newhash", 3L);
+        UserRequest request = UserRequest.builder()
+                .username("updateduser")
+                .email("updated@test.com")
+                .password("newhash")
+                .roleId(3L)
+                .build();
         when(userService.update(eq(1L), any(UserRequest.class)))
-                .thenReturn(new UserResponse(1L, "updateduser", "updated@test.com", "USER", CREATED_AT));
+                .thenReturn(UserResponse.builder().id(1L).username("updateduser").email("updated@test.com").roleName("USER").createdAt(CREATED_AT).build());
 
-        mockMvc.perform(put("/api/users/1")
+        mockMvc.perform(put("/auth/users/1")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk())
@@ -128,11 +148,16 @@ class UserControllerTest extends ControllerTestSupport {
 
     @Test
     void update_whenUserDoesNotExist_shouldReturn404() throws Exception {
-        UserRequest request = new UserRequest("updateduser", "updated@test.com", "newhash", 3L);
+        UserRequest request = UserRequest.builder()
+                .username("updateduser")
+                .email("updated@test.com")
+                .password("newhash")
+                .roleId(3L)
+                .build();
         when(userService.update(eq(99L), any(UserRequest.class)))
                 .thenThrow(new ResourceNotFoundException("User not found with id: 99"));
 
-        mockMvc.perform(put("/api/users/99")
+        mockMvc.perform(put("/auth/users/99")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isNotFound())
@@ -141,7 +166,7 @@ class UserControllerTest extends ControllerTestSupport {
 
     @Test
     void delete_whenUserExists_shouldReturn204() throws Exception {
-        mockMvc.perform(delete("/api/users/1"))
+        mockMvc.perform(delete("/auth/users/1"))
                 .andExpect(status().isNoContent());
     }
 
@@ -149,7 +174,7 @@ class UserControllerTest extends ControllerTestSupport {
     void delete_whenUserDoesNotExist_shouldReturn404() throws Exception {
         doThrow(new ResourceNotFoundException("User not found with id: 99")).when(userService).delete(99L);
 
-        mockMvc.perform(delete("/api/users/99"))
+        mockMvc.perform(delete("/auth/users/99"))
                 .andExpect(status().isNotFound())
                 .andExpect(jsonPath("$.error").value("NOT_FOUND"));
     }
