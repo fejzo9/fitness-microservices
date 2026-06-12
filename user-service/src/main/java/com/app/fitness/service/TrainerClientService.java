@@ -27,6 +27,13 @@ public class TrainerClientService {
     }
 
     @Transactional(readOnly = true)
+    public List<TrainerClientResponse> findAllByTrainerId(Long trainerId) {
+        return trainerClientRepository.findAllByTrainerId(trainerId).stream()
+                .map(trainerClientMapper::toResponse)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
     public TrainerClientResponse findById(Long id) {
         return trainerClientRepository.findById(id)
                 .map(trainerClientMapper::toResponse)

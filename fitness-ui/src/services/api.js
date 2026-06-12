@@ -143,6 +143,7 @@ export const api = {
   deleteFitnessGoal: (id) => request(`${API_BASE.user}/fitness-goals/${id}`, { method: 'DELETE' }),
 
   getTrainerClients: () => request(`${API_BASE.user}/trainer-clients`),
+  getTrainerClientsByTrainerId: (trainerId) => request(`${API_BASE.user}/trainer-clients/trainer/${trainerId}`),
   getTrainerClientById: (id) => request(`${API_BASE.user}/trainer-clients/${id}`),
   createTrainerClient: (data) => requestJson(`${API_BASE.user}/trainer-clients`, 'POST', data),
   updateTrainerClient: (id, data) => requestJson(`${API_BASE.user}/trainer-clients/${id}`, 'PUT', data),

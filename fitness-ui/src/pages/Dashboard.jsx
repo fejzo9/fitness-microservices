@@ -133,7 +133,7 @@ export function Dashboard() {
                       <button
                         type="button"
                         onClick={() => handleComplete(ex.id)}
-                        className="text-emerald-500 hover:text-emerald-700 text-xs font-bold px-1.5 py-0.5 rounded bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition-colors"
+                        className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm transition-all flex items-center justify-center min-w-[24px]"
                         title="Označi kao završeno"
                       >✓</button>
                     )}
@@ -217,7 +217,7 @@ export function Dashboard() {
               </div>
               <div className="text-center">
                 <div className="text-xs text-muted-foreground mb-1">Procenat</div>
-                <div className="text-xl font-bold text-blue-400">{stats.completionPercentage}%</div>
+                <div className="text-xl font-bold text-blue-400">{(stats.completionPercentage || 0).toFixed(2)}%</div>
               </div>
             </div>
           ) : (

@@ -420,7 +420,7 @@ export function PlanTreninga() {
                   disabled={weekOffset === 1}
                   className="bg-card border border-border text-foreground px-3 py-1 text-sm rounded hover:bg-secondary transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
                 >
-                  Sledeća →
+                  Sljedeća →
                 </button>
               </div>
             </div>
@@ -459,7 +459,7 @@ export function PlanTreninga() {
                                       <button
                                         type="button"
                                         onClick={() => markAsCompleted(exercise.id)}
-                                        className="text-emerald-500 hover:text-emerald-700 text-xs font-bold px-1 rounded bg-emerald-500/10 hover:bg-emerald-500/20 cursor-pointer transition-colors"
+                                        className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] font-bold px-2 py-1 rounded shadow-sm transition-all flex items-center justify-center min-w-[24px]"
                                         title="Označi kao završeno"
                                       >✓</button>
                                     )}
@@ -530,7 +530,7 @@ export function PlanTreninga() {
             <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-blue-500">
               <div className="text-xs text-muted-foreground mb-2">Procenat</div>
               <div className="text-3xl font-bold text-blue-400" style={{ fontFamily: "'Barlow Condensed', sans-serif" }}>
-                {stats?.completionPercentage || 0}%
+                {stats?.completionPercentage ? Number(stats.completionPercentage).toFixed(2) : "0.00"}%
               </div>
             </div>
             <div className="bg-card border border-border rounded-lg p-4 text-center border-t-2 border-t-muted-foreground">

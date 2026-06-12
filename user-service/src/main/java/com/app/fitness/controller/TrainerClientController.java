@@ -43,6 +43,11 @@ public class TrainerClientController {
         return ResponseEntity.ok(trainerClientService.findAll());
     }
 
+    @GetMapping("/trainer/{trainerId}")
+    public ResponseEntity<List<TrainerClientResponse>> getByTrainerId(@PathVariable Long trainerId) {
+        return ResponseEntity.ok(trainerClientService.findAllByTrainerId(trainerId));
+    }
+
     @GetMapping("/{id}")
     public ResponseEntity<TrainerClientResponse> getById(@PathVariable Long id) {
         return ResponseEntity.ok(trainerClientService.findById(id));

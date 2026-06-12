@@ -249,7 +249,7 @@ export function Biblioteka() {
               onClick={() => setCurrentPage(Math.min(totalPages - 1, currentPage + 1))}
               disabled={currentPage === totalPages - 1}
             >
-              Sledeća →
+              Sljedeća →
             </button>
           </div>
           <div className="text-sm text-muted-foreground">Ukupno: {totalPages} stranica</div>
