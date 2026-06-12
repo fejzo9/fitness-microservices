@@ -91,11 +91,15 @@ export function Napredak() {
         return d >= twoWeeksAgo && d < oneWeekAgo;
       });
 
+      const currentWeekExercises = await api.getWorkoutExercises(user.id);
+      const totalSets = currentWeekExercises.reduce((sum, ex) => sum + (ex.sets || 0), 0);
+      const totalWorkoutTime = Math.round(totalSets * 2.5);
+
       setMetrics(prev => ({
         ...prev,
         weeklyWorkouts: workoutsThisWeek.length,
         workoutChange: workoutsThisWeek.length - workoutsPrevWeek.length,
-        totalWorkoutTime: 0
+        totalWorkoutTime: totalWorkoutTime
       }));
 
       const workoutCountByDate = {};
@@ -115,31 +119,35 @@ export function Napredak() {
 
       const completedExercisesData = await api.getCompletedExercisesByUserId(user.id);
 
-      const exerciseStats = {};
+      const exerciseGroups = {};
       completedExercisesData.forEach(ce => {
-        if (!exerciseStats[ce.exerciseName]) exerciseStats[ce.exerciseName] = [];
-        const workout = userWorkouts.find(w => w.id === ce.completedWorkoutId);
-        if (workout) {
-          exerciseStats[ce.exerciseName].push({
-            date: workout.date,
-            reps: ce.repsDone,
-            sets: ce.setsDone,
-            volume: ce.repsDone * ce.setsDone
-          });
+        if (!exerciseGroups[ce.exerciseId]) {
+          exerciseGroups[ce.exerciseId] = {
+            name: ce.exerciseName,
+            entries: []
+          };
         }
+        exerciseGroups[ce.exerciseId].entries.push(ce);
       });
 
-      const progressList = Object.keys(exerciseStats).map(name => {
-        const entries = exerciseStats[name].sort((a, b) => new Date(a.date) - new Date(b.date));
-        const first = entries[0];
-        const last = entries[entries.length - 1];
-        const improvement = first.volume > 0 ? ((last.volume - first.volume) / first.volume * 100).toFixed(0) : 0;
+      const progressList = Object.values(exerciseGroups).map(group => {
+        const sorted = [...group.entries].sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+        const first = sorted[0];
+        const last = sorted[sorted.length - 1];
+        
+        const firstVol = (first.sets || 0) * (first.reps || 0);
+        const lastVol = (last.sets || 0) * (last.reps || 0);
+        
+        let improvement = 0;
+        if (sorted.length > 1 && firstVol > 0) {
+          improvement = ((lastVol - firstVol) / firstVol * 100).toFixed(2);
+        }
+
         return {
-          name,
-          improvement,
-          lastValue: last.volume,
-          unit: 'volumen (set×rep)',
-          trend: entries.map(e => e.volume).slice(-5)
+          name: group.name,
+          improvement: parseFloat(improvement),
+          firstVolume: `${first.sets || 0} x ${first.reps || 0}`,
+          lastVolume: `${last.sets || 0} x ${last.reps || 0}`
         };
       });
       setExerciseProgress(progressList);
@@ -493,7 +501,7 @@ export function Napredak() {
 
             <div className="border border-border rounded-lg overflow-hidden">
               <div className="grid grid-cols-4 border-b border-border bg-secondary">
-                {['Vježba', 'Napredak', 'Zadnji volumen', 'Trend (poslednjih 5)'].map((h, i) => (
+                {['Vježba', 'Napredak', 'Prvi volumen', 'Zadnji volumen'].map((h, i) => (
                     <div key={h} className={`p-3 ${i < 3 ? 'border-r border-border' : ''}`}>
                       <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">{h}</span>
                     </div>
@@ -515,17 +523,12 @@ export function Napredak() {
                     </span>
                         </div>
                         <div className="p-3 border-r border-border">
-                          <span className="text-sm text-foreground font-medium">{ex.lastValue}</span>
-                          <span className="text-[10px] text-muted-foreground ml-1 block">{ex.unit}</span>
+                          <span className="text-sm text-foreground font-medium">{ex.firstVolume}</span>
+                          <span className="text-[10px] text-muted-foreground ml-1 block">prvi (set×rep)</span>
                         </div>
-                        <div className="p-3 flex items-end gap-1">
-                          {ex.trend.map((val, i) => {
-                            const max = Math.max(...ex.trend);
-                            const height = max > 0 ? (val / max) * 100 : 0;
-                            return (
-                                <div key={i} className="flex-1 bg-primary/40 rounded-t-[1px]" style={{ height: `${height}%`, minHeight: '4px' }} />
-                            );
-                          })}
+                        <div className="p-3">
+                          <span className="text-sm text-foreground font-medium">{ex.lastVolume}</span>
+                          <span className="text-[10px] text-muted-foreground ml-1 block">zadnji (set×rep)</span>
                         </div>
                       </div>
                   ))
