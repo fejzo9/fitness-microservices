@@ -6,6 +6,7 @@ import com.app.fitness.exception.DuplicateResourceException;
 import com.app.fitness.exception.ResourceNotFoundException;
 import com.app.fitness.service.WorkoutExerciseService;
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -42,10 +43,28 @@ class WorkoutExerciseControllerTest extends ControllerTestSupport {
     @BeforeEach
     void setUp() {
         setUpMockMvc(workoutExerciseController);
-        mockResponse = new WorkoutExerciseResponse(
-                1L, 3L, DayOfWeek.MONDAY, LocalTime.of(8, 0), false, 2L, "Squat", 4, 8, 120);
-        mockRequest = new WorkoutExerciseRequest(
-                3L, DayOfWeek.MONDAY, LocalTime.of(8, 0), false, 2L, 4, 8, 120);
+        mockResponse = WorkoutExerciseResponse.builder()
+                .id(1L)
+                .userId(3L)
+                .scheduledDate(LocalDate.of(2026, 6, 15))
+                .startTime(LocalTime.of(8, 0))
+                .completed(false)
+                .exerciseId(2L)
+                .exerciseName("Squat")
+                .sets(4)
+                .reps(8)
+                .restSec(120)
+                .build();
+        mockRequest = WorkoutExerciseRequest.builder()
+                .userId(3L)
+                .scheduledDate(LocalDate.of(2026, 6, 15))
+                .startTime(LocalTime.of(8, 0))
+                .completed(false)
+                .exerciseId(2L)
+                .sets(4)
+                .reps(8)
+                .restSec(120)
+                .build();
     }
 
     @Test
@@ -60,7 +79,7 @@ class WorkoutExerciseControllerTest extends ControllerTestSupport {
 
     @Test
     void getByUserId_shouldReturnList() throws Exception {
-        when(workoutExerciseService.findByUserId(3L)).thenReturn(List.of(mockResponse));
+        when(workoutExerciseService.findByUserId(3L, false)).thenReturn(List.of(mockResponse));
 
         mockMvc.perform(get("/api/workout-exercises/user/3"))
                 .andExpect(status().isOk())

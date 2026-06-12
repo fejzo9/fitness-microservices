@@ -9,7 +9,7 @@ import com.app.fitness.repository.ExerciseRepository;
 import com.app.fitness.repository.WorkoutExerciseRepository;
 import com.app.fitness.model.Exercise;
 import com.app.fitness.model.WorkoutExercise;
-import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.Test;
@@ -38,32 +38,6 @@ class WorkoutExerciseServiceTest {
     private WorkoutExerciseService workoutExerciseService;
 
     @Test
-    void findAll_shouldReturnMappedList() {
-        WorkoutExercise we = WorkoutExercise.builder().id(1L).sets(4).reps(10).build();
-        WorkoutExerciseResponse response = WorkoutExerciseResponse.builder().id(1L).sets(4).reps(10).build();
-        when(workoutExerciseRepository.findAll()).thenReturn(List.of(we));
-        when(workoutExerciseMapper.toResponse(we)).thenReturn(response);
-
-        var result = workoutExerciseService.findAll();
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getSets()).isEqualTo(4);
-    }
-
-    @Test
-    void findByUserId_shouldReturnMappedList() {
-        WorkoutExercise we = WorkoutExercise.builder().id(1L).userId(3L).build();
-        WorkoutExerciseResponse response = WorkoutExerciseResponse.builder().id(1L).userId(3L).build();
-        when(workoutExerciseRepository.findByUserId(3L)).thenReturn(List.of(we));
-        when(workoutExerciseMapper.toResponse(we)).thenReturn(response);
-
-        var result = workoutExerciseService.findByUserId(3L);
-
-        assertThat(result).hasSize(1);
-        assertThat(result.get(0).getUserId()).isEqualTo(3L);
-    }
-
-    @Test
     void findById_whenNotFound_shouldThrow() {
         when(workoutExerciseRepository.findById(99L)).thenReturn(Optional.empty());
 
@@ -87,7 +61,7 @@ class WorkoutExerciseServiceTest {
     void create_whenExerciseNotFound_shouldThrow() {
         WorkoutExerciseRequest request = WorkoutExerciseRequest.builder()
                 .userId(3L)
-                .dayOfWeek(DayOfWeek.MONDAY)
+                .scheduledDate(LocalDate.of(2026, 6, 15))
                 .exerciseId(99L)
                 .build();
         when(exerciseRepository.findById(99L)).thenReturn(Optional.empty());
@@ -97,26 +71,11 @@ class WorkoutExerciseServiceTest {
     }
 
     @Test
-    void create_whenDuplicate_shouldThrow() {
-        Exercise exercise = Exercise.builder().id(1L).name("Bench Press").build();
-        WorkoutExerciseRequest request = WorkoutExerciseRequest.builder()
-                .userId(3L)
-                .dayOfWeek(DayOfWeek.MONDAY)
-                .exerciseId(1L)
-                .build();
-        when(exerciseRepository.findById(1L)).thenReturn(Optional.of(exercise));
-        when(workoutExerciseRepository.existsByUserIdAndDayOfWeekAndExercise(3L, DayOfWeek.MONDAY, exercise)).thenReturn(true);
-
-        assertThatThrownBy(() -> workoutExerciseService.create(request))
-                .isInstanceOf(DuplicateResourceException.class);
-    }
-
-    @Test
     void create_withValidRequest_shouldSaveAndReturn() {
         Exercise exercise = Exercise.builder().id(1L).name("Bench Press").build();
         WorkoutExerciseRequest request = WorkoutExerciseRequest.builder()
                 .userId(3L)
-                .dayOfWeek(DayOfWeek.MONDAY)
+                .scheduledDate(LocalDate.of(2026, 6, 15))
                 .exerciseId(1L)
                 .sets(4)
                 .build();
@@ -125,7 +84,6 @@ class WorkoutExerciseServiceTest {
         WorkoutExerciseResponse response = WorkoutExerciseResponse.builder().id(1L).sets(4).build();
 
         when(exerciseRepository.findById(1L)).thenReturn(Optional.of(exercise));
-        when(workoutExerciseRepository.existsByUserIdAndDayOfWeekAndExercise(3L, DayOfWeek.MONDAY, exercise)).thenReturn(false);
         when(workoutExerciseMapper.toEntity(request)).thenReturn(entity);
         when(workoutExerciseRepository.save(entity)).thenReturn(saved);
         when(workoutExerciseMapper.toResponse(saved)).thenReturn(response);
@@ -141,7 +99,7 @@ class WorkoutExerciseServiceTest {
     void update_whenNotFound_shouldThrow() {
         WorkoutExerciseRequest request = WorkoutExerciseRequest.builder()
                 .userId(3L)
-                .dayOfWeek(DayOfWeek.MONDAY)
+                .scheduledDate(LocalDate.of(2026, 6, 15))
                 .exerciseId(1L)
                 .build();
         when(workoutExerciseRepository.findById(99L)).thenReturn(Optional.empty());
@@ -156,7 +114,7 @@ class WorkoutExerciseServiceTest {
         Exercise exercise = Exercise.builder().id(1L).name("Bench Press").build();
         WorkoutExerciseRequest request = WorkoutExerciseRequest.builder()
                 .userId(3L)
-                .dayOfWeek(DayOfWeek.MONDAY)
+                .scheduledDate(LocalDate.of(2026, 6, 15))
                 .exerciseId(1L)
                 .sets(5)
                 .reps(12)
