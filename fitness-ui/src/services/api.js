@@ -220,6 +220,8 @@ export const api = {
   completeWorkoutExercise: (id) => request(`${API_BASE.workout}/workout-exercises/${id}/complete`, { method: 'PATCH' }),
   deleteWorkoutExercise: (id) => request(`${API_BASE.workout}/workout-exercises/${id}`, { method: 'DELETE' }),
 
+  getLatestNotifications: (userId) => request(`${API_BASE.workout}/notifications/latest/${userId}`),
+
   getCompletedWorkouts: () => request(`${API_BASE.workout}/completed-workouts`),
   getCompletedWorkoutsByUserId: (userId) => request(`${API_BASE.workout}/workout-exercises/user/${userId}/completed`),
   createCompletedWorkout: (data) => requestJson(`${API_BASE.workout}/completed-workouts`, 'POST', data),

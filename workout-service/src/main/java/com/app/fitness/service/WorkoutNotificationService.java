@@ -94,6 +94,8 @@ public class WorkoutNotificationService {
                             .build());
             
             logEntry.setNotificationSent(true);
+            String formattedMessage = String.format("Email podsjetnik za broj vježbi: %d na dan %s je uspješno poslan.", exercises.size(), date);
+            logEntry.setMessage(formattedMessage);
             notificationLogRepository.save(logEntry);
 
             log.info("Notification sent to RabbitMQ for user {}: {}", userId, message);
@@ -108,5 +110,9 @@ public class WorkoutNotificationService {
         List<NotificationLog> logs = notificationLogRepository.findAll();
         logs.forEach(l -> l.setNotificationSent(false));
         notificationLogRepository.saveAll(logs);
+    }
+
+    public List<NotificationLog> getLatestNotifications(Long userId) {
+        return notificationLogRepository.findTop2ByUserIdAndNotificationSentTrueOrderByNotificationDateDesc(userId);
     }
 }

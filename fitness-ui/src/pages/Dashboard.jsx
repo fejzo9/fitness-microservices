@@ -11,6 +11,7 @@ export function Dashboard() {
   const [todayExercises, setTodayExercises] = useState([]);
   const [stats, setStats] = useState(null);
   const [todayMeals, setTodayMeals] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [showWeightModal, setShowWeightModal] = useState(false);
@@ -32,16 +33,18 @@ export function Dashboard() {
       const today = days[new Date().getDay()];
       const todayDate = new Date().toISOString().split('T')[0];
 
-      const [ex, statistics, meals] = await Promise.all([
+      const [ex, statistics, meals, notifs] = await Promise.all([
         api.getWorkoutExercisesByDay(user.id, today),
         api.getWorkoutStatistics(user.id),
-        api.getMealEntriesByUserAndDate(user.id, todayDate)
+        api.getMealEntriesByUserAndDate(user.id, todayDate),
+        api.getLatestNotifications(user.id)
       ]);
       
       const sorted = (ex || []).sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
       setTodayExercises(sorted);
       setStats(statistics);
       setTodayMeals(meals || []);
+      setNotifications(notifs || []);
     } catch (error) {
       toast('Greška pri učitavanju podataka. Provjerite konekciju i pokušajte ponovo.', 'error');
     } finally {
@@ -232,8 +235,26 @@ export function Dashboard() {
           <div className="border-b border-border pb-3 mb-4">
             <h3 className="text-base font-normal">Aktivnosti</h3>
           </div>
-          <div className="text-center py-8 text-muted-foreground text-sm">
-            Nema nedavnih aktivnosti
+          <div className="space-y-4">
+            {loading ? (
+              <Spinner size="md" className="py-8" />
+            ) : notifications.length > 0 ? (
+              notifications.map((notif) => (
+                <div key={notif.id} className="border-b border-border/50 pb-2 last:border-0">
+                  <div className="flex justify-between items-start mb-1">
+                    <span className="text-xs font-bold text-primary">Notifikacija</span>
+                    <span className="text-[10px] text-muted-foreground">{notif.notificationDate}</span>
+                  </div>
+                  <p className="text-sm text-foreground leading-tight">
+                    {notif.message || 'Poslan email podsjetnik.'}
+                  </p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground text-sm">
+                Nema nedavnih aktivnosti
+              </div>
+            )}
           </div>
         </div>
       </div>

@@ -25,4 +25,7 @@ public class NotificationLog {
 
     @Column(name = "notification_sent", nullable = false)
     private Boolean notificationSent;
+
+    @Column(name = "message")
+    private String message;
 }
