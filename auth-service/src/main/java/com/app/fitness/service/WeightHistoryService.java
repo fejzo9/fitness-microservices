@@ -40,15 +40,16 @@ public class WeightHistoryService {
 
         WeightHistory saved = weightHistoryRepository.save(weightHistory);
         
-        // Update user's current weight only if this is the latest entry
-        weightHistoryRepository.findByUserIdOrderByEntryDateDesc(user.getId()).stream()
+        // Update user's current weight only if this is the latest entry (or the first one)
+        boolean isLatest = weightHistoryRepository.findByUserIdOrderByEntryDateDesc(user.getId()).stream()
                 .findFirst()
-                .ifPresent(latest -> {
-                    if (latest.getEntryDate().isBefore(request.getEntryDate()) || latest.getEntryDate().isEqual(request.getEntryDate())) {
-                        user.setWeight(request.getWeight());
-                        userRepository.save(user);
-                    }
-                });
+                .map(latest -> !request.getEntryDate().isBefore(latest.getEntryDate()))
+                .orElse(true);
+
+        if (isLatest) {
+            user.setWeight(request.getWeight());
+            userRepository.save(user);
+        }
 
         return mapToResponse(saved);
     }

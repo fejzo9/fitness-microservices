@@ -35,7 +35,7 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/auth/login", "/auth/register", "/auth/refresh-token").permitAll()
-                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/auth/users/{id}").hasAnyRole("ADMIN", "INTERNAL")
+                        .requestMatchers(org.springframework.http.HttpMethod.GET, "/auth/users/{id}").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
